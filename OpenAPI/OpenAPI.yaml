@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  description: |-
+    Each user will be presented with a stream of photos in reverse chronological order, with information
+    about when it was uploaded (date and time) and how many likes and comments it has. Users can place
+    (and later remove) a “like” to photos from other users. Also, users can add comments to any photo
+    (even those uploaded by themself). Comments can be removed by the author only.
+
+    Users can ban other users. If Alice (user) bans Eve (user), Eve won’t be able to see any information
+    about Alice. Alice can decide to remove the ban at any moment.
+
+    Users will have their own personal profiles. The personal profile page for user detail: user’s photos (in
+    reverse chronological order), their followers and following, and how many photos have been uploaded.
+    Each user can change his/her own username, upload photos, remove photos, and follow/unfollow
+    other users. Removal of a photo will also remove likes and comments.
+
+    Users profiles can be searched via username.
+
+    The login is perfomed by specifying the username.
+  title: WASAPhoto API
+  version: 1.0.0
+
+paths:
+  /session/:
+    post:
+      tags: ["login"]
+      summary: Logs in the user.
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Maria
+                  pattern: '^.*?$'
+                  minLength: 3
+                  maxLength: 16
+        required: true
+      responses:
+        '201':
+          description: User log-in action successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                    example: "abcdef'12345"
+  
+  /session/{userId}:
+    parameters:
+      - $ref : "#/components/parameters/userID"
+    post: 
+      tags: ["user action"]
+      summary: Sets user username.
+      description: TODO
+      operationId: setMyUserName
+      requestBody:
+        content:
+          application/json:
+      responses:
+        "201":
+          description: Username updated successfully.
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identifier:
+                    type: string
+                    example: "abcdef'12345"
+  /session/{userId}/photo:
+    parameters:
+      - $ref : "#/components/parameters/userID"
+    post: 
+      tags: ["Photo actions"]
+      summary: Upload a photo.
+      description: TODO
+      operationId: uploadPhoto
+      
+      responses:
+        "200":
+          description: Photo uploaded successfully.
+  /session/{userId}/photo/{photoId}:
+    parameters:
+      - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/photoID"
+    #! likePhoto
+
+    #! unlikePhoto
+    #* deletePhoto 
+    delete:
+      tags: ["Photo actions"]
+      operationId: deletePhoto
+      summary: Delete a photo.
+      description: Delete a photo from the system.
+      responses:
+        "204": {description: Photo deleted successfully.}
+        "404": {description: Photo not found}
+  /session/{userId}/photo/{photoId}/comment:
+    post: 
+  /session/{userId}/photo/{photoId}/comment/{commentId}/photo:
+
+components:
+  schemas:
+    User:
+      title: User
+      description: "This object represent a single User"
+      type: object
+      properties:
+        id:
+          description: Unique user identifier
+          type: integer
+          readOnly: true
+        username:
+          description: "User's username"
+          type: string
+          example: "Lucian"
+
+  parameters:
+    userID:
+      schema:
+        type: integer
+        example: 1
+        readOnly: true
+      name: id
+      in: path
+      required: true
+      description: User ID
+    photoID:
+      schema:
+        type: integer
+        example: 1
+        readOnly: true
+      name: id
+      in: path
+      required: true
+      description: User ID
+    commentID:
+      schema:
+        type: integer
+        example: 1
+        readOnly: true
+      name: id
+      in: path
+      required: true
+      description: User ID

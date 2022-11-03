@@ -19,3 +19,9 @@ Users will have their own personal profiles. The personal profile page for user 
 User profiles can be searched via username.
 
 The login is perfomed by specifying the username.
+
+## OpenAPI
+
+## Backend
+## Frontend
+## Deployment
