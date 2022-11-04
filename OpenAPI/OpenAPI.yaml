@@ -100,11 +100,19 @@ paths:
         "400":
           description: User not found
   /session/{Id}/{userId}: 
-    #! getUserProfile
+    parameters:
+      - $ref: "#/components/parameters/Id"
+      - $ref: "#/components/parameters/userId"
+    #* getUserProfile
     get:
       tags: ["User actions"]
       summary: Returns user profile
       operationId: getUserProfile
+      description: |-
+        ## Information
+        - If the **userId** provided by the **user(Id)** exists then it returns the profile of the User.
+        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
+        response is given.
       responses:
         "200": 
           description: OK
@@ -137,7 +145,7 @@ paths:
           description: User banned successfully.
         "404":
           description: User not found.
-    #? unbanUser
+    #* unbanUser
     put: 
       tags: ["User Ban actions"]
       summary: Unban an user.
@@ -158,11 +166,36 @@ paths:
         "404":
           description: User not found.
   /session/{Id}/{UserId}/follow:
-    #! followUser
+    #* followUser
     post: 
       tags: ["User Follow actions"]
-      summary: Follow an User.
-      description: TODO
+      summary: Follow an user.
+      description: |-
+        ## Information
+        - If the **userId** provided by the **user(Id)** exists then followStatus is 
+        changed from "None" to "Follow". 
+        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
+        response is given.
+      operationId: followUser
+      requestBody:
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/user"}
+      responses:
+        "200": 
+          description: User followed successfully.
+        "404":
+          description: User not found.
+    #* unfollowUser
+    put: 
+      tags: ["User Follow actions"]
+      summary: Unfollow an user.
+      description: |-
+        ## Information
+        - If the **userId** provided by the **user(Id)** exists then banStatus is 
+        changed from "Follow" to "None". 
+        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
+        response is given.
       operationId: banUser
       requestBody:
         content:
@@ -170,24 +203,9 @@ paths:
             schema: {$ref: "#/components/schemas/user"}
       responses:
         "200": 
-          description: User banned successfully.
+          description: User Unfollowed successfully.
         "404":
           description: User not found.
-    #! unfollowUser
-    put: 
-      tags: ["User Follow actions"]
-      summary: Unfollow a User.
-      description: TODO
-      operationId: uploadPhoto
-      requestBody:
-        content:
-          image/png:
-            schema: { $ref: "#/components/schemas/photo" }
-      responses:
-        "200":
-          description: Photo uploaded successfully.
-        "404":
-          description: format not correct.
   /session/{Id}/photo:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -255,13 +273,14 @@ paths:
         "204": {description: Photo deleted successfully.}
         "404": {description: Photo not found}
   
-  /session/{Id}/photo/{photoId}/comment:
+  /session/{Id}/{userId}/photo/{photoId}/comment:
     parameters:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/photoID"
+      - $ref : "#/components/parameters/userId"
       - $ref: "#/components/parameters/commentID"
     #* commentPhoto
-    put:
+    post:
       tags: ["Comment actions"]
       summary: Add a comment under a Photo.
       description: TODO
@@ -276,20 +295,24 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/comment"}
         "404": {description: Comment not found}
-  /session/{Id}/photo/{photoId}/comment/{commentId}:
+  /session/{Id}/{userId}/photo/{photoId}/comment/{commentId}:
     parameters:
       - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/userId"
       - $ref : "#/components/parameters/photoID"
       - $ref: "#/components/parameters/commentID"
     #* uncommentPhoto
     delete:
      operationId: uncommentPhoto
      tags: ["Comment actions"]
-     summary: Uncomment a Photo.
-     description: TODO
+     summary: Remove a comment under a Photo.
+     description: |-
+        # Information
+        - If the **commentId** provided exists then the comment is removed.
+        - If the **usedId** provided does not exist then a 404 error response is given.
      responses:
-       "204": {description: Comment removed successfully.}
-       "404": {description: Comment not found}
+       "200": {description: Comment removed successfully.}
+       "404": {description: Comment not found.}
 components:
   schemas:
     #* User schema
@@ -306,13 +329,13 @@ components:
         followStatus:
           description: Describe the follow status of the user
           type: string
-          enum: ["Follow", "Unfollow"]
-          example: Unfollow
+          enum: ["Follow", "None"]
+          example: None
         banStatus:
           description: Describe the ban status of the user
           type: string
-          enum: ["Ban","Unban"]
-          example: Unban
+          enum: ["Ban","None"]
+          example: None
         followerStatus:
           description: Number of followers.
           type: integer
@@ -387,22 +410,22 @@ components:
       name: userId
       in: path
       required: true
-      description: "**userID** that identifies a specific user of WASAPhoto"
+      description: "**userID** that identifies a specific user of WASAPhoto."
     photoID:
       schema:
         type: integer
-        example: 1
+        example: 123456
         readOnly: true
-      name: photoId
+      name: photoId 
       in: path
       required: true
-      description: photoID
+      description: "**photoID** of a photo on a user profile."
     commentID:
       schema:
         type: integer
-        example: 1
+        example: 123456
         readOnly: true
       name: commentId
       in: path
       required: true
-      description: commentID
+      description: "**commentID** of a single comment under a photo."
