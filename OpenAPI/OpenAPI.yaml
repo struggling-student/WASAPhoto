@@ -19,11 +19,18 @@ info:
     The login is perfomed by specifying the username.
   title: WASAPhoto API
   version: 1.0.0
+  contact:
+    name: Lucian Dorin Crainic
+    email: crainic.1938430@studenti.uniroma1.it
+    url: https://github.com/LucianCrainic
+  license:
+    name: MIT
 
 paths:
   /session/:
+    #* doLogin
     post:
-      tags: ["login"]
+      tags: ["Login action"]
       summary: Logs in the user.
       description: |-
         If the user does not exist, it will be created,
@@ -49,24 +56,21 @@ paths:
           description: User log-in action successful
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  identifier:
-                    type: string
-                    example: "abcdef'12345"
+              schema: { $ref: "#/components/schemas/user"}
   
-  /session/{userId}:
+  /session/{Id}:
     parameters:
-      - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/Id"
+    #! setMyUserName
     post: 
-      tags: ["user action"]
+      tags: ["Session User actions"]
       summary: Sets user username.
       description: TODO
       operationId: setMyUserName
       requestBody:
         content:
           application/json:
+            schema: {$ref: "#/components/schemas/username"}
       responses:
         "201":
           description: Username updated successfully.
@@ -75,28 +79,172 @@ paths:
               schema:
                 type: object
                 properties:
-                  identifier:
+                  name:
                     type: string
-                    example: "abcdef'12345"
-  /session/{userId}/photo:
-    parameters:
-      - $ref : "#/components/parameters/userID"
+                    example: Maria
+                    pattern: '^.*?$'
+                    minLength: 3
+                    maxLength: 16
+
+    #! getMyStream
+    get:
+      tags: ["Session User actions"]
+      summary: Returns user Stream.
+      operationId: getMyStream
+      responses:
+        "200": 
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user"}
+        "400":
+          description: User not found
+  /session/{Id}/{userId}: 
+    #! getUserProfile
+    get:
+      tags: ["User actions"]
+      summary: Returns user profile
+      operationId: getUserProfile
+      responses:
+        "200": 
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user"}
+        "400":
+          description: User not found
+  /session/{Id}/{userId}/ban:
+    parameters: 
+      - $ref: "#/components/parameters/Id"
+      - $ref: "#/components/parameters/userId"
+    #* banUser
     post: 
+      tags: ["User Ban actions"]
+      summary: Ban an user.
+      description: |-
+        ## Information
+        - If the **userId** provided by the **user(Id)** exists then banStatus is 
+        changed from "None" to "Ban". 
+        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
+        response is given.
+      operationId: banUser
+      requestBody:
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/user"}
+      responses:
+        "200": 
+          description: User banned successfully.
+        "404":
+          description: User not found.
+    #? unbanUser
+    put: 
+      tags: ["User Ban actions"]
+      summary: Unban an user.
+      description: |-
+        ## Information
+        - If the **userId** provided by the **user(Id)** exists then banStatus is 
+        changed from "Ban" to "None". 
+        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
+        response is given.
+      operationId: banUser
+      requestBody:
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/user"}
+      responses:
+        "200": 
+          description: User Unbanned successfully.
+        "404":
+          description: User not found.
+  /session/{Id}/{UserId}/follow:
+    #! followUser
+    post: 
+      tags: ["User Follow actions"]
+      summary: Follow an User.
+      description: TODO
+      operationId: banUser
+      requestBody:
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/user"}
+      responses:
+        "200": 
+          description: User banned successfully.
+        "404":
+          description: User not found.
+    #! unfollowUser
+    put: 
+      tags: ["User Follow actions"]
+      summary: Unfollow a User.
+      description: TODO
+      operationId: uploadPhoto
+      requestBody:
+        content:
+          image/png:
+            schema: { $ref: "#/components/schemas/photo" }
+      responses:
+        "200":
+          description: Photo uploaded successfully.
+        "404":
+          description: format not correct.
+  /session/{Id}/photo:
+    parameters:
+      - $ref : "#/components/parameters/Id"
+    #! uploadPhoto
+    put: 
       tags: ["Photo actions"]
       summary: Upload a photo.
       description: TODO
       operationId: uploadPhoto
-      
+      requestBody:
+        content:
+          image/png:
+            schema: { $ref: "#/components/schemas/photo" }
       responses:
         "200":
           description: Photo uploaded successfully.
-  /session/{userId}/photo/{photoId}:
+        "404":
+          description: format not correct.
+  /session/{Id}/photo/{photoId}:
     parameters:
-      - $ref : "#/components/parameters/userID"
+      - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/photoID"
-    #! likePhoto
+    #* likePhoto
+    post: 
+      tags: ["Photo actions"]
+      operationId: likePhoto
+      summary: Like a photo.
+      description: Like a photo from a user.
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/photo" }
+      responses:
+        "201":
+          description: Like added successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/photo"}
+        "404": {description: Photo not found.}
 
-    #! unlikePhoto
+    #* unlikePhoto
+    put: 
+      tags: ["Photo actions"]
+      operationId: unlikePhoto
+      summary: Unlike a photo.
+      description: Unlike a photo from a user.
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/photo" }
+      responses:
+        "201":
+          description: Like added successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/photo"}
+        "404": {description: Photo not found.}
     #* deletePhoto 
     delete:
       tags: ["Photo actions"]
@@ -106,51 +254,155 @@ paths:
       responses:
         "204": {description: Photo deleted successfully.}
         "404": {description: Photo not found}
-  /session/{userId}/photo/{photoId}/comment:
-    post: 
-  /session/{userId}/photo/{photoId}/comment/{commentId}/photo:
-
+  
+  /session/{Id}/photo/{photoId}/comment:
+    parameters:
+      - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/photoID"
+      - $ref: "#/components/parameters/commentID"
+    #* commentPhoto
+    put:
+      tags: ["Comment actions"]
+      summary: Add a comment under a Photo.
+      description: TODO
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/comment"}
+      responses:
+        "200":
+          description:  Comment added successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/comment"}
+        "404": {description: Comment not found}
+  /session/{Id}/photo/{photoId}/comment/{commentId}:
+    parameters:
+      - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/photoID"
+      - $ref: "#/components/parameters/commentID"
+    #* uncommentPhoto
+    delete:
+     operationId: uncommentPhoto
+     tags: ["Comment actions"]
+     summary: Uncomment a Photo.
+     description: TODO
+     responses:
+       "204": {description: Comment removed successfully.}
+       "404": {description: Comment not found}
 components:
   schemas:
-    User:
-      title: User
-      description: "This object represent a single User"
+    #* User schema
+    user:
+      title: User Schema
+      description: This object represent a single User
       type: object
       properties:
         id:
           description: Unique user identifier
           type: integer
           readOnly: true
-        username:
-          description: "User's username"
+          example: user123
+        followStatus:
+          description: Describe the follow status of the user
           type: string
-          example: "Lucian"
-
+          enum: ["Follow", "Unfollow"]
+          example: Unfollow
+        banStatus:
+          description: Describe the ban status of the user
+          type: string
+          enum: ["Ban","Unban"]
+          example: Unban
+        followerStatus:
+          description: Number of followers.
+          type: integer
+          readOnly: true
+          example: 1420
+        followingStatus:
+          description: Number of followings.
+          type: integer
+          readOnly: true
+          example: 820
+        photoStatus:
+          description: Number of photos published.
+          type: integer
+          readOnly: true
+          example: 80
+    #* Username schema
+    username:
+      title: Username Schema
+      description: User username
+      type: string
+      example: "Lucian"
+    #* Photo schema
+    photo: 
+      title: Photo Schema
+      description: "This object represent a singe photo"
+      type: object
+      properties:
+        id: 
+          description:  Unique photo identifier
+          type: integer
+          readOnly: true   
+        likeCount:
+          description: Number of likes.
+          type: integer
+          example: 15
+          minimum: 0
+          maximum : 9999999
+        commentsCount:
+          description: Number of comments.
+          type: integer
+          example: 20
+          minimum: 0
+          maximum : 9999999
+    #* Comment Schema
+    comment: 
+      title: Comment Schema
+      description: This object represent a single comment
+      type: object
+      properties:
+        id:
+          description: Unique comment identifier
+          type: integer
+          readOnly: true 
+        content:
+          description: Content of the comment
+          type: string
+          example: "Hello World!"
   parameters:
-    userID:
+    Id:
       schema:
-        type: integer
-        example: 1
+        type: string
+        example: "abcdef012345"
         readOnly: true
-      name: id
+      name: Id
       in: path
       required: true
-      description: User ID
+      description: "**ID** of the current user that is logged in WASAPhoto."
+    userId:
+      schema:
+         type: string
+         example: "abcdef012345"
+      name: userId
+      in: path
+      required: true
+      description: "**userID** that identifies a specific user of WASAPhoto"
     photoID:
       schema:
         type: integer
         example: 1
         readOnly: true
-      name: id
+      name: photoId
       in: path
       required: true
-      description: User ID
+      description: photoID
     commentID:
       schema:
         type: integer
         example: 1
         readOnly: true
-      name: id
+      name: commentId
       in: path
       required: true
-      description: User ID
+      description: commentID
