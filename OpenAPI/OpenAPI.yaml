@@ -61,31 +61,24 @@ paths:
   /session/{Id}:
     parameters:
       - $ref : "#/components/parameters/Id"
-    #! setMyUserName
+    #* setMyUserName
     post: 
       tags: ["Session User actions"]
       summary: Sets user username.
-      description: TODO
+      description: |-
+        ## Information
+        - If the **Id** provided exists then it sets a username for the profile.
+        - If the **Id** provided does not exist then a 404 error response is given.
       operationId: setMyUserName
       requestBody:
         content:
           application/json:
-            schema: {$ref: "#/components/schemas/username"}
+            schema: {$ref: "#/components/schemas/user"}
       responses:
         "201":
           description: Username updated successfully.
-          content: 
-            application/json:
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: Maria
-                    pattern: '^.*?$'
-                    minLength: 3
-                    maxLength: 16
-
+        "404":
+          description: User not found.
     #! getMyStream
     get:
       tags: ["Session User actions"]
@@ -206,34 +199,42 @@ paths:
           description: User Unfollowed successfully.
         "404":
           description: User not found.
-  /session/{Id}/photo:
+  /session/{Id}/{userId}/photo:
     parameters:
       - $ref : "#/components/parameters/Id"
-    #! uploadPhoto
+      - $ref : "#/components/parameters/userId"
+    #* uploadPhoto
     put: 
       tags: ["Photo actions"]
       summary: Upload a photo.
-      description: TODO
+      description: |-
+        # Information
+        - If the **photo** provided has the right format then the photo is added.
+        - If the **photo** provided does not have the right format then a 404 error response is given.
       operationId: uploadPhoto
       requestBody:
         content:
-          image/png:
+          image/*:
             schema: { $ref: "#/components/schemas/photo" }
       responses:
         "200":
           description: Photo uploaded successfully.
         "404":
-          description: format not correct.
-  /session/{Id}/photo/{photoId}:
+          description: Image format is not correct.
+  /session/{Id}/{userId}/photo/{photoId}:
     parameters:
       - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/userId"
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
     post: 
       tags: ["Photo actions"]
       operationId: likePhoto
       summary: Like a photo.
-      description: Like a photo from a user.
+      description: |-
+        # Information
+        - If the **photoId** provided exists then the like is added.
+        - If the **usedId** provided does not exist then a 404 error response is given.
       requestBody:
         content:
           application/json:
@@ -245,13 +246,15 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
         "404": {description: Photo not found.}
-
     #* unlikePhoto
     put: 
       tags: ["Photo actions"]
       operationId: unlikePhoto
-      summary: Unlike a photo.
-      description: Unlike a photo from a user.
+      summary: Delete a like from a photo.
+      description: |-
+        # Information
+        - If the **photoId** provided exists then the like is removed from the photo.
+        - If the **photoId** provided does not exist then a 404 error response is given.
       requestBody:
         content:
           application/json:
@@ -267,12 +270,14 @@ paths:
     delete:
       tags: ["Photo actions"]
       operationId: deletePhoto
-      summary: Delete a photo.
-      description: Delete a photo from the system.
+      summary: Remove a photo.
+      description: |-
+        # Information
+        - If the **phototId** provided exists then the photo is removed.
+        - If the **photoId** provided does not exist then a 404 error response is given.
       responses:
-        "204": {description: Photo deleted successfully.}
+        "200": {description: Photo deleted successfully.}
         "404": {description: Photo not found}
-  
   /session/{Id}/{userId}/photo/{photoId}/comment:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -283,7 +288,10 @@ paths:
     post:
       tags: ["Comment actions"]
       summary: Add a comment under a Photo.
-      description: TODO
+      description: |-
+        # Information
+        - If the **commentId** provided exists then the comment is added.
+        - If the **usedId** provided does not exist then a 404 error response is given.
       requestBody:
         content:
           application/json:
@@ -294,7 +302,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/comment"}
-        "404": {description: Comment not found}
+        "404": {description: Comment not found.}
   /session/{Id}/{userId}/photo/{photoId}/comment/{commentId}:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -326,6 +334,10 @@ components:
           type: integer
           readOnly: true
           example: user123
+        username:
+          description: User username
+          type: string
+          example: Maria Grey
         followStatus:
           description: Describe the follow status of the user
           type: string
@@ -351,12 +363,6 @@ components:
           type: integer
           readOnly: true
           example: 80
-    #* Username schema
-    username:
-      title: Username Schema
-      description: User username
-      type: string
-      example: "Lucian"
     #* Photo schema
     photo: 
       title: Photo Schema
