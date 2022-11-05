@@ -25,7 +25,6 @@ info:
     url: https://github.com/LucianCrainic
   license:
     name: MIT
-
 paths:
   /session/:
     #* doLogin
@@ -57,7 +56,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
-  
   /session/{Id}:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -79,7 +77,7 @@ paths:
           description: Username updated successfully.
         "404":
           description: User not found.
-    #! getMyStream
+    #* getMyStream
     get:
       tags: ["Session User actions"]
       summary: Returns user Stream.
@@ -88,10 +86,10 @@ paths:
         "200": 
           description: OK
           content:
-            application/json:
-              schema: { $ref: "#/components/schemas/user"}
+            image/*:
+              schema: { $ref: "#/components/schemas/photo"}
         "400":
-          description: User not found
+          description: User not found.
   /session/{Id}/{userId}: 
     parameters:
       - $ref: "#/components/parameters/Id"
@@ -204,7 +202,7 @@ paths:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/userId"
     #* uploadPhoto
-    put: 
+    post: 
       tags: ["Photo actions"]
       summary: Upload a photo.
       description: |-
@@ -371,9 +369,10 @@ components:
       properties:
         id: 
           description:  Unique photo identifier
-          type: integer
+          type: string
+          example: "#P1234"
           readOnly: true   
-        likeCount:
+        likesCount:
           description: Number of likes.
           type: integer
           example: 15
@@ -385,6 +384,11 @@ components:
           example: 20
           minimum: 0
           maximum : 9999999
+        uploadDate:
+          description: Upload date of a specific Photo.
+          type: string
+          example: "2022-11-02T09:00:00Z"
+          readOnly: true
     #* Comment Schema
     comment: 
       title: Comment Schema
@@ -393,12 +397,18 @@ components:
       properties:
         id:
           description: Unique comment identifier
-          type: integer
+          type: string
           readOnly: true 
+          example: "#C1234"
         content:
           description: Content of the comment
           type: string
           example: "Hello World!"
+        uploadDate:
+          description: Upload date of a specific Photo.
+          type: string
+          example: "2022-11-02T09:00:00Z"
+          readOnly: true
   parameters:
     Id:
       schema:
