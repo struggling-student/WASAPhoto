@@ -56,7 +56,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
-  /session/{Id}:
+  /session/{Id}/username:
     parameters:
       - $ref : "#/components/parameters/Id"
     #* setMyUserName
@@ -64,9 +64,8 @@ paths:
       tags: ["Session User actions"]
       summary: Sets user username.
       description: |-
-        ## Information
-        - If the **Id** provided exists then it sets a username for the profile.
-        - If the **Id** provided does not exist then a 404 error response is given.
+        Set user username, if the user is logged in then the username is set with the username
+        in the request body.
       operationId: setMyUserName
       requestBody:
         content:
@@ -74,23 +73,58 @@ paths:
             schema: {$ref: "#/components/schemas/user"}
       responses:
         "201":
-          description: Username updated successfully.
+          description: Username set successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user"}
         "404":
           description: User not found.
+  /session/{Id}/stream:
+    parameters:
+      - $ref : "#/components/parameters/Id"
     #* getMyStream
     get:
       tags: ["Session User actions"]
       summary: Returns user Stream.
+      description: |-
+        Return a list of photos for the user stream.
+        If the client specifies a range for when the photos were uploaded,
+        the list will be sorted by date from that point and filtered.
+        Optionally, the client can specify a custom quantity of photos to be displayed.
       operationId: getMyStream
+      parameters:
+        - name: range
+          in: query
+          description: |-
+            Range for when the photos were uploaded.
+            Default: Today
+          schema:
+            type: string
+            enum: ["Today","Yesterday", "Last week"]
+            example: "Today"
+        - name: quantity
+          in: query
+          required: false
+          description: |-
+            Quantity of photos to be displayed. 
+            Default: 10.
+          schema:
+            type: number
+            format: float
+            example: 15
+            minimum: 1
+            maximum: 50
       responses:
         "200": 
-          description: OK
+          description: List of photos.
           content:
             image/*:
-              schema: { $ref: "#/components/schemas/photo"}
+              schema: 
+                type: array
+                items: { $ref: "#/components/schemas/photo"}
         "400":
           description: User not found.
-  /session/{Id}/{userId}: 
+  /session/{Id}/{userId}/profile: 
     parameters:
       - $ref: "#/components/parameters/Id"
       - $ref: "#/components/parameters/userId"
@@ -100,18 +134,17 @@ paths:
       summary: Returns user profile
       operationId: getUserProfile
       description: |-
-        ## Information
-        - If the **userId** provided by the **user(Id)** exists then it returns the profile of the User.
-        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
-        response is given.
+        Return the user profile of a userId provided by the current logged in userId. 
+        If the userId exists then the profile of the user is returned. a user not found
+        error is given if the userId does not exist.
       responses:
         "200": 
-          description: OK
+          description: User profile retrived.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
         "400":
-          description: User not found
+          description: User not found.
   /session/{Id}/{userId}/ban:
     parameters: 
       - $ref: "#/components/parameters/Id"
@@ -121,11 +154,8 @@ paths:
       tags: ["User Ban actions"]
       summary: Ban an user.
       description: |-
-        ## Information
-        - If the **userId** provided by the **user(Id)** exists then banStatus is 
-        changed from "None" to "Ban". 
-        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
-        response is given.
+       Ban an user, if the userId provided by the current logged in user exist. If the userId 
+       does not exist then a user not found response is given.
       operationId: banUser
       requestBody:
         content:
@@ -134,19 +164,23 @@ paths:
       responses:
         "200": 
           description: User banned successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user"}
         "404":
           description: User not found.
+  /session/{Id}/{userId}/unban:
+    parameters: 
+      - $ref: "#/components/parameters/Id"
+      - $ref: "#/components/parameters/userId"
     #* unbanUser
     put: 
       tags: ["User Ban actions"]
       summary: Unban an user.
       description: |-
-        ## Information
-        - If the **userId** provided by the **user(Id)** exists then banStatus is 
-        changed from "Ban" to "None". 
-        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
-        response is given.
-      operationId: banUser
+        Unban an user, if the userId provided by the current logged in user
+         exist. If the userId does not exist then a user not found response is given.
+      operationId: unbanUser
       requestBody:
         content:
           application/json:
@@ -154,19 +188,21 @@ paths:
       responses:
         "200": 
           description: User Unbanned successfully.
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/user"}
         "404":
           description: User not found.
-  /session/{Id}/{UserId}/follow:
+  /session/{Id}/{userId}/follow:
+    parameters: 
+    - $ref: "#/components/parameters/Id"
+    - $ref: "#/components/parameters/userId"
     #* followUser
     post: 
       tags: ["User Follow actions"]
       summary: Follow an user.
       description: |-
-        ## Information
-        - If the **userId** provided by the **user(Id)** exists then followStatus is 
-        changed from "None" to "Follow". 
-        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
-        response is given.
+        Folow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
       operationId: followUser
       requestBody:
         content:
@@ -175,19 +211,22 @@ paths:
       responses:
         "200": 
           description: User followed successfully.
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/user"}
         "404":
           description: User not found.
+  /session/{Id}/{userId}/unfollow:
+    parameters: 
+    - $ref: "#/components/parameters/Id"
+    - $ref: "#/components/parameters/userId"    
     #* unfollowUser
     put: 
       tags: ["User Follow actions"]
       summary: Unfollow an user.
       description: |-
-        ## Information
-        - If the **userId** provided by the **user(Id)** exists then banStatus is 
-        changed from "Follow" to "None". 
-        - If the **usedId** provided by the **user(Id)** does not exist then a 404 error
-        response is given.
-      operationId: banUser
+       Unfollow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
+      operationId: unfollowUser
       requestBody:
         content:
           application/json:
@@ -195,20 +234,21 @@ paths:
       responses:
         "200": 
           description: User Unfollowed successfully.
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/user"}
         "404":
           description: User not found.
-  /session/{Id}/{userId}/photo:
+  /session/{Id}/photo/:
     parameters:
       - $ref : "#/components/parameters/Id"
-      - $ref : "#/components/parameters/userId"
     #* uploadPhoto
     post: 
       tags: ["Photo actions"]
       summary: Upload a photo.
       description: |-
-        # Information
-        - If the **photo** provided has the right format then the photo is added.
-        - If the **photo** provided does not have the right format then a 404 error response is given.
+        Upload a photo, if the photo has the right format then it is uploaded on the user profile. If the file
+        format is not correct, then an error response is given.
       operationId: uploadPhoto
       requestBody:
         content:
@@ -217,9 +257,27 @@ paths:
       responses:
         "200":
           description: Photo uploaded successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/photo" }
         "404":
           description: Image format is not correct.
-  /session/{Id}/{userId}/photo/{photoId}:
+  /session/{Id}/photo/{photoId}:
+    parameters:
+      - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/photoID"
+    #* deletePhoto 
+    delete:
+      tags: ["Photo actions"]
+      operationId: deletePhoto
+      summary: Remove a photo.
+      description: |-
+       Delete a photo from a user profile. If the photoId is correct then the photo is removed, an 
+       error response is given if the photoId is not found.
+      responses:
+        "200": {description: Photo deleted successfully.}
+        "404": {description: Photo not found.}
+  /session/{Id}/{userId}/photo/{photoId}/like:
     parameters:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/userId"
@@ -230,9 +288,9 @@ paths:
       operationId: likePhoto
       summary: Like a photo.
       description: |-
-        # Information
-        - If the **photoId** provided exists then the like is added.
-        - If the **usedId** provided does not exist then a 404 error response is given.
+        Add a like from a specific photo, is the photoid and the userid provided by the 
+        current logged in user are correct then the like is added. If either one of the IDs
+        are not correct then a photo not found error response is given.
       requestBody:
         content:
           application/json:
@@ -244,15 +302,20 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
         "404": {description: Photo not found.}
+  /session/{Id}/{userId}/photo/{photoId}/unlike:
+    parameters:
+      - $ref : "#/components/parameters/Id"
+      - $ref : "#/components/parameters/userId"
+      - $ref : "#/components/parameters/photoID"   
     #* unlikePhoto
     put: 
       tags: ["Photo actions"]
       operationId: unlikePhoto
       summary: Delete a like from a photo.
       description: |-
-        # Information
-        - If the **photoId** provided exists then the like is removed from the photo.
-        - If the **photoId** provided does not exist then a 404 error response is given.
+        Remove a like from a specific photo, is the photoid and the userid provided by the 
+        current logged in user are correct then the like is removed. If either one of the IDs
+        are not correct then a photo not found error response is given.
       requestBody:
         content:
           application/json:
@@ -264,32 +327,21 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
         "404": {description: Photo not found.}
-    #* deletePhoto 
-    delete:
-      tags: ["Photo actions"]
-      operationId: deletePhoto
-      summary: Remove a photo.
-      description: |-
-        # Information
-        - If the **phototId** provided exists then the photo is removed.
-        - If the **photoId** provided does not exist then a 404 error response is given.
-      responses:
-        "200": {description: Photo deleted successfully.}
-        "404": {description: Photo not found}
+
   /session/{Id}/{userId}/photo/{photoId}/comment:
     parameters:
       - $ref : "#/components/parameters/Id"
-      - $ref : "#/components/parameters/photoID"
       - $ref : "#/components/parameters/userId"
-      - $ref: "#/components/parameters/commentID"
+      - $ref : "#/components/parameters/photoID"
     #* commentPhoto
     post:
       tags: ["Comment actions"]
       summary: Add a comment under a Photo.
+      operationId: commentPhoto
       description: |-
-        # Information
-        - If the **commentId** provided exists then the comment is added.
-        - If the **usedId** provided does not exist then a 404 error response is given.
+       Add a comment under a Photo, if the userID and photoID are correct
+       then the comment in the request body is added under the photo. If 
+       either one of the IDs are wrong then a photo not found response is given.
       requestBody:
         content:
           application/json:
@@ -300,7 +352,8 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/comment"}
-        "404": {description: Comment not found.}
+        "404": 
+          description: Photo not found.
   /session/{Id}/{userId}/photo/{photoId}/comment/{commentId}:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -309,15 +362,15 @@ paths:
       - $ref: "#/components/parameters/commentID"
     #* uncommentPhoto
     delete:
-     operationId: uncommentPhoto
      tags: ["Comment actions"]
+     operationId: uncommentPhoto
      summary: Remove a comment under a Photo.
      description: |-
-        # Information
-        - If the **commentId** provided exists then the comment is removed.
-        - If the **usedId** provided does not exist then a 404 error response is given.
+       Delete a comment under a photo. If the userID,photoID and commentID 
+       are correct then the photo is removed, if one of the 3 IDs are wrong 
+       then a comment not found response error is given.
      responses:
-       "200": {description: Comment removed successfully.}
+       "204": {description: Comment removed successfully.}
        "404": {description: Comment not found.}
 components:
   schemas:
@@ -346,28 +399,33 @@ components:
           type: string
           enum: ["Ban","None"]
           example: None
-        followerStatus:
+        followersCount:
           description: Number of followers.
           type: integer
           readOnly: true
           example: 1420
-        followingStatus:
+        followingCount:
           description: Number of followings.
           type: integer
           readOnly: true
           example: 820
-        photoStatus:
+        photoCount:
           description: Number of photos published.
           type: integer
           readOnly: true
           example: 80
+        createDate:
+          description: Upload date of a specific Photo.
+          type: string
+          example: "2022-11-02T09:00:00Z"
+          readOnly: true
     #* Photo schema
     photo: 
       title: Photo Schema
       description: "This object represent a singe photo"
       type: object
       properties:
-        id: 
+        photoId: 
           description:  Unique photo identifier
           type: string
           example: "#P1234"
@@ -395,7 +453,7 @@ components:
       description: This object represent a single comment
       type: object
       properties:
-        id:
+        commentId:
           description: Unique comment identifier
           type: string
           readOnly: true 
@@ -404,6 +462,12 @@ components:
           description: Content of the comment
           type: string
           example: "Hello World!"
+        commentLikeCount:
+          description: Count likes of a comments.
+          type: integer
+          example: 20
+          minimum: 0
+          maximum : 9999999
         uploadDate:
           description: Upload date of a specific Photo.
           type: string
@@ -413,7 +477,7 @@ components:
     Id:
       schema:
         type: string
-        example: "abcdef012345"
+        example: "#U12345"
         readOnly: true
       name: Id
       in: path
@@ -429,17 +493,17 @@ components:
       description: "**userID** that identifies a specific user of WASAPhoto."
     photoID:
       schema:
-        type: integer
-        example: 123456
+        type: string
+        example: "#P1234"
         readOnly: true
       name: photoId 
       in: path
       required: true
-      description: "**photoID** of a photo on a user profile."
+      description: "**photoID** of a specific photo on a user profile."
     commentID:
       schema:
-        type: integer
-        example: 123456
+        type: string
+        example: "#C1234"
         readOnly: true
       name: commentId
       in: path
