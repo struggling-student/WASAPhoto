@@ -30,7 +30,7 @@ paths:
     #* doLogin
     post:
       tags: ["Login action"]
-      summary: Logs in the user.
+      summary: Log in user
       description: |-
         If the user does not exist, it will be created,
         and an identifier is returned.
@@ -43,9 +43,9 @@ paths:
             schema:
               type: object
               properties:
-                name:
+                username:
                   type: string
-                  example: Maria
+                  example: LucianCrainic
                   pattern: '^.*?$'
                   minLength: 3
                   maxLength: 16
@@ -62,7 +62,7 @@ paths:
     #* setMyUserName
     put: 
       tags: ["Session User actions"]
-      summary: Sets user username.
+      summary: Set user username
       description: |-
         Set user username, if the user is logged in then the username is set with the username
         in the request body.
@@ -78,14 +78,14 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
         "404":
-          description: User not found.
+          description:  A user with the specified ID was not found.
   /session/{Id}/stream/:
     parameters:
       - $ref : "#/components/parameters/Id"
     #* getMyStream
     get:
       tags: ["Session User actions"]
-      summary: Returns user Stream.
+      summary: Return user stream
       description: |-
         Return a list of photos for the user stream.
         If the client specifies a range for when the photos were uploaded,
@@ -123,16 +123,24 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/photo"}
         "400":
-          description: User not found.
-  /session/{Id}/profile/user/{userId}: 
+          description:  A user with the specified ID was not found.
+  /session/{Id}/profile/{username}: 
     parameters:
       - $ref: "#/components/parameters/Id"
-      - $ref: "#/components/parameters/userId"
     #* getUserProfile
     get:
       tags: ["User actions"]
-      summary: Returns user profile.
+      summary: Return user profile
       operationId: getUserProfile
+      parameters:
+        - name: username
+          in: query
+          description: |-
+            **username** of the user to return.
+          schema:
+            type: string
+            example: "LucianCrainic"
+          required: true
       description: |-
         Return the user profile of a userId provided by the current logged in userId. 
         If the userId exists then the profile of the user is returned. a user not found
@@ -144,23 +152,19 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
         "400":
-          description: User not found.
-  /session/{Id}/ban/user/{userId}:
+          description: A user with the specified ID was not found.
+  /session/{Id}/ban/{userId}:
     parameters: 
       - $ref: "#/components/parameters/Id"
       - $ref: "#/components/parameters/userId"
     #* banUser
     put: 
       tags: ["User Ban actions"]
-      summary: Ban an user.
+      summary: Ban user
       description: |-
        Ban an user, if the userId provided by the current logged in user exist. If the userId 
        does not exist then a user not found response is given.
       operationId: banUser
-      requestBody:
-        content:
-          application/json:
-            schema: {$ref: "#/components/schemas/user"}
       responses:
         "200": 
           description: User banned successfully.
@@ -168,39 +172,30 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
         "404":
-          description: User not found.
+          description: A user with the specified ID was not found.
     #* unbanUser
     delete: 
       tags: ["User Ban actions"]
-      summary: Unban an user.
+      summary: Unban user
       description: |-
         Unban an user, if the userId provided by the current logged in user
          exist. If the userId does not exist then a user not found response is given.
       operationId: unbanUser
 
       responses:
-        "200": 
-          description: User Unbanned successfully.
-          content:
-            application/json:
-              schema: {$ref: "#/components/schemas/user"}
-        "404":
-          description: User not found.
-  /session/{Id}/follow/user/{userId}:
+       "200": {description: Ban removed successfully.}
+       "404": {description: A user with the specified ID was not found.}
+  /session/{Id}/follow/{userId}:
     parameters: 
     - $ref: "#/components/parameters/Id"
     - $ref: "#/components/parameters/userId"
     #* followUser
     put: 
       tags: ["User Follow actions"]
-      summary: Follow an user.
+      summary: Follow user
       description: |-
         Folow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
       operationId: followUser
-      requestBody:
-        content:
-          application/json:
-            schema: {$ref: "#/components/schemas/user"}
       responses:
         "200": 
           description: User followed successfully.
@@ -208,33 +203,24 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/user"}
         "404":
-          description: User not found.    
+          description: A user with the specified ID was not found. 
     #* unfollowUser
     delete: 
       tags: ["User Follow actions"]
-      summary: Unfollow an user.
+      summary: Unfollow user
       description: |-
        Unfollow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
       operationId: unfollowUser
-      requestBody:
-        content:
-          application/json:
-            schema: {$ref: "#/components/schemas/user"}
       responses:
-        "200": 
-          description: User Unfollowed successfully.
-          content:
-            application/json:
-              schema: {$ref: "#/components/schemas/user"}
-        "404":
-          description: User not found.
+       "200": {description: Follow removed successfully.}
+       "404": {description: A user with the specified ID was not found.}
   /session/{Id}/photo/:
     parameters:
       - $ref : "#/components/parameters/Id"
     #* uploadPhoto
     post: 
       tags: ["Photo actions"]
-      summary: Upload a photo.
+      summary: Upload photo
       description: |-
         Upload a photo, if the photo has the right format then it is uploaded on the user profile. If the file
         format is not correct, then an error response is given.
@@ -243,6 +229,7 @@ paths:
         content:
           image/*:
             schema: { $ref: "#/components/schemas/photo" }
+        required: true
       responses:
         "200":
           description: Photo uploaded successfully.
@@ -259,13 +246,13 @@ paths:
     delete:
       tags: ["Photo actions"]
       operationId: deletePhoto
-      summary: Remove a photo.
+      summary: Remove photo
       description: |-
        Delete a photo from a user profile. If the photoId is correct then the photo is removed, an 
        error response is given if the photoId is not found.
       responses:
         "200": {description: Photo deleted successfully.}
-        "404": {description: Photo not found.}
+        "404": {description: A photo with the specified ID was not found.}
   /session/{Id}/user/{userId}/photo/{photoId}/like/:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -275,42 +262,30 @@ paths:
     put: 
       tags: ["Photo actions"]
       operationId: likePhoto
-      summary: Like a photo.
+      summary: Like photo
       description: |-
         Add a like from a specific photo, is the photoid and the userid provided by the 
         current logged in user are correct then the like is added. If either one of the IDs
         are not correct then a photo not found error response is given.
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/photo" }
       responses:
-        "201":
+        "200":
           description: Like added successfully.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
-        "404": {description: Photo not found.}  
+        "404": {description: A photo with the specified ID was not found.}  
     #* unlikePhoto
     delete: 
       tags: ["Photo actions"]
       operationId: unlikePhoto
-      summary: Delete a like from a photo.
+      summary: Delete like
       description: |-
         Remove a like from a specific photo, is the photoid and the userid provided by the 
         current logged in user are correct then the like is removed. If either one of the IDs
         are not correct then a photo not found error response is given.
-      requestBody:
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/photo" }
       responses:
-        "201":
-          description: Like added successfully.
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/photo"}
-        "404": {description: Photo not found.}
+        "200": {description: Like removed successfully.}
+        "404": {description: A photo with the specified ID was not found.}
   /session/{Id}/user/{userId}/photo/{photoId}/comment/:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -319,16 +294,24 @@ paths:
     #* commentPhoto
     post:
       tags: ["Comment actions"]
-      summary: Add a comment under a Photo.
+      summary: Add comment
       operationId: commentPhoto
       description: |-
        Add a comment under a Photo, if the userID and photoID are correct
        then the comment in the request body is added under the photo. If 
        either one of the IDs are wrong then a photo not found response is given.
       requestBody:
-        content:
+        content: 
           application/json:
-            schema: { $ref: "#/components/schemas/comment"}
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: Hello World!
+                  minLength: 1
+                  maxLength: 80
+        required: true
       responses:
         "200":
           description:  Comment added successfully.
@@ -336,7 +319,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/comment"}
         "404": 
-          description: Photo not found.
+          description: A photo with the specified ID was not found.
   /session/{Id}/user/{userId}/photo/{photoId}/comment/{commentId}:
     parameters:
       - $ref : "#/components/parameters/Id"
@@ -347,112 +330,120 @@ paths:
     delete:
      tags: ["Comment actions"]
      operationId: uncommentPhoto
-     summary: Remove a comment under a Photo.
+     summary: Remove comment
      description: |-
        Delete a comment under a photo. If the userID,photoID and commentID 
-       are correct then the photo is removed, if one of the 3 IDs are wrong 
-       then a comment not found response error is given.
+       are correct then the photo is removed, if either  one of the 3 IDs are wrong 
+       then a response error is given.
      responses:
-       "204": {description: Comment removed successfully.}
-       "404": {description: Comment not found.}
+       "200": {description: Comment removed successfully.}
+       "404": {description: A comment with the specified ID was not found.}
 components:
   schemas:
     #* User schema
     user:
       title: User Schema
-      description: This object represent a single User
+      description: This object represent a single user.
       type: object
       properties:
         id:
-          description: Unique user identifier
+          description: Unique user identifier.
           type: string
           readOnly: true
           example: "#U6789"
         username:
-          description: User username
+          description: User username.
           type: string
-          example: Lucian Crainic
+          example: LucianCrainic
         followList: 
-          description: to does
+          description: list of objects(each object is a followed user).
           type: array
           items:
-            type: string
-            description: ID of Users
-            example: "#U1234" 
+            type: object
+            properties:
+              id: 
+                type: string
+                example: "#U1234" 
         banList: 
-          description: to does
+          description: list of objects(each object is a banned user).
           type: array
           items:
-            type: string
-            description: ID of Users
-            example: "#U1234"
+            type: object
+            properties:
+              id: 
+                type: string
+                example: "#U1234"
         followersCount:
           description: Number of followers.
           type: integer
+          minimum: 0
+          maximum : 9999999
           readOnly: true
           example: 1420
-
         photoCount:
           description: Number of photos published.
           type: integer
+          minimum: 0
+          maximum : 9999999
           readOnly: true
           example: 80
         createDate:
-          description: Upload date of a specific Photo.
+          description: Registration date.
           type: string
-          example: "2022-11-02T09:00:00Z"
+          format: date-time
           readOnly: true
+          example: "2022-11-02T09:00:00Z"
     #* Photo schema
     photo: 
       title: Photo Schema
-      description: "This object represent a singe photo"
+      description: This object represent a single photo.
       type: object
       properties:
         photoId: 
-          description:  Unique photo identifier
+          description:  Unique photo identifier.
           type: string
+          readOnly: true
           example: "#P1234"
-          readOnly: true   
         likesCount:
           description: Number of likes.
           type: integer
-          example: 15
           minimum: 0
           maximum : 9999999
+          example: 15
         commentsCount:
           description: Number of comments.
           type: integer
-          example: 20
           minimum: 0
           maximum : 9999999
+          example: 20
         uploadDate:
-          description: Upload date of a specific Photo.
+          description: Upload date of a specific photo.
           type: string
-          example: "2022-11-02T09:00:00Z"
           readOnly: true
+          example: "2022-11-02T09:00:00Z"
     #* Comment Schema
     comment: 
       title: Comment Schema
-      description: This object represent a single comment
+      description: This object represent a single comment.
       type: object
       properties:
         commentId:
-          description: Unique comment identifier
+          description: Unique comment identifier.
           type: string
           readOnly: true 
           example: "#C1234"
         content:
-          description: Content of the comment
+          description: Content of the comment.
           type: string
           example: "Hello World!"
         commentLikeCount:
-          description: Count likes of a comments.
+          description: Count likes of a comment.
           type: integer
           example: 20
           minimum: 0
           maximum : 9999999
         uploadDate:
-          description: Upload date of a specific Photo.
+          description: Upload date of a specific comment.
           type: string
           example: "2022-11-02T09:00:00Z"
           readOnly: true
@@ -460,7 +451,7 @@ components:
     Id:
       schema:
         type: string
-        example: "#U12345"
+        example: "#U1234"
         readOnly: true
       name: Id
       in: path
@@ -469,7 +460,7 @@ components:
     userId:
       schema:
          type: string
-         example: "abcdef012345"
+         example: "#U5678"
       name: userId
       in: path
       required: true
@@ -499,10 +490,11 @@ components:
 #TODO addPhotoDescription
 #TODO removeDescription    
 
-#! Check schemas
+#! Reformat Description
+# Check schemas
 #! Methods Descriptions
-#! Methods Request and Response body 
-#! Methods Responses
+# Methods Request and Response body 
+# Methods Responses
 
-#? Implemen the get user profile method like => Query if you want to
+#? Implement the get user profile method like => Query if you want to
 #? return user profile/followers/photos/followings...
