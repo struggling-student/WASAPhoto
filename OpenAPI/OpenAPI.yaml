@@ -56,11 +56,11 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/user"}
-  /session/{Id}/username:
+  /session/{Id}/username/:
     parameters:
       - $ref : "#/components/parameters/Id"
     #* setMyUserName
-    post: 
+    put: 
       tags: ["Session User actions"]
       summary: Sets user username.
       description: |-
@@ -79,7 +79,7 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "404":
           description: User not found.
-  /session/{Id}/stream:
+  /session/{Id}/stream/:
     parameters:
       - $ref : "#/components/parameters/Id"
     #* getMyStream
@@ -124,14 +124,14 @@ paths:
                 items: { $ref: "#/components/schemas/photo"}
         "400":
           description: User not found.
-  /session/{Id}/{userId}/profile: 
+  /session/{Id}/profile/user/{userId}: 
     parameters:
       - $ref: "#/components/parameters/Id"
       - $ref: "#/components/parameters/userId"
     #* getUserProfile
     get:
       tags: ["User actions"]
-      summary: Returns user profile
+      summary: Returns user profile.
       operationId: getUserProfile
       description: |-
         Return the user profile of a userId provided by the current logged in userId. 
@@ -145,12 +145,12 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "400":
           description: User not found.
-  /session/{Id}/{userId}/ban:
+  /session/{Id}/ban/user/{userId}:
     parameters: 
       - $ref: "#/components/parameters/Id"
       - $ref: "#/components/parameters/userId"
     #* banUser
-    post: 
+    put: 
       tags: ["User Ban actions"]
       summary: Ban an user.
       description: |-
@@ -169,22 +169,15 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "404":
           description: User not found.
-  /session/{Id}/{userId}/unban:
-    parameters: 
-      - $ref: "#/components/parameters/Id"
-      - $ref: "#/components/parameters/userId"
     #* unbanUser
-    put: 
+    delete: 
       tags: ["User Ban actions"]
       summary: Unban an user.
       description: |-
         Unban an user, if the userId provided by the current logged in user
          exist. If the userId does not exist then a user not found response is given.
       operationId: unbanUser
-      requestBody:
-        content:
-          application/json:
-            schema: {$ref: "#/components/schemas/user"}
+
       responses:
         "200": 
           description: User Unbanned successfully.
@@ -193,12 +186,12 @@ paths:
               schema: {$ref: "#/components/schemas/user"}
         "404":
           description: User not found.
-  /session/{Id}/{userId}/follow:
+  /session/{Id}/follow/user/{userId}:
     parameters: 
     - $ref: "#/components/parameters/Id"
     - $ref: "#/components/parameters/userId"
     #* followUser
-    post: 
+    put: 
       tags: ["User Follow actions"]
       summary: Follow an user.
       description: |-
@@ -215,13 +208,9 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/user"}
         "404":
-          description: User not found.
-  /session/{Id}/{userId}/unfollow:
-    parameters: 
-    - $ref: "#/components/parameters/Id"
-    - $ref: "#/components/parameters/userId"    
+          description: User not found.    
     #* unfollowUser
-    put: 
+    delete: 
       tags: ["User Follow actions"]
       summary: Unfollow an user.
       description: |-
@@ -277,13 +266,13 @@ paths:
       responses:
         "200": {description: Photo deleted successfully.}
         "404": {description: Photo not found.}
-  /session/{Id}/{userId}/photo/{photoId}/like:
+  /session/{Id}/user/{userId}/photo/{photoId}/like/:
     parameters:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/userId"
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
-    post: 
+    put: 
       tags: ["Photo actions"]
       operationId: likePhoto
       summary: Like a photo.
@@ -301,14 +290,9 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
-        "404": {description: Photo not found.}
-  /session/{Id}/{userId}/photo/{photoId}/unlike:
-    parameters:
-      - $ref : "#/components/parameters/Id"
-      - $ref : "#/components/parameters/userId"
-      - $ref : "#/components/parameters/photoID"   
+        "404": {description: Photo not found.}  
     #* unlikePhoto
-    put: 
+    delete: 
       tags: ["Photo actions"]
       operationId: unlikePhoto
       summary: Delete a like from a photo.
@@ -327,8 +311,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/photo"}
         "404": {description: Photo not found.}
-
-  /session/{Id}/{userId}/photo/{photoId}/comment:
+  /session/{Id}/user/{userId}/photo/{photoId}/comment/:
     parameters:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/userId"
@@ -354,7 +337,7 @@ paths:
               schema: { $ref: "#/components/schemas/comment"}
         "404": 
           description: Photo not found.
-  /session/{Id}/{userId}/photo/{photoId}/comment/{commentId}:
+  /session/{Id}/user/{userId}/photo/{photoId}/comment/{commentId}:
     parameters:
       - $ref : "#/components/parameters/Id"
       - $ref : "#/components/parameters/userId"
@@ -382,33 +365,33 @@ components:
       properties:
         id:
           description: Unique user identifier
-          type: integer
+          type: string
           readOnly: true
-          example: user123
+          example: "#U6789"
         username:
           description: User username
           type: string
-          example: Maria Grey
-        followStatus:
-          description: Describe the follow status of the user
-          type: string
-          enum: ["Follow", "None"]
-          example: None
-        banStatus:
-          description: Describe the ban status of the user
-          type: string
-          enum: ["Ban","None"]
-          example: None
+          example: Lucian Crainic
+        followList: 
+          description: to does
+          type: array
+          items:
+            type: string
+            description: ID of Users
+            example: "#U1234" 
+        banList: 
+          description: to does
+          type: array
+          items:
+            type: string
+            description: ID of Users
+            example: "#U1234"
         followersCount:
           description: Number of followers.
           type: integer
           readOnly: true
           example: 1420
-        followingCount:
-          description: Number of followings.
-          type: integer
-          readOnly: true
-          example: 820
+
         photoCount:
           description: Number of photos published.
           type: integer
@@ -509,3 +492,17 @@ components:
       in: path
       required: true
       description: "**commentID** of a single comment under a photo."
+
+#TODO profileDescription
+#TODO profilePicture
+#TODO commentLike
+#TODO addPhotoDescription
+#TODO removeDescription    
+
+#! Check schemas
+#! Methods Descriptions
+#! Methods Request and Response body 
+#! Methods Responses
+
+#? Implemen the get user profile method like => Query if you want to
+#? return user profile/followers/photos/followings...
