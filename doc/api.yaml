@@ -62,6 +62,7 @@ paths:
                     example: "#U1234"
   /setUsername/{username}:
     parameters: 
+      - $ref: "#/components/parameters/identifier"
       - $ref: "#/components/parameters/username"
     #* setMyUserName
     put: 
@@ -71,15 +72,6 @@ paths:
         Set user username, if the user is logged in then the username is set with the username
         in the request body.
       operationId: setMyUserName
-      parameters:
-        - name: username
-          in: query
-          description: |-
-            **username** of the user to return.
-          schema:
-            type: string
-            example: "LucianCrainic"
-          required: true
       requestBody:
         description: User username
         content: 
@@ -101,9 +93,10 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /stream/{identifier}:
+  /stream/{username}:
     parameters:
-      - $ref : "#/components/parameters/identifier"
+      - $ref: "#/components/parameters/identifier"
+      - $ref : "#/components/parameters/username"
     #* getMyStream
     get:
       tags: ["Session User actions"]
@@ -148,6 +141,7 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
   /profile/{username}:
     parameters: 
+      - $ref: "#/components/parameters/identifier"
       - $ref: "#/components/parameters/username"
     #* getUserProfile
     get:
@@ -164,9 +158,7 @@ paths:
             example: "LucianCrainic"
           required: true
       description: |-
-        Return the user profile of a userId provided by the current logged in userId. 
-        If the userId exists then the profile of the user is returned. a user not found
-        error is given if the userId does not exist.
+        Return an user profile, if the username provided exists. If the username does not exist then an error response is given.
       responses:
         "200": 
           description: User profile retrived.
@@ -177,14 +169,14 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
   /ban/{username}:
     parameters: 
+      - $ref: "#/components/parameters/identifier"
       - $ref: "#/components/parameters/username"
     #* banUser
     post: 
       tags: ["User Ban actions"]
       summary: Ban user
       description: |-
-       Ban an user, if the userId provided by the current logged in user exist. If the userId 
-       does not exist then a user not found response is given.
+       Ban an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: banUser
       responses:
         "200": 
@@ -199,8 +191,7 @@ paths:
       tags: ["User Ban actions"]
       summary: Unban user
       description: |-
-        Unban an user, if the userId provided by the current logged in user
-         exist. If the userId does not exist then a user not found response is given.
+        Unban an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: unbanUser
 
       responses:
@@ -208,14 +199,15 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   /follow/{username}:
-    parameters: 
+    parameters:
+    - $ref: "#/components/parameters/identifier" 
     - $ref: "#/components/parameters/username"
     #* followUser
     post: 
       tags: ["User Follow actions"]
       summary: Follow user
       description: |-
-        Folow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
+        Folow an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: followUser
       responses:
         "200": 
@@ -230,13 +222,15 @@ paths:
       tags: ["User Follow actions"]
       summary: Unfollow user
       description: |-
-       Unfollow an user, if the userId provided by the current logged in user exist. If the userId does not exist then a user not found response is given.
+       Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: unfollowUser
       responses:
        "200": {description: Follow removed successfully.}
        "400": { $ref: "#/components/responses/BadRequest" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   /photo/:
+    parameters:
+      - $ref: "#/components/parameters/identifier" 
     #* uploadPhoto
     post: 
       tags: ["Photo actions"]
@@ -260,6 +254,7 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
   /photo/{photoId}:
     parameters:
+      - $ref: "#/components/parameters/identifier" 
       - $ref : "#/components/parameters/photoID"
     #* deletePhoto 
     delete:
@@ -268,23 +263,23 @@ paths:
       summary: Remove photo
       description: |-
        Delete a photo from a user profile. If the photoId is correct then the photo is removed, an 
-       error response is given if the photoId is not found.
+       error response is given if the photoId is not correct.
       responses:
         "200": {description: Photo deleted successfully.}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   /like/{photoId}:
     parameters:
+      - $ref: "#/components/parameters/identifier" 
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
     post: 
-      tags: ["Photo actions"]
+      tags: ["Like actions"]
       operationId: likePhoto
       summary: Like photo
       description: |-
-        Add a like from a specific photo, is the photoid and the userid provided by the 
-        current logged in user are correct then the like is added. If either one of the IDs
-        are not correct then a photo not found error response is given.
+        Add a like to a specific photo, is the photoId is correct then a like is added. If the photoId
+        is not correct then an error response is given.
       responses:
         "200":
           description: Like added successfully.
@@ -295,19 +290,19 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
     #* unlikePhoto
     delete: 
-      tags: ["Photo actions"]
+      tags: ["Like actions"]
       operationId: unlikePhoto
       summary: Delete like
       description: |-
-        Remove a like from a specific photo, is the photoid and the userid provided by the 
-        current logged in user are correct then the like is removed. If either one of the IDs
-        are not correct then a photo not found error response is given.
+        Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
+        If the photoId is not correct then an error response is given.
       responses:
         "200": {description: Like removed successfully.}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   /comment/{photoId}:
     parameters:
+      - $ref: "#/components/parameters/identifier" 
       - $ref : "#/components/parameters/photoID"
     #* commentPhoto
     post:
@@ -315,9 +310,9 @@ paths:
       summary: Add comment
       operationId: commentPhoto
       description: |-
-       Add a comment under a Photo, if the userID and photoID are correct
+       Add a comment under a Photo, if photoId is correct
        then the comment in the request body is added under the photo. If 
-       either one of the IDs are wrong then a photo not found response is given.
+       the photoId is wrong then a response error is given.
       requestBody:
         description: Comment 
         content: 
@@ -329,7 +324,7 @@ paths:
                   type: string
                   example: Hello World!
                   minLength: 1
-                  maxLength: 16
+                  maxLength: 40
         required: true
       responses:
         "200":
@@ -341,16 +336,61 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
   /comment/{commentId}:
     parameters:
+      - $ref: "#/components/parameters/identifier" 
       - $ref: "#/components/parameters/commentID"
+    #* editComment
+    put: 
+      tags: ["Comment actions"]
+      operationId: editComment
+      summary: Edit comment
+      description: |-
+        Edit a published comment with a new comment content. If the commentId is correct then the comment
+        is updated, an error response is given if the commentId is not correct.
+      requestBody:
+        description: User username
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "Nice World!"
+                  minLength: 1
+                  maxLength: 40
+        required: true
+      responses:
+        "201":
+          description: Comment updated successfully.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  commentId:
+                    description: Unique comment identifier.
+                    type: string
+                    readOnly: true 
+                    example: "#C1234"
+                  content:
+                    description: Content of the comment.
+                    type: string
+                    example: "Nice World!"
+                  uploadDate:
+                    description: Upload date of a specific comment.
+                    type: string
+                    example: "2022-11-02T09:00:00Z"
+                    readOnly: true
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
     #* uncommentPhoto
     delete:
      tags: ["Comment actions"]
      operationId: uncommentPhoto
      summary: Remove comment
      description: |-
-       Delete a comment under a photo. If the userID,photoID and commentID 
-       are correct then the photo is removed, if either  one of the 3 IDs are wrong 
-       then a response error is given.
+       Delete a comment under a photo. If the commentId is correct then the comment is removed from the photo, an error response
+       is given if the commentId is not correct.
      responses:
        "200": {description: Comment removed successfully.}
        "400": { $ref: "#/components/responses/BadRequest" }
@@ -467,11 +507,11 @@ components:
   parameters:
     identifier:
       schema:
-        type: string
-        example: "#U1234"
-        readOnly: true
-      name: userId
-      in: path
+          type: string
+          example: "#U1234"
+          readOnly: true
+      name: identifier
+      in: header
       required: true
       description: "**Identifier** of a WASAPhoto user."
     username:
@@ -484,7 +524,7 @@ components:
       name: username
       in: path
       required: true
-      description: "**Username* of a WASAPhoto user."
+      description: "**Username** of a WASAPhoto user."
     photoID:
       schema:
         type: string
