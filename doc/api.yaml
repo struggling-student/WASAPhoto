@@ -55,10 +55,14 @@ paths:
           description: User log-in action successful
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user"}
-  /setUsername/{userId}:
-    parameters:
-      - $ref : "#/components/parameters/userId"
+              schema:
+                properties:
+                  identifier:
+                    type: string
+                    example: "#U1234"
+  /setUsername/{username}:
+    parameters: 
+      - $ref: "#/components/parameters/username"
     #* setMyUserName
     put: 
       tags: ["Session User actions"]
@@ -67,6 +71,15 @@ paths:
         Set user username, if the user is logged in then the username is set with the username
         in the request body.
       operationId: setMyUserName
+      parameters:
+        - name: username
+          in: query
+          description: |-
+            **username** of the user to return.
+          schema:
+            type: string
+            example: "LucianCrainic"
+          required: true
       requestBody:
         description: User username
         content: 
@@ -76,7 +89,7 @@ paths:
               properties:
                 username:
                   type: string
-                  example: Lucian Dorin Crainic
+                  example: LucianCrainic
                   minLength: 5
                   maxLength: 30
         required: true
@@ -88,9 +101,9 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /stream/{userId}:
+  /stream/{identifier}:
     parameters:
-      - $ref : "#/components/parameters/userId"
+      - $ref : "#/components/parameters/identifier"
     #* getMyStream
     get:
       tags: ["Session User actions"]
@@ -105,7 +118,7 @@ paths:
         - name: range
           in: query
           description: |-
-            Range for when the photos were uploaded.
+            **Range** for when the photos were uploaded.
             Default: Today
           schema:
             type: string
@@ -115,7 +128,7 @@ paths:
           in: query
           required: false
           description: |-
-            Quantity of photos to be displayed. 
+            **Quantity** of photos to be displayed. 
             Default: 10.
           schema:
             type: number
@@ -133,7 +146,9 @@ paths:
                 items: { $ref: "#/components/schemas/photo"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /profile/{username}: 
+  /profile/{username}:
+    parameters: 
+      - $ref: "#/components/parameters/username"
     #* getUserProfile
     get:
       tags: ["User actions"]
@@ -160,11 +175,11 @@ paths:
               schema: { $ref: "#/components/schemas/user"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /ban/{userId}:
+  /ban/{username}:
     parameters: 
-      - $ref: "#/components/parameters/userId"
+      - $ref: "#/components/parameters/username"
     #* banUser
-    put: 
+    post: 
       tags: ["User Ban actions"]
       summary: Ban user
       description: |-
@@ -192,11 +207,11 @@ paths:
        "200": {description: Ban removed successfully.}
        "400": { $ref: "#/components/responses/BadRequest" }
        "500": { $ref: "#/components/responses/InternalServerError" }
-  /follow/{userId}:
+  /follow/{username}:
     parameters: 
-    - $ref: "#/components/parameters/userId"
+    - $ref: "#/components/parameters/username"
     #* followUser
-    put: 
+    post: 
       tags: ["User Follow actions"]
       summary: Follow user
       description: |-
@@ -262,7 +277,7 @@ paths:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
-    put: 
+    post: 
       tags: ["Photo actions"]
       operationId: likePhoto
       summary: Like photo
@@ -295,7 +310,7 @@ paths:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* commentPhoto
-    put:
+    post:
       tags: ["Comment actions"]
       summary: Add comment
       operationId: commentPhoto
@@ -354,15 +369,15 @@ components:
       description: This object represent a single user.
       type: object
       properties:
-        userId:
+        identifier:
           description: Unique user identifier.
           type: string
           readOnly: true
-          example: Lucian
+          example: "#U1234"
         username:
           description: User username.
           type: string
-          example: Lucian Dorin Crainic
+          example: LucianCrainic
         followList: 
           description: list of objects(each object is a followed user).
           type: array
@@ -450,15 +465,26 @@ components:
           example: "2022-11-02T09:00:00Z"
           readOnly: true
   parameters:
-    userId:
+    identifier:
       schema:
         type: string
         example: "#U1234"
         readOnly: true
-      name: Id
+      name: userId
       in: path
       required: true
-      description: "**ID** of the current user that is logged in WASAPhoto."
+      description: "**Identifier** of a WASAPhoto user."
+    username:
+      schema:
+          type: string
+          example: LucianCrainic
+          readOnly: true
+          minLength: 5
+          maxLength: 30
+      name: username
+      in: path
+      required: true
+      description: "**Username* of a WASAPhoto user."
     photoID:
       schema:
         type: string
