@@ -131,7 +131,7 @@ paths:
             maximum: 50
       responses:
         "200": 
-          description: List of photos.
+          description: User stream retrived successfully.
           content:
             image/*:
               schema: 
@@ -206,8 +206,8 @@ paths:
        "500": { $ref: "#/components/responses/InternalServerError" }
   /follow/{username}:
     parameters:
-    - $ref: "#/components/parameters/identifier" 
-    - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/identifier" 
+      - $ref: "#/components/parameters/username"
     #* followUser
     post: 
       tags: ["User Follow actions"]
@@ -282,6 +282,25 @@ paths:
                   identifier:
                     type: string
                     example: "#P1234"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+  /photo/{username}:
+    parameters:
+      - $ref: "#/components/parameters/identifier" 
+      - $ref: "#/components/parameters/username"
+    #* getUserPhotos
+    get:
+      tags: ["Photo actions"]
+      summary: Return user photos
+      operationId: getUserPhotos
+      description: |-
+        Return an user photos, if the username provided exists. If the username does not exist then an error response is given.
+      responses:
+        "200": 
+          description: User photos retrived.
+          content:
+            image/*:
+              schema: { $ref: "#/components/schemas/photosList"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   /photo/{photoId}:
@@ -446,11 +465,14 @@ paths:
 
 components:
   responses:
+    #* BadRequest response
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc).
+    #* InternalServerError response
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
   schemas:
+    #* user
     user:
       title: User 
       description: This object represent a single user.
@@ -471,6 +493,7 @@ components:
           format: date-time
           readOnly: true
           example: "2022-11-02T09:00:00Z"
+    #* followList schema
     followList:
       title: Followers
       description: This object represent the likes under a photo.
@@ -487,10 +510,12 @@ components:
           items:
             type: object
             properties:
-              username:
-                description: User username.
+              identifier:
+                description: Unique user identifier.
                 type: string
-                example: LucianCrainic
+                readOnly: true
+                example: "#U5678" 
+    #* banList schema
     banList:
       title: Bans
       description: This object represent the likes under a photo.
@@ -507,10 +532,12 @@ components:
           items:
             type: object
             properties:
-              username:
-                description: User username.
+              identifier:
+                description: Unique user identifier.
                 type: string
-                example: LucianCrainic  
+                readOnly: true
+                example: "#U5678" 
+    #* commentsList schema
     commentsList: 
       title: Comments
       description: This object represent the comments under a photo.
@@ -532,11 +559,11 @@ components:
                 type: string
                 readOnly: true 
                 example: "#C1234"
-              username: 
+              identifier:
+                description: Unique user identifier.
                 type: string
-                example: LucianCrainic
-                minLength: 5
-                maxLength: 30
+                readOnly: true
+                example: "#U5678" 
               content:
                 description: Content of the comment.
                 type: string
@@ -548,6 +575,7 @@ components:
                 type: string
                 example: "2022-11-02T09:00:00Z"
                 readOnly: true
+    #* likesList schema
     likesList: 
       title: Likes
       description: This object represent the users banned by another user.
@@ -569,17 +597,17 @@ components:
                 type: string
                 readOnly: true
                 example: "#U1234"
+    #* photoList schema
     photosList: 
       title: Photos
       description: This object represent the photos of an user.
       type: object
       properties:
-        username: 
-            type: string
-            example: LucianCrainic
-            readOnly: true
-            minLength: 5
-            maxLength: 30 
+        identifier:
+          description: Unique user identifier.
+          type: string
+          readOnly: true
+          example: "#U1234" 
         photos: 
           description: list of objects (each object is a photo)
           type: array
@@ -597,6 +625,7 @@ components:
                 readOnly: true
                 example: "2022-11-02T09:00:00Z"
   parameters:
+    #* identififer parameter
     identifier:
       schema:
           type: string
@@ -606,6 +635,7 @@ components:
       in: header
       required: true
       description: "**Identifier** of a WASAPhoto user."
+    #* username parameter
     username:
       schema:
           type: string
@@ -617,6 +647,7 @@ components:
       in: path
       required: true
       description: "**Username** of a WASAPhoto user."
+    #* photoID parameter
     photoID:
       schema:
         type: string
@@ -626,6 +657,7 @@ components:
       in: path
       required: true
       description: "**photoID** of a specific photo on a user profile."
+    #* commentID parameter
     commentID:
       schema:
         type: string
