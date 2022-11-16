@@ -67,7 +67,6 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      - {} #nosec
       tags: ["Session User actions"]
       summary: Set user username
       description: |-
@@ -102,7 +101,6 @@ paths:
     #* getMyStream
     get:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Session User actions"]
       summary: Return user stream
@@ -151,7 +149,6 @@ paths:
     #* getUserProfile
     get:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User actions"]
       summary: Return user profile
@@ -173,7 +170,6 @@ paths:
     #* banUser
     post: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Ban actions"]
       summary: Ban user
@@ -192,7 +188,6 @@ paths:
     #* getBans
     get:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Ban actions"]
       summary: Return user bans
@@ -211,7 +206,6 @@ paths:
     #* unbanUser
     delete: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Ban actions"]
       summary: Unban user
@@ -230,7 +224,6 @@ paths:
     #* followUser
     post: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Follow actions"]
       summary: Follow user
@@ -249,7 +242,6 @@ paths:
     #* getFollowers
     get:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Follow actions"]
       summary: Return user followers
@@ -268,7 +260,6 @@ paths:
     #* unfollowUser
     delete: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["User Follow actions"]
       summary: Unfollow user
@@ -294,7 +285,7 @@ paths:
       requestBody:
         required: true
         content:
-          image/*:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -302,6 +293,10 @@ paths:
                   type: string
                   format: binary
                   readOnly: true
+                 description:
+                  description: Small description of the specific photo.
+                  type: string
+                  example: "I took this photo!"
 
       responses:
         "201":
@@ -310,13 +305,24 @@ paths:
             application/json:
               schema:
                 properties:
-                  identifier:
+                  photoId: 
+                    description:  Unique photo identifier.
                     type: string
+                    readOnly: true
                     example: "#P1234"
                   file: 
+                      type: string
+                      format: binary
+                      readOnly: true
+                  description:
+                    description: Small description of the specific photo.
                     type: string
-                    format: binary
+                    example: "I took this photo!"
+                  uploadDate:
+                    description: Upload date of a specific photo.
+                    type: string
                     readOnly: true
+                    example: "2022-11-02T09:00:00Z"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -326,8 +332,7 @@ paths:
     #* getUserPhotos
     get:
       security:
-      - {} #nosec
-      - bearerAuth : []      
+      - bearerAuth : []   
       tags: ["Photo actions"]
       summary: Return user photos
       operationId: getUserPhotos
@@ -345,10 +350,57 @@ paths:
   /photo/{photoId}:
     parameters:
       - $ref : "#/components/parameters/photoID"
-    #* deletePhoto
+    #* getPhotoDescription
+    get:
+      security:
+      - bearerAuth : []      
+      tags: ["Photo actions"]
+      summary: Return photo description
+      operationId: getPhotoDescription
+      description: |-
+        Return a photo description, if the photoId provided exists. If the photoId does not exist then an error response is given.
+      responses:
+        "200": 
+          description: Photo description retrived.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/photosList"}
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    #* updateDescription
+    put: 
+      security:
+      - bearerAuth : []
+      tags: ["Photo actions"]
+      operationId: updateDescription
+      summary: Edit photo description
+      description: |-
+        Edit a published description with a new description content. If the phototId is correct then the description
+        is updated, an error response is given if the commentId is not correct.
+      requestBody:
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                 description:
+                  description: Small description of the specific photo.
+                  type: string
+                  example: "I took this photo!"
+        required: true
+      responses:
+        "201":
+          description: Description updated successfully.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/photosList"}
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    #* deletePhoto    
     delete:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Photo actions"]
       operationId: deletePhoto
@@ -367,7 +419,6 @@ paths:
     #* likePhoto
     post: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Like actions"]
       operationId: likePhoto
@@ -387,7 +438,7 @@ paths:
     #* getLikes
     get:
       security:
-      - {} #nosec
+
       - bearerAuth : []
       tags: ["Like actions"]
       summary: Return photo likes
@@ -407,7 +458,6 @@ paths:
     #* unlikePhoto
     delete: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Like actions"]
       operationId: unlikePhoto
@@ -426,7 +476,6 @@ paths:
     #* commentPhoto
     post:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Comment actions"]
       summary: Add comment
@@ -460,7 +509,6 @@ paths:
     #* getComments
     get:
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Comment actions"]
       summary: Return photo comments
@@ -483,7 +531,6 @@ paths:
     #* editComment
     put: 
       security:
-      - {} #nosec
       - bearerAuth : []
       tags: ["Comment actions"]
       operationId: editComment
@@ -516,7 +563,6 @@ paths:
     #* uncommentPhoto
     delete:
      security:
-     - {} #nosec
      - bearerAuth : []
      tags: ["Comment actions"]
      operationId: uncommentPhoto
@@ -705,6 +751,10 @@ components:
                   type: string
                   format: binary
                   readOnly: true
+              description:
+                description: Small description of the specific photo.
+                type: string
+                example: "I took this photo!"
               uploadDate:
                 description: Upload date of a specific photo.
                 type: string
