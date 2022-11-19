@@ -26,10 +26,10 @@ info:
   license:
     name: MIT
 paths:
-  /session/:
+  /session:
     #* doLogin
     post:
-      tags: ["Login action"]
+      tags: ["LoginAction"]
       summary: Log in user
       description: |-
         If the user does not exist, it will be created,
@@ -41,6 +41,7 @@ paths:
         content: 
           application/json:
             schema:
+              description: user schema.
               type: object
               properties:
                 user:
@@ -56,10 +57,13 @@ paths:
           content:
             application/json:
               schema:
+                description: user identifier schema.
                 properties:
                   identifier:
                     type: string
                     example: "#U1234"
+                    minLength: 3
+                    maxLength: 16
   /setUsername/{username}:
     parameters: 
       - $ref: "#/components/parameters/username"
@@ -67,7 +71,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["Session User actions"]
+      tags: ["SessionUserActions"]
       summary: Set user username
       description: |-
         Set user username, if the user is logged in then the username is set with the username
@@ -102,7 +106,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["Session User actions"]
+      tags: ["SessionUserActions"]
       summary: Return user stream
       description: |-
         Return a list of photos for the user stream.
@@ -139,6 +143,8 @@ paths:
             image/*:
               schema: 
                 type: array
+                minItems: 0
+                maxItems: 999
                 items: { $ref: "#/components/schemas/photosList"}
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -150,7 +156,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["User actions"]
+      tags: ["UserActions"]
       summary: Return user profile
       operationId: getUserProfile
       description: |-
@@ -171,13 +177,13 @@ paths:
     post: 
       security:
       - bearerAuth : []
-      tags: ["User Ban actions"]
+      tags: ["UserBanActions"]
       summary: Ban user
       description: |-
        Ban an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: banUser
       responses:
-        "200": 
+        "201": 
           description: User banned successfully.
           content:
             application/json:
@@ -189,7 +195,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["User Ban actions"]
+      tags: ["UserBanActions"]
       summary: Return user bans
       operationId: getBans
       description: |-
@@ -207,7 +213,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["User Ban actions"]
+      tags: ["UserBanActions"]
       summary: Unban user
       description: |-
         Unban an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -225,13 +231,13 @@ paths:
     post: 
       security:
       - bearerAuth : []
-      tags: ["User Follow actions"]
+      tags: ["UserFollowActions"]
       summary: Follow user
       description: |-
         Folow an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: followUser
       responses:
-        "200": 
+        "201": 
           description: User followed successfully.
           content:
             application/json:
@@ -243,7 +249,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["User Follow actions"]
+      tags: ["UserFollowActions"]
       summary: Return user followers
       operationId: getFolowers
       description: |-
@@ -261,7 +267,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["User Follow actions"]
+      tags: ["UserFollowActions"]
       summary: Unfollow user
       description: |-
        Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -276,7 +282,7 @@ paths:
     post: 
       security:
       - bearerAuth : []
-      tags: ["Photo actions"]
+      tags: ["PhotoActions"]
       summary: Upload photo
       description: |-
         Upload a photo, if the photo has the right format then it is uploaded on the user profile. If the file
@@ -293,10 +299,14 @@ paths:
                   type: string
                   format: binary
                   readOnly: true
+                  minLength: 0
+                  maxLength: 9999
                  description:
                   description: Small description of the specific photo.
                   type: string
                   example: "I took this photo!"
+                  minLength: 1
+                  maxLength: 40
 
       responses:
         "201":
@@ -310,19 +320,27 @@ paths:
                     type: string
                     readOnly: true
                     example: "#P1234"
+                    minLength: 3
+                    maxLength: 16
                   file: 
                       type: string
                       format: binary
                       readOnly: true
+                      minLength: 1
+                      maxLength: 9999
                   description:
                     description: Small description of the specific photo.
                     type: string
                     example: "I took this photo!"
+                    minLength: 1
+                    maxLength: 40
                   uploadDate:
                     description: Upload date of a specific photo.
                     type: string
                     readOnly: true
                     example: "2022-11-02T09:00:00Z"
+                    minLength: 1
+                    maxLength: 9999
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -333,7 +351,7 @@ paths:
     get:
       security:
       - bearerAuth : []   
-      tags: ["Photo actions"]
+      tags: ["PhotoActions"]
       summary: Return user photos
       operationId: getUserPhotos
       description: |-
@@ -354,7 +372,7 @@ paths:
     get:
       security:
       - bearerAuth : []      
-      tags: ["Photo actions"]
+      tags: ["PhotoActions"]
       summary: Return photo description
       operationId: getPhotoDescription
       description: |-
@@ -372,7 +390,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["Photo actions"]
+      tags: ["PhotoActions"]
       operationId: updateDescription
       summary: Edit photo description
       description: |-
@@ -388,6 +406,8 @@ paths:
                   description: Small description of the specific photo.
                   type: string
                   example: "I took this photo!"
+                  minLength: 1
+                  maxLength: 40
         required: true
       responses:
         "201":
@@ -402,7 +422,7 @@ paths:
     delete:
       security:
       - bearerAuth : []
-      tags: ["Photo actions"]
+      tags: ["PhotoActions"]
       operationId: deletePhoto
       summary: Remove photo
       description: |-
@@ -420,14 +440,14 @@ paths:
     post: 
       security:
       - bearerAuth : []
-      tags: ["Like actions"]
+      tags: ["LikeActions"]
       operationId: likePhoto
       summary: Like photo
       description: |-
         Add a like to a specific photo, is the photoId is correct then a like is added. If the photoId
         is not correct then an error response is given.
       responses:
-        "200":
+        "201":
           description: Like added successfully.
           content:
             application/json:
@@ -440,7 +460,7 @@ paths:
       security:
 
       - bearerAuth : []
-      tags: ["Like actions"]
+      tags: ["LikeActions"]
       summary: Return photo likes
       description: |-
         Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
@@ -459,7 +479,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["Like actions"]
+      tags: ["LikeActions"]
       operationId: unlikePhoto
       summary: Delete like
       description: |-
@@ -477,7 +497,7 @@ paths:
     post:
       security:
       - bearerAuth : []
-      tags: ["Comment actions"]
+      tags: ["CommentActions"]
       summary: Add comment
       operationId: commentPhoto
       description: |-
@@ -498,7 +518,7 @@ paths:
                   maxLength: 40
         required: true
       responses:
-        "200":
+        "201":
           description:  Comment added successfully.
           content:
             application/json:
@@ -510,7 +530,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["Comment actions"]
+      tags: ["CommentActions"]
       summary: Return photo comments
       description: |-
         Return a list of comments under a specific photo. If the photoId is correct the list is returned, an error message
@@ -532,7 +552,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["Comment actions"]
+      tags: ["CommentActions"]
       operationId: editComment
       summary: Edit comment
       description: |-
@@ -564,7 +584,7 @@ paths:
     delete:
      security:
      - bearerAuth : []
-     tags: ["Comment actions"]
+     tags: ["CommentActions"]
      operationId: uncommentPhoto
      summary: Remove comment
      description: |-
@@ -603,16 +623,22 @@ components:
           type: string
           readOnly: true
           example: "#U1234"
+          minLength: 3
+          maxLength: 16
         username:
           description: User username.
           type: string
           example: LucianCrainic
+          minLength: 3
+          maxLength: 16
         createDate:
           description: Registration date.
           type: string
           format: date-time
           readOnly: true
           example: "2022-11-02T09:00:00Z"
+          minLength: 3
+          maxLength: 9999
     #* followList schema
     followList:
       title: Followers
@@ -624,13 +650,19 @@ components:
           type: string
           readOnly: true
           example: "#U1234"
+          minLength: 3
+          maxLength: 16
         username:
           description: User username.
           type: string
           example: LucianCrainic
+          minLength: 3
+          maxLength: 16
         followers: 
           description: list of objects (each object is a single user)
           type: array
+          minItems: 0
+          maxItems: 99999
           items:
             type: object
             properties:
@@ -639,6 +671,8 @@ components:
                 type: string
                 readOnly: true
                 example: "#U5678" 
+                minLength: 3
+                maxLength: 16
     #* banList schema
     banList:
       title: Bans
@@ -650,13 +684,19 @@ components:
           type: string
           readOnly: true
           example: "#U1234"
+          minLength: 3
+          maxLength: 16
         username:
           description: User username.
           type: string
           example: LucianCrainic
+          minLength: 3
+          maxLength: 16
         ban: 
           description: list of objects (each object is a single user)
           type: array
+          minItems: 0
+          maxItems: 99999
           items:
             type: object
             properties:
@@ -665,6 +705,8 @@ components:
                 type: string
                 readOnly: true
                 example: "#U5678" 
+                minLength: 3
+                maxLength: 16
     #* commentsList schema
     commentsList: 
       title: Comments
@@ -676,9 +718,13 @@ components:
           type: string
           readOnly: true
           example: "#P1234"
+          minLength: 3
+          maxLength: 16
         comments: 
           description: list of objects (each object is a comment).
           type: array
+          minItems: 0
+          maxItems: 99999
           items:
             type: object
             properties:
@@ -687,11 +733,15 @@ components:
                 type: string
                 readOnly: true 
                 example: "#C1234"
+                minLength: 3
+                maxLength: 16
               identifier:
                 description: Unique user identifier.
                 type: string
                 readOnly: true
                 example: "#U5678" 
+                minLength: 3
+                maxLength: 16
               content:
                 description: Content of the comment.
                 type: string
@@ -703,6 +753,8 @@ components:
                 type: string
                 example: "2022-11-02T09:00:00Z"
                 readOnly: true
+                minLength: 3
+                maxLength: 16
     #* likesList schema
     likesList: 
       title: Likes
@@ -714,9 +766,13 @@ components:
           type: string
           readOnly: true
           example: "#P1234"
+          minLength: 3
+          maxLength: 16
         likes: 
           description: list of objects (each object is a like)
           type: array
+          minItems: 0
+          maxItems: 99999
           items:
             type: object
             properties:
@@ -725,6 +781,8 @@ components:
                 type: string
                 readOnly: true
                 example: "#U1234"
+                minLength: 3
+                maxLength: 16
     #* photoList schema
     photosList: 
       title: Photos
@@ -736,9 +794,13 @@ components:
           type: string
           readOnly: true
           example: "#U1234" 
+          minLength: 3
+          maxLength: 16
         photos: 
           description: list of objects (each object is a photo)
           type: array
+          minItems: 0
+          maxItems: 99999
           items:
             type: object
             properties:
@@ -747,19 +809,27 @@ components:
                 type: string
                 readOnly: true
                 example: "#P1234"
+                minLength: 3
+                maxLength: 16
               file: 
                   type: string
                   format: binary
                   readOnly: true
+                  minLength: 3
+                  maxLength: 16
               description:
                 description: Small description of the specific photo.
                 type: string
                 example: "I took this photo!"
+                minLength: 3
+                maxLength: 16
               uploadDate:
                 description: Upload date of a specific photo.
                 type: string
                 readOnly: true
                 example: "2022-11-02T09:00:00Z"
+                minLength: 3
+                maxLength: 16
   parameters:
     #* username parameter
     username:
@@ -779,6 +849,8 @@ components:
         type: string
         example: "#P1234"
         readOnly: true
+        minLength: 3
+        maxLength: 16
       name: photoId 
       in: path
       required: true
@@ -789,6 +861,8 @@ components:
         type: string
         example: "#C1234"
         readOnly: true
+        minLength: 3
+        maxLength: 16
       name: commentId
       in: path
       required: true
