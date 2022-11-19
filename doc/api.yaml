@@ -94,7 +94,7 @@ paths:
                   maxLength: 30
         required: true
       responses:
-        "201":
+        "200":
           description: Username set successfully.
           content:
             application/json:
@@ -307,6 +307,7 @@ paths:
         format is not correct, then an error response is given.
       operationId: uploadPhoto
       requestBody:
+        description: photo
         required: true
         content:
           multipart/form-data:
@@ -368,7 +369,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /photo/{username}:
+  /photos/{username}:
     parameters:
       - $ref: "#/components/parameters/username"
     #* getUserPhotos
@@ -425,6 +426,7 @@ paths:
         Edit a published description with a new description content. If the phototId is correct then the description
         is updated, an error response is given if the commentId is not correct.
       requestBody:
+        description: Description
         content: 
           application/json:
             schema:
@@ -439,7 +441,7 @@ paths:
                   maxLength: 40
         required: true
       responses:
-        "201":
+        "200":
           description: Description updated successfully.
           content:
             application/json:
@@ -565,6 +567,9 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
+  /comments/{photoId}:
+    parameters:
+      - $ref : "#/components/parameters/photoID" 
     #* getComments
     get:
       security:
@@ -615,7 +620,7 @@ paths:
                   maxLength: 40
         required: true
       responses:
-        "201":
+        "200":
           description: Comment updated successfully.
           content:
             application/json:
@@ -650,12 +655,27 @@ components:
     #* UnauthorizedError response 
     UnauthorizedError:
       description: Access token is missing or invalid
+      content:
+        text/plain:
+            schema:
+              type: string
+              example: Access token is missing or invalid
     #* BadRequest response
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc).
+      content:  
+        text/plain:
+            schema:
+              type: string
+              example: The request was not compliant with the documentation (eg. missing fields, etc).
     #* InternalServerError response
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
+      content:
+        text/plain:
+            schema:
+              type: string
+              example: The server encountered an internal error. Further info in server logs.
   schemas:
     #* user
     user:
