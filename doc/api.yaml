@@ -62,6 +62,7 @@ paths:
                   identifier:
                     type: string
                     example: "#U1234"
+                    pattern: '^.*?$'
                     minLength: 3
                     maxLength: 16
   /setUsername/{username}:
@@ -83,10 +84,12 @@ paths:
           application/json:
             schema:
               type: object
+              description: User username schema.
               properties:
                 username:
                   type: string
                   example: LucianCrainic
+                  pattern: '^.*?$'
                   minLength: 5
                   maxLength: 30
         required: true
@@ -95,7 +98,9 @@ paths:
           description: Username set successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user"}
+              schema: 
+                description: Username schema.
+                $ref: "#/components/schemas/user"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -121,6 +126,7 @@ paths:
             **Range** for when the photos were uploaded.
             Default: Today
           schema:
+            description: When the photos were uploaded schema.
             type: string
             enum: ["Today","Yesterday", "Last week"]
             example: "Today"
@@ -131,6 +137,7 @@ paths:
             **Quantity** of photos to be displayed. 
             Default: 10.
           schema:
+            description: Quantity schema.
             type: number
             format: float
             example: 15
@@ -144,6 +151,7 @@ paths:
               schema: 
                 type: array
                 minItems: 0
+                description: image array schema.
                 maxItems: 999
                 items: { $ref: "#/components/schemas/photosList"}
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -166,7 +174,9 @@ paths:
           description: User profile retrived.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user"}
+              schema: 
+                description: User schema.
+                $ref: "#/components/schemas/user"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -187,7 +197,9 @@ paths:
           description: User banned successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/banList"}
+              schema: 
+                description: banList schema.
+                $ref: "#/components/schemas/banList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -205,7 +217,9 @@ paths:
           description: User bans retrived successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/banList"}
+              schema: 
+                description: banList schema.
+                $ref: "#/components/schemas/banList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -241,7 +255,9 @@ paths:
           description: User followed successfully.
           content:
             application/json:
-              schema: {$ref: "#/components/schemas/followList"}
+              schema: 
+                description: followList schema.
+                $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -259,7 +275,9 @@ paths:
           description: User followers retrived successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/followList"}
+              schema: 
+                description: followlist schema.
+                $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -293,6 +311,7 @@ paths:
         content:
           multipart/form-data:
             schema:
+              description: Image and description schema.
               type: object
               properties:
                  file: 
@@ -304,6 +323,7 @@ paths:
                  description:
                   description: Small description of the specific photo.
                   type: string
+                  pattern: '^.*?$'
                   example: "I took this photo!"
                   minLength: 1
                   maxLength: 40
@@ -314,10 +334,12 @@ paths:
           content:
             application/json:
               schema:
+                description: photo schema.
                 properties:
                   photoId: 
                     description:  Unique photo identifier.
                     type: string
+                    pattern: '^.*?$'
                     readOnly: true
                     example: "#P1234"
                     minLength: 3
@@ -331,12 +353,14 @@ paths:
                   description:
                     description: Small description of the specific photo.
                     type: string
+                    pattern: '^.*?$'
                     example: "I took this photo!"
                     minLength: 1
                     maxLength: 40
                   uploadDate:
                     description: Upload date of a specific photo.
                     type: string
+                    pattern: '^.*?$'
                     readOnly: true
                     example: "2022-11-02T09:00:00Z"
                     minLength: 1
@@ -361,7 +385,9 @@ paths:
           description: User photos retrived.
           content:
             image/*:
-              schema: { $ref: "#/components/schemas/photosList"}
+              schema: 
+                description: photoList schema.
+                $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -382,7 +408,9 @@ paths:
           description: Photo description retrived.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/photosList"}
+              schema: 
+                description: photoList schema.
+                $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -401,11 +429,12 @@ paths:
           application/json:
             schema:
               type: object
+              description: Small description of the specific photo.
               properties:
-                 description:
-                  description: Small description of the specific photo.
+                content:
                   type: string
                   example: "I took this photo!"
+                  pattern: '^.*?$'
                   minLength: 1
                   maxLength: 40
         required: true
@@ -414,7 +443,9 @@ paths:
           description: Description updated successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/photosList"}
+              schema: 
+                description: photoList schema.
+                $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -451,7 +482,9 @@ paths:
           description: Like added successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/likesList"}
+              schema: 
+                description: likesList schema.
+                $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -471,7 +504,9 @@ paths:
           description: Photo likes retrived successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/likesList"}
+              schema: 
+                description: likesList schema.
+                $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -510,10 +545,12 @@ paths:
           application/json:
             schema:
               type: object
+              description: content schema.
               properties:
                 content:
                   type: string
                   example: Hello World!
+                  pattern: '^.*?$'
                   minLength: 1
                   maxLength: 40
         required: true
@@ -522,7 +559,9 @@ paths:
           description:  Comment added successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/commentsList"}
+              schema: 
+                description: commentsList schema.
+                $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -541,7 +580,9 @@ paths:
           description: Photo comments retrived successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/commentsList"}
+              schema: 
+                description: commentsList schema.
+                $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }  
@@ -564,10 +605,12 @@ paths:
           application/json:
             schema:
               type: object
+              description: content schema.
               properties:
                 content:
                   type: string
                   example: "Nice World!"
+                  pattern: '^.*?$'
                   minLength: 1
                   maxLength: 40
         required: true
@@ -576,7 +619,9 @@ paths:
           description: Comment updated successfully.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/commentsList"}
+              schema: 
+                description: commentList schema.
+                $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -621,6 +666,7 @@ components:
         identifier:
           description: Unique user identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#U1234"
           minLength: 3
@@ -628,6 +674,7 @@ components:
         username:
           description: User username.
           type: string
+          pattern: '^.*?$'
           example: LucianCrainic
           minLength: 3
           maxLength: 16
@@ -648,6 +695,7 @@ components:
         identifier:
           description: Unique user identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#U1234"
           minLength: 3
@@ -655,6 +703,7 @@ components:
         username:
           description: User username.
           type: string
+          pattern: '^.*?$'
           example: LucianCrainic
           minLength: 3
           maxLength: 16
@@ -669,6 +718,7 @@ components:
               identifier:
                 description: Unique user identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true
                 example: "#U5678" 
                 minLength: 3
@@ -682,6 +732,7 @@ components:
         identifier:
           description: Unique user identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#U1234"
           minLength: 3
@@ -689,6 +740,7 @@ components:
         username:
           description: User username.
           type: string
+          pattern: '^.*?$'
           example: LucianCrainic
           minLength: 3
           maxLength: 16
@@ -703,6 +755,7 @@ components:
               identifier:
                 description: Unique user identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true
                 example: "#U5678" 
                 minLength: 3
@@ -716,6 +769,7 @@ components:
         photoId: 
           description:  Unique photo identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#P1234"
           minLength: 3
@@ -731,6 +785,7 @@ components:
               commentId:
                 description: Unique comment identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true 
                 example: "#C1234"
                 minLength: 3
@@ -738,6 +793,7 @@ components:
               identifier:
                 description: Unique user identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true
                 example: "#U5678" 
                 minLength: 3
@@ -745,6 +801,7 @@ components:
               content:
                 description: Content of the comment.
                 type: string
+                pattern: '^.*?$'
                 example: "Hello World!"
                 minLength: 2
                 maxLength: 30
@@ -764,6 +821,7 @@ components:
         photoId: 
           description:  Unique photo identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#P1234"
           minLength: 3
@@ -779,6 +837,7 @@ components:
               identifier:
                 description: Unique user identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true
                 example: "#U1234"
                 minLength: 3
@@ -792,6 +851,7 @@ components:
         identifier:
           description: Unique user identifier.
           type: string
+          pattern: '^.*?$'
           readOnly: true
           example: "#U1234" 
           minLength: 3
@@ -807,6 +867,7 @@ components:
               photoId: 
                 description:  Unique photo identifier.
                 type: string
+                pattern: '^.*?$'
                 readOnly: true
                 example: "#P1234"
                 minLength: 3
@@ -820,6 +881,7 @@ components:
               description:
                 description: Small description of the specific photo.
                 type: string
+                pattern: '^.*?$'
                 example: "I took this photo!"
                 minLength: 3
                 maxLength: 16
@@ -834,7 +896,9 @@ components:
     #* username parameter
     username:
       schema:
+          description: username schema.
           type: string
+          pattern: '^.*?$'
           example: LucianCrainic
           readOnly: true
           minLength: 5
@@ -846,7 +910,9 @@ components:
     #* photoID parameter
     photoID:
       schema:
+        description: photoID schema.
         type: string
+        pattern: '^.*?$'
         example: "#P1234"
         readOnly: true
         minLength: 3
@@ -858,7 +924,9 @@ components:
     #* commentID parameter
     commentID:
       schema:
+        description: commentID schema.
         type: string
+        pattern: '^.*?$'
         example: "#C1234"
         readOnly: true
         minLength: 3
