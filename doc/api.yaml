@@ -68,16 +68,7 @@ paths:
         content: 
           application/json:
             schema:
-              type: object
-              description: User username schema.
-              properties:
-                username:
-                  description: username
-                  type: string
-                  example: LucianCrainic
-                  pattern: '^.*?$'
-                  minLength: 5
-                  maxLength: 30
+              $ref: "#/components/schemas/user"
         required: true
       responses:
         "200":
@@ -332,36 +323,7 @@ paths:
           content:
             application/json:
               schema:
-                description: photo schema.
-                properties:
-                  photoId: 
-                    description:  Unique photo identifier.
-                    type: string
-                    pattern: '^.*?$'
-                    readOnly: true
-                    example: "#P1234"
-                    minLength: 3
-                    maxLength: 16
-                  file: 
-                      description: file
-                      type: string
-                      format: binary
-                      minLength: 1
-                      maxLength: 9999
-                  description:
-                    description: Small description of the specific photo.
-                    type: string
-                    pattern: '^.*?$'
-                    example: "I took this photo!"
-                    minLength: 1
-                    maxLength: 40
-                  uploadDate:
-                    description: Upload date of a specific photo.
-                    type: string
-                    pattern: '^.*?$'
-                    example: "2022-11-02T09:00:00Z"
-                    minLength: 1
-                    maxLength: 9999
+                $ref: "#/components/schemas/photo"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -390,61 +352,6 @@ paths:
   /photo/{photoId}:
     parameters:
       - $ref : "#/components/parameters/photoID"
-    #* getPhotoDescription
-    get:
-      security:
-      - bearerAuth : []      
-      tags: ["PhotoActions"]
-      summary: Return photo description
-      operationId: getPhotoDescription
-      description: |-
-        Return a photo description, if the photoId provided exists. If the photoId does not exist then an error response is given.
-      responses:
-        "200": 
-          description: Photo description retrived.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/photosList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    #* updateDescription
-    put: 
-      security:
-      - bearerAuth : []
-      tags: ["PhotoActions"]
-      operationId: updateDescription
-      summary: Edit photo description
-      description: |-
-        Edit a published description with a new description content. If the phototId is correct then the description
-        is updated, an error response is given if the commentId is not correct.
-      requestBody:
-        description: Description
-        content: 
-          application/json:
-            schema:
-              type: object
-              description: Small description of the specific photo.
-              properties:
-                content:
-                  description: content
-                  type: string
-                  example: "I took this photo!"
-                  pattern: '^.*?$'
-                  minLength: 1
-                  maxLength: 40
-        required: true
-      responses:
-        "200":
-          description: Description updated successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/photosList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
     #* deletePhoto    
     delete:
       security:
@@ -488,30 +395,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* unlikePhoto
-    delete: 
-      security:
-      - bearerAuth : []
-      tags: ["LikeActions"]
-      operationId: unlikePhoto
-      summary: Delete like
-      description: |-
-        Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
-        If the photoId is not correct then an error response is given.
-      responses:
-        "200": 
-          description: Like removed successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/likesList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /photo/{photoId}/likes/:
-    parameters:
-       - $ref : "#/components/parameters/photoID"
-    #* getLikes
+   #* getLikes
     get:
       security:
 
@@ -525,6 +409,26 @@ paths:
       responses:
         "200": 
           description: Photo likes retrived successfully.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/likesList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    #* unlikePhoto
+    delete: 
+      security:
+      - bearerAuth : []
+      tags: ["LikeActions"]
+      operationId: unlikePhoto
+      summary: Delete like
+      description: |-
+        Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
+        If the photoId is not correct then an error response is given.
+      responses:
+        "200": 
+          description: Like removed successfully.
           content:
             application/json:
               schema: 
@@ -551,15 +455,7 @@ paths:
         content: 
           application/json:
             schema:
-              type: object
-              description: content schema.
-              properties:
-                content:
-                  type: string
-                  example: Hello World!
-                  pattern: '^.*?$'
-                  minLength: 1
-                  maxLength: 40
+              $ref: "#/components/schemas/comment"
         required: true
       responses:
         "201":
@@ -571,7 +467,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /photo/{photoId}/comments/:
+  /photo/{photoId}/comments:
     parameters:
       - $ref : "#/components/parameters/photoID" 
     #* getComments
@@ -597,41 +493,6 @@ paths:
   /comment/{commentId}:
     parameters:
       - $ref: "#/components/parameters/commentID"
-    #* editComment
-    put: 
-      security:
-      - bearerAuth : []
-      tags: ["CommentActions"]
-      operationId: editComment
-      summary: Edit comment
-      description: |-
-        Edit a published comment with a new comment content. If the commentId is correct then the comment
-        is updated, an error response is given if the commentId is not correct.
-      requestBody:
-        description: User username
-        content: 
-          application/json:
-            schema:
-              type: object
-              description: content schema.
-              properties:
-                content:
-                  type: string
-                  example: "Nice World!"
-                  pattern: '^.*?$'
-                  minLength: 1
-                  maxLength: 40
-        required: true
-      responses:
-        "200":
-          description: Comment updated successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/commentsList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
     #* uncommentPhoto
     delete:
      security:
@@ -918,15 +779,7 @@ components:
               file: 
                 description: file
                 type: string
-                pattern: '*'
                 format: binary
-                minLength: 3
-                maxLength: 16
-              desc:
-                description: Small description of the specific photo.
-                type: string
-                pattern: '^.*?$'
-                example: "photo!"
                 minLength: 3
                 maxLength: 16
               uploadDate:
@@ -946,6 +799,48 @@ components:
           pattern: '^.*?$'
           minLength: 3
           maxLength: 16
+    photo:
+      description: photo schema.
+      properties:
+        photoId: 
+          description:  Unique photo identifier.
+          type: string
+          pattern: '^.*?$'
+          readOnly: true
+          example: "#P1234"
+          minLength: 3
+          maxLength: 16
+        file: 
+            description: file
+            type: string
+            format: binary
+            minLength: 1
+            maxLength: 9999
+        description:
+          description: Small description of the specific photo.
+          type: string
+          pattern: '^.*?$'
+          example: "I took this photo!"
+          minLength: 1
+          maxLength: 40
+        uploadDate:
+          description: Upload date of a specific photo.
+          type: string
+          pattern: '^.*?$'
+          example: "2022-11-02T09:00:00Z"
+          minLength: 1
+          maxLength: 9999
+    comment:
+      type: object
+      description: content schema.
+      properties:
+        content:
+          description: content
+          type: string
+          example: Hello World!
+          pattern: '^.*?$'
+          minLength: 1
+          maxLength: 40
   parameters:
     #* username parameter
     username:
@@ -960,7 +855,7 @@ components:
       in: path
       required: true
       description: "**Username** of a WASAPhoto user."
-    #* photoID parameter
+   #* photoID parameter
     photoID:
       schema:
         description: photoID schema.
