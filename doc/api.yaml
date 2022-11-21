@@ -41,30 +41,15 @@ paths:
         content: 
           application/json:
             schema:
-              description: user schema.
-              type: object
-              properties:
-                user:
-                  type: string
-                  example: Lucian
-                  pattern: '^.*?$'
-                  minLength: 3
-                  maxLength: 16
+              $ref: "#/components/schemas/login"
         required: true
       responses:
         '201':
           description: User log-in action successful
           content:
             application/json:
-              schema:
-                description: user identifier schema.
-                properties:
-                  identifier:
-                    type: string
-                    example: "#U1234"
-                    pattern: '^.*?$'
-                    minLength: 3
-                    maxLength: 16
+              schema: 
+                $ref: "#/components/schemas/commentsList"
   /setUsername/{username}:
     parameters: 
       - $ref: "#/components/parameters/username"
@@ -87,6 +72,7 @@ paths:
               description: User username schema.
               properties:
                 username:
+                  description: username
                   type: string
                   example: LucianCrainic
                   pattern: '^.*?$'
@@ -127,7 +113,6 @@ paths:
           schema:
             description: When the photos were uploaded schema.
             type: string
-            pattern: '*'
             enum: ["Today","Yesterday", "Last week"]
             example: "Today"
         - name: quantity
@@ -175,7 +160,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: User schema.
                 $ref: "#/components/schemas/user"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -328,9 +312,9 @@ paths:
               type: object
               properties:
                  file: 
+                  description: file
                   type: string
                   format: binary
-                  pattern: '*'
                   readOnly: true
                   minLength: 0
                   maxLength: 9999
@@ -359,8 +343,8 @@ paths:
                     minLength: 3
                     maxLength: 16
                   file: 
+                      description: file
                       type: string
-                      pattern: '*'
                       format: binary
                       minLength: 1
                       maxLength: 9999
@@ -444,6 +428,7 @@ paths:
               description: Small description of the specific photo.
               properties:
                 content:
+                  description: content
                   type: string
                   example: "I took this photo!"
                   pattern: '^.*?$'
@@ -709,9 +694,19 @@ components:
               pattern: '^.*?$'
               minLength: 1
               maxLength: 40
-              example: The server encountered an internal error.
+              example: internalError.
   schemas:
     #* user
+    identifier:
+      title: Identifier
+      description: user identifier schema.
+      properties:
+        identifier:
+          type: string
+          example: "#U1234"
+          pattern: '^.*?$'
+          minLength: 3
+          maxLength: 16
     user:
       title: User 
       description: This object represent a single user.
@@ -736,7 +731,6 @@ components:
           description: Registration date.
           type: string
           format: date-time
-          pattern: '*'
           example: "2022-11-02T09:00:00Z"
           minLength: 3
           maxLength: 9999
@@ -860,8 +854,7 @@ components:
               uploadDate:
                 description: Upload date of a specific comment.
                 type: string
-                pattern: '*'
-                example: "2022-11-02T09:00:00Z"
+                example: "2022-11-02"
                 minLength: 3
                 maxLength: 16
     #* likesList schema
@@ -923,25 +916,36 @@ components:
                 minLength: 3
                 maxLength: 16
               file: 
-                  type: string
-                  pattern: '*'
-                  format: binary
-                  minLength: 3
-                  maxLength: 16
-              description:
+                description: file
+                type: string
+                pattern: '*'
+                format: binary
+                minLength: 3
+                maxLength: 16
+              desc:
                 description: Small description of the specific photo.
                 type: string
                 pattern: '^.*?$'
-                example: "I took this photo!"
+                example: "photo!"
                 minLength: 3
                 maxLength: 16
               uploadDate:
                 description: Upload date of a specific photo.
                 type: string
-                pattern: '*'
-                example: "2022-11-02T09:00:00Z"
+                example: "2022-11-02"
                 minLength: 3
                 maxLength: 16
+    login:        
+      description: user schema.
+      type: object
+      properties:
+        user:
+          description: user
+          type: string
+          example: Lucian
+          pattern: '^.*?$'
+          minLength: 3
+          maxLength: 16
   parameters:
     #* username parameter
     username:
@@ -982,5 +986,3 @@ components:
       in: path
       required: true
       description: "**commentID** of a single comment under a photo."
-
-
