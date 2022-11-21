@@ -25,6 +25,23 @@ info:
     url: https://github.com/LucianCrainic
   license:
     name: MIT
+tags:
+  - name: "LoginAction"
+    description: "Function for logging in"
+  - name: "SessionUserActions"
+    description: "Function for user actions"
+  - name: "UserActions"
+    description: "Function for logging in"
+  - name: "PhotoActions"
+    description: "Function for logging in"
+  - name: "UserBanActions"
+    description: "Function for logging in"
+  - name: "UserFollowActions"
+    description: "Function for logging in"
+  - name: "LikeActions"
+    description: "Function for logging in"
+  - name: "CommentActions"
+    description: "Function for comment actions"
 paths:
   /session:
     #* doLogin
@@ -154,9 +171,9 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #? ban a specific user
-  /bans/{username}/ban:
-    parameters: 
+  #?
+  /ban/{username}:
+    parameters:
       - $ref: "#/components/parameters/username"
     #* banUser
     post: 
@@ -197,10 +214,6 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
-  #? all bans for a user
-  /bans/{username}:
-    parameters:
-      - $ref: "#/components/parameters/username"
     #* getBans
     get:
       security:
@@ -220,11 +233,11 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #? follow a specific user
-  /followers/{username}/follow:
+  #? all followers for a user
+  /follow/{username}:
     parameters:
       - $ref: "#/components/parameters/username"
-    #* followUser
+      #* followUser
     post: 
       security:
       - bearerAuth : []
@@ -262,10 +275,6 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
-  #? all followers for a user
-  /followers/{username}:
-    parameters:
-      - $ref: "#/components/parameters/username"
   #* getFollowers
     get:
       security:
@@ -286,7 +295,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #?
-  /photos:
+  /photo:
     #* uploadPhoto
     post: 
       security:
@@ -331,7 +340,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #?
-  /photos/{photoId}:
+  /photo/{photoId}:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* deletePhoto    
@@ -354,10 +363,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" } 
-  #?
-  /gallery/{username}:
-    parameters:
-      - $ref: "#/components/parameters/username"
     #* getUserPhotos
     get:
       security:
@@ -378,7 +383,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #?
-  /likes/{photoId}/like:
+  /like/{photoId}:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
@@ -394,6 +399,27 @@ paths:
       responses:
         "201":
           description: Like added successfully.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/likesList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    #* getLikes
+    get:
+      security:
+
+      - bearerAuth : []
+      tags: ["LikeActions"]
+      summary: Return photo likes
+      description: |-
+        Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
+        users that liked the picture. An error message is given if the Id is not correct.
+      operationId: getLikes
+      responses:
+        "200": 
+          description: Photo likes retrived successfully.
           content:
             application/json:
               schema: 
@@ -422,35 +448,10 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #?
-  /likes/{photoId}: 
-    parameters:
-      - $ref : "#/components/parameters/photoID"
-   #* getLikes
-    get:
-      security:
-
-      - bearerAuth : []
-      tags: ["LikeActions"]
-      summary: Return photo likes
-      description: |-
-        Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
-        users that liked the picture. An error message is given if the Id is not correct.
-      operationId: getLikes
-      responses:
-        "200": 
-          description: Photo likes retrived successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/likesList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /comments/{photoId}/comment:
+  /comment/{photoId}:
     parameters:
       - $ref : "#/components/parameters/photoID" 
-    #* commentPhoto
+     #* commentPhoto
     post:
       security:
       - bearerAuth : []
@@ -478,10 +479,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /comments/{photoId}:
-    parameters:
-      - $ref : "#/components/parameters/photoID" 
     #* getComments
     get:
       security:
@@ -503,9 +500,8 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }  
   #?
-  /comments/{photoId}/comment/{commentId}:
+  /comment/{commentId}:
     parameters:
-      - $ref: "#/components/parameters/photoID"
       - $ref: "#/components/parameters/commentID"
     #* uncommentPhoto
     delete:
