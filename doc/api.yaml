@@ -49,7 +49,7 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/user"
+                $ref: "#/components/schemas/identifier"
   #? set user username
   /setUsername:
     #* setMyUserName
@@ -330,29 +330,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #? 
-  /photos/{username}:
-    parameters:
-      - $ref: "#/components/parameters/username"
-    #* getUserPhotos
-    get:
-      security:
-      - bearerAuth : []   
-      tags: ["PhotoActions"]
-      summary: Return user photos
-      operationId: getUserPhotos
-      description: |-
-        Return user photos, if the username provided exists. If the username does not exist then an error response is given.
-      responses:
-        "200": 
-          description: User photos retrived.
-          content:
-            image/*:
-              schema: 
-                $ref: "#/components/schemas/photosList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
   #?
   /photos/{photoId}:
     parameters:
@@ -374,6 +351,29 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/followList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" } 
+  #?
+  /gallery/{username}:
+    parameters:
+      - $ref: "#/components/parameters/username"
+    #* getUserPhotos
+    get:
+      security:
+      - bearerAuth : []   
+      tags: ["PhotoActions"]
+      summary: Return user photos
+      operationId: getUserPhotos
+      description: |-
+        Return user photos, if the username provided exists. If the username does not exist then an error response is given.
+      responses:
+        "200": 
+          description: User photos retrived.
+          content:
+            image/*:
+              schema: 
+                $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -577,6 +577,7 @@ components:
       description: user identifier schema.
       properties:
         identifier:
+          description: identifier
           type: string
           example: "#U1234"
           pattern: '^.*?$'
