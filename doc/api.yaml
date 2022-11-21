@@ -99,7 +99,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: Username schema.
                 $ref: "#/components/schemas/user"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -199,7 +198,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: banList schema.
                 $ref: "#/components/schemas/banList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -220,7 +218,6 @@ paths:
         content:
             application/json:
               schema: 
-                description: banList schema.
                 $ref: "#/components/schemas/banList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -243,7 +240,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: banList schema.
                 $ref: "#/components/schemas/banList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -266,7 +262,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: followList schema.
                 $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -286,7 +281,6 @@ paths:
         content:
             application/json:
               schema: 
-                description: followList schema.
                 $ref: "#/components/schemas/followList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -309,7 +303,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: followlist schema.
                 $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -406,7 +399,6 @@ paths:
           content:
             image/*:
               schema: 
-                description: photoList schema.
                 $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -429,7 +421,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: photoList schema.
                 $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -465,7 +456,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: photoList schema.
                 $ref: "#/components/schemas/photosList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -486,7 +476,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: followList schema.
                 $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -510,7 +499,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: likesList schema.
                 $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -531,7 +519,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: likesList schema.
                 $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -556,7 +543,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: likesList schema.
                 $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -596,7 +582,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: commentsList schema.
                 $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -620,7 +605,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: commentsList schema.
                 $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -659,7 +643,6 @@ paths:
           content:
             application/json:
               schema: 
-                description: commentList schema.
                 $ref: "#/components/schemas/commentsList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -680,7 +663,6 @@ paths:
         content:
             application/json:
               schema: 
-                description: commentsList schema.
                 $ref: "#/components/schemas/commentsList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
@@ -703,7 +685,7 @@ components:
               pattern: '^.*?$'
               minLength: 1
               maxLength: 40
-              example: Access token is missing or invalid
+              example: Access token  missing.
     #* BadRequest response
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc).
@@ -715,7 +697,7 @@ components:
               pattern: '^.*?$'
               minLength: 1
               maxLength: 40
-              example: The request was not compliant with the documentation (eg. missing fields, etc).
+              example: The request was not compliant.
     #* InternalServerError response
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
@@ -727,7 +709,7 @@ components:
               pattern: '^.*?$'
               minLength: 1
               maxLength: 40
-              example: The server encountered an internal error. Further info in server logs.
+              example: The server encountered an internal error.
   schemas:
     #* user
     user:
@@ -1000,3 +982,5 @@ components:
       in: path
       required: true
       description: "**commentID** of a single comment under a photo."
+
+
