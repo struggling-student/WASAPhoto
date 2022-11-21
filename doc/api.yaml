@@ -363,6 +363,9 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" } 
+  /photo/{username}:
+    parameters:
+      - $ref : "#/components/parameters/username"
     #* getUserPhotos
     get:
       security:
