@@ -203,6 +203,24 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
+    #* unbanUser
+    delete: 
+      security:
+      - bearerAuth : []
+      tags: ["UserBanActions"]
+      summary: Unban user
+      description: |-
+        Unban an user, if the username provided exists. If the username does not exist then an error response is given.
+      operationId: unbanUser
+
+      responses:
+       "200": {description: Ban removed successfully.}
+       "400": { $ref: "#/components/responses/BadRequest" }
+       "401": { $ref: "#/components/responses/UnauthorizedError" }
+       "500": { $ref: "#/components/responses/InternalServerError" }
+  /bans/{username}:
+    parameters: 
+      - $ref: "#/components/parameters/username" 
     #* getBans
     get:
       security:
@@ -223,21 +241,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* unbanUser
-    delete: 
-      security:
-      - bearerAuth : []
-      tags: ["UserBanActions"]
-      summary: Unban user
-      description: |-
-        Unban an user, if the username provided exists. If the username does not exist then an error response is given.
-      operationId: unbanUser
-
-      responses:
-       "200": {description: Ban removed successfully.}
-       "400": { $ref: "#/components/responses/BadRequest" }
-       "401": { $ref: "#/components/responses/UnauthorizedError" }
-       "500": { $ref: "#/components/responses/InternalServerError" }
   /follow/{username}:
     parameters:
       - $ref: "#/components/parameters/username"
@@ -261,7 +264,24 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* getFollowers
+    #* unfollowUser
+    delete: 
+      security:
+      - bearerAuth : []
+      tags: ["UserFollowActions"]
+      summary: Unfollow user
+      description: |-
+       Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
+      operationId: unfollowUser
+      responses:
+       "200": {description: Follow removed successfully.}
+       "400": { $ref: "#/components/responses/BadRequest" }
+       "401": { $ref: "#/components/responses/UnauthorizedError" }
+       "500": { $ref: "#/components/responses/InternalServerError" }
+  /followers/{username}:
+    parameters:
+      - $ref: "#/components/parameters/username"
+  #* getFollowers
     get:
       security:
       - bearerAuth : []
@@ -281,20 +301,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* unfollowUser
-    delete: 
-      security:
-      - bearerAuth : []
-      tags: ["UserFollowActions"]
-      summary: Unfollow user
-      description: |-
-       Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
-      operationId: unfollowUser
-      responses:
-       "200": {description: Follow removed successfully.}
-       "400": { $ref: "#/components/responses/BadRequest" }
-       "401": { $ref: "#/components/responses/UnauthorizedError" }
-       "500": { $ref: "#/components/responses/InternalServerError" }
   /photo/:
     #* uploadPhoto
     post: 
@@ -466,7 +472,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /like/{photoId}:
+  /photo/{photoId}/like/:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* likePhoto
@@ -490,6 +496,24 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
+    #* unlikePhoto
+    delete: 
+      security:
+      - bearerAuth : []
+      tags: ["LikeActions"]
+      operationId: unlikePhoto
+      summary: Delete like
+      description: |-
+        Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
+        If the photoId is not correct then an error response is given.
+      responses:
+        "200": {description: Like removed successfully.}
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+  /photo/{photoId}/likes/:
+    parameters:
+       - $ref : "#/components/parameters/photoID"
     #* getLikes
     get:
       security:
@@ -512,22 +536,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* unlikePhoto
-    delete: 
-      security:
-      - bearerAuth : []
-      tags: ["LikeActions"]
-      operationId: unlikePhoto
-      summary: Delete like
-      description: |-
-        Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
-        If the photoId is not correct then an error response is given.
-      responses:
-        "200": {description: Like removed successfully.}
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /comment/{photoId}:
+  /photo/{photoId}/comment/:
     parameters:
       - $ref : "#/components/parameters/photoID" 
     #* commentPhoto
@@ -567,7 +576,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  /comments/{photoId}:
+  /photo/{photoId}/comments/:
     parameters:
       - $ref : "#/components/parameters/photoID" 
     #* getComments
