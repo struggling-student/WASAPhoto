@@ -128,6 +128,7 @@ paths:
           schema:
             description: When the photos were uploaded schema.
             type: string
+            pattern: '*'
             enum: ["Today","Yesterday", "Last week"]
             example: "Today"
         - name: quantity
@@ -214,7 +215,13 @@ paths:
       operationId: unbanUser
 
       responses:
-       "200": {description: Ban removed successfully.}
+       "200": 
+        description: Ban removed successfully.
+        content:
+            application/json:
+              schema: 
+                description: banList schema.
+                $ref: "#/components/schemas/banList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
@@ -274,7 +281,13 @@ paths:
        Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
       operationId: unfollowUser
       responses:
-       "200": {description: Follow removed successfully.}
+       "200": 
+        description: Follow removed successfully.
+        content:
+            application/json:
+              schema: 
+                description: followList schema.
+                $ref: "#/components/schemas/followList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
@@ -324,6 +337,7 @@ paths:
                  file: 
                   type: string
                   format: binary
+                  pattern: '*'
                   readOnly: true
                   minLength: 0
                   maxLength: 9999
@@ -353,8 +367,8 @@ paths:
                     maxLength: 16
                   file: 
                       type: string
+                      pattern: '*'
                       format: binary
-                      readOnly: true
                       minLength: 1
                       maxLength: 9999
                   description:
@@ -368,7 +382,6 @@ paths:
                     description: Upload date of a specific photo.
                     type: string
                     pattern: '^.*?$'
-                    readOnly: true
                     example: "2022-11-02T09:00:00Z"
                     minLength: 1
                     maxLength: 9999
@@ -468,7 +481,13 @@ paths:
        Delete a photo from a user profile. If the photoId is correct then the photo is removed, an 
        error response is given if the photoId is not correct.
       responses:
-        "200": {description: Photo deleted successfully.}
+        "200": 
+          description: Photo deleted successfully.
+          content:
+            application/json:
+              schema: 
+                description: followList schema.
+                $ref: "#/components/schemas/followList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -507,7 +526,13 @@ paths:
         Remove a like from a specific photo, is the photoId provided is correct then the like is removed. 
         If the photoId is not correct then an error response is given.
       responses:
-        "200": {description: Like removed successfully.}
+        "200": 
+          description: Like removed successfully.
+          content:
+            application/json:
+              schema: 
+                description: likesList schema.
+                $ref: "#/components/schemas/likesList"
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -650,7 +675,13 @@ paths:
        Delete a comment under a photo. If the commentId is correct then the comment is removed from the photo, an error response
        is given if the commentId is not correct.
      responses:
-       "200": {description: Comment removed successfully.}
+       "200": 
+        description: Comment removed successfully.
+        content:
+            application/json:
+              schema: 
+                description: commentsList schema.
+                $ref: "#/components/schemas/commentsList"
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
@@ -665,25 +696,37 @@ components:
     UnauthorizedError:
       description: Access token is missing or invalid
       content:
-        text/plain:
+        application/json:
             schema:
               type: string
+              description: Unique user identifier.
+              pattern: '^.*?$'
+              minLength: 1
+              maxLength: 40
               example: Access token is missing or invalid
     #* BadRequest response
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc).
       content:  
-        text/plain:
+        application/json:
             schema:
               type: string
+              description: Unique user identifier.
+              pattern: '^.*?$'
+              minLength: 1
+              maxLength: 40
               example: The request was not compliant with the documentation (eg. missing fields, etc).
     #* InternalServerError response
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
       content:
-        text/plain:
+         application/json:
             schema:
               type: string
+              description: Unique user identifier.
+              pattern: '^.*?$'
+              minLength: 1
+              maxLength: 40
               example: The server encountered an internal error. Further info in server logs.
   schemas:
     #* user
@@ -711,7 +754,7 @@ components:
           description: Registration date.
           type: string
           format: date-time
-          readOnly: true
+          pattern: '*'
           example: "2022-11-02T09:00:00Z"
           minLength: 3
           maxLength: 9999
@@ -799,7 +842,6 @@ components:
           description:  Unique photo identifier.
           type: string
           pattern: '^.*?$'
-          readOnly: true
           example: "#P1234"
           minLength: 3
           maxLength: 16
@@ -815,7 +857,6 @@ components:
                 description: Unique comment identifier.
                 type: string
                 pattern: '^.*?$'
-                readOnly: true 
                 example: "#C1234"
                 minLength: 3
                 maxLength: 16
@@ -837,8 +878,8 @@ components:
               uploadDate:
                 description: Upload date of a specific comment.
                 type: string
+                pattern: '*'
                 example: "2022-11-02T09:00:00Z"
-                readOnly: true
                 minLength: 3
                 maxLength: 16
     #* likesList schema
@@ -851,7 +892,6 @@ components:
           description:  Unique photo identifier.
           type: string
           pattern: '^.*?$'
-          readOnly: true
           example: "#P1234"
           minLength: 3
           maxLength: 16
@@ -897,14 +937,13 @@ components:
                 description:  Unique photo identifier.
                 type: string
                 pattern: '^.*?$'
-                readOnly: true
                 example: "#P1234"
                 minLength: 3
                 maxLength: 16
               file: 
                   type: string
+                  pattern: '*'
                   format: binary
-                  readOnly: true
                   minLength: 3
                   maxLength: 16
               description:
@@ -917,7 +956,7 @@ components:
               uploadDate:
                 description: Upload date of a specific photo.
                 type: string
-                readOnly: true
+                pattern: '*'
                 example: "2022-11-02T09:00:00Z"
                 minLength: 3
                 maxLength: 16
@@ -929,7 +968,6 @@ components:
           type: string
           pattern: '^.*?$'
           example: LucianCrainic
-          readOnly: true
           minLength: 5
           maxLength: 30
       name: username
@@ -943,7 +981,6 @@ components:
         type: string
         pattern: '^.*?$'
         example: "#P1234"
-        readOnly: true
         minLength: 3
         maxLength: 16
       name: photoId 
@@ -957,7 +994,6 @@ components:
         type: string
         pattern: '^.*?$'
         example: "#C1234"
-        readOnly: true
         minLength: 3
         maxLength: 16
       name: commentId
