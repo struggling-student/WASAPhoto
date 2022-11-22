@@ -68,7 +68,9 @@ paths:
               schema: 
                 $ref: "#/components/schemas/identifier"
   #? set user username
-  /setUsername:
+  /user/{username}/setUsername:
+    parameters:
+      - $ref: "#/components/parameters/username"
     #* setMyUserName
     put: 
       security:
@@ -97,7 +99,9 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? show the user stream
-  /stream:
+  /user/{username}/stream:
+    parameters:
+      - $ref: "#/components/parameters/username"
     #* getMyStream
     get:
       security:
@@ -149,7 +153,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? get a user profile
-  /user/{username}/profile:
+  /users/{username}/profile:
     parameters: 
       - $ref: "#/components/parameters/username"
     #* getUserProfile
@@ -171,12 +175,13 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /user/{username}/ban:
+  #? ban 
+  /users/{username}/ban/{banid}:
     parameters:
       - $ref: "#/components/parameters/username"
+      - $ref: "#/components/parameters/banID"
     #* banUser
-    post: 
+    put: 
       security:
       - bearerAuth : []
       tags: ["UserBanActions"]
@@ -214,6 +219,10 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
+  #? get user bans
+  /users/{username}/ban/:
+    parameters:
+      - $ref: "#/components/parameters/username"
     #* getBans
     get:
       security:
@@ -233,12 +242,13 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #? all followers for a user
-  /user/{username}/follow:
+  #? follow 
+  /users/{username}/follow/{followId}:
     parameters:
       - $ref: "#/components/parameters/username"
-      #* followUser
-    post: 
+      - $ref: "#/components/parameters/followID"
+    #* followUser
+    put: 
       security:
       - bearerAuth : []
       tags: ["UserFollowActions"]
@@ -275,7 +285,11 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
-  #* getFollowers
+  #? get user followers
+  /users/{username}/follow/:
+    parameters:
+      - $ref: "#/components/parameters/username"
+    #* getFollowers
     get:
       security:
       - bearerAuth : []
@@ -294,10 +308,13 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /photo:
+  #? photo
+  /users/{username}/photo/{photoId}:
+    parameters:
+      - $ref : "#/components/parameters/username"
+      - $ref : "#/components/parameters/photoID"
     #* uploadPhoto
-    post: 
+    put: 
       security:
       - bearerAuth : []
       tags: ["PhotoActions"]
@@ -339,10 +356,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /photo/{photoId}:
-    parameters:
-      - $ref : "#/components/parameters/photoID"
     #* deletePhoto    
     delete:
       security:
@@ -363,8 +376,8 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" } 
-  #?
-  /user/{username}/photo:
+  #? get all photos of a user
+  /users/{username}/photo/:
     parameters:
       - $ref : "#/components/parameters/username"
     #* getUserPhotos
@@ -386,12 +399,13 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /like/{photoId}:
+  #? like
+  /photo/{photoId}/like/{likeid}:
     parameters:
       - $ref : "#/components/parameters/photoID"
+      - $ref : "#/components/parameters/likeID"
     #* likePhoto
-    post: 
+    put: 
       security:
       - bearerAuth : []
       tags: ["LikeActions"]
@@ -403,27 +417,6 @@ paths:
       responses:
         "201":
           description: Like added successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/likesList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    #* getLikes
-    get:
-      security:
-
-      - bearerAuth : []
-      tags: ["LikeActions"]
-      summary: Return photo likes
-      description: |-
-        Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
-        users that liked the picture. An error message is given if the Id is not correct.
-      operationId: getLikes
-      responses:
-        "200": 
-          description: Photo likes retrived successfully.
           content:
             application/json:
               schema: 
@@ -451,12 +444,38 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  #?
-  /comment/{photoId}:
+  #? get all likes under a photo
+  /photo/{photoId}/like/:
     parameters:
-      - $ref : "#/components/parameters/photoID" 
-     #* commentPhoto
-    post:
+      - $ref : "#/components/parameters/photoID"
+    #* getLikes
+    get:
+      security:
+
+      - bearerAuth : []
+      tags: ["LikeActions"]
+      summary: Return photo likes
+      description: |-
+        Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
+        users that liked the picture. An error message is given if the Id is not correct.
+      operationId: getLikes
+      responses:
+        "200": 
+          description: Photo likes retrived successfully.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/likesList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+  #? comment
+  /photo/{photoId}/comment/{commentId}:
+    parameters:
+      - $ref: "#/components/parameters/photoID"
+      - $ref: "#/components/parameters/commentID"
+    #* commentPhoto
+    put:
       security:
       - bearerAuth : []
       tags: ["CommentActions"]
@@ -483,30 +502,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    #* getComments
-    get:
-      security:
-      - bearerAuth : []
-      tags: ["CommentActions"]
-      summary: Return photo comments
-      description: |-
-        Return a list of comments under a specific photo. If the photoId is correct the list is returned, an error message
-        is returned if the Id is not corecct.
-      operationId: getComments
-      responses:
-        "200": 
-          description: Photo comments retrived successfully.
-          content:
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/commentsList"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/UnauthorizedError" }
-        "500": { $ref: "#/components/responses/InternalServerError" }  
-  #?
-  /comment/{commentId}:
-    parameters:
-      - $ref: "#/components/parameters/commentID"
     #* uncommentPhoto
     delete:
      security:
@@ -527,7 +522,30 @@ paths:
        "400": { $ref: "#/components/responses/BadRequest" }
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
-
+  #?  get all coments under a photo
+  /photo/{photoId}/comment/:
+    parameters:
+      - $ref: "#/components/parameters/photoID"
+    #* getComments
+    get:
+      security:
+      - bearerAuth : []
+      tags: ["CommentActions"]
+      summary: Return photo comments
+      description: |-
+        Return a list of comments under a specific photo. If the photoId is correct the list is returned, an error message
+        is returned if the Id is not corecct.
+      operationId: getComments
+      responses:
+        "200": 
+          description: Photo comments retrived successfully.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/commentsList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" } 
 components:
   securitySchemes:
     bearerAuth:
@@ -861,7 +879,7 @@ components:
       in: path
       required: true
       description: "**Username** of a WASAPhoto user."
-   #* photoID parameter
+    #* photoID parameter
     photoID:
       schema:
         description: photoID schema.
@@ -887,3 +905,42 @@ components:
       in: path
       required: true
       description: "**commentID** of a single comment under a photo."
+    #* likeID
+    likeID:
+      schema:
+        description: likeID schema.
+        type: string
+        pattern: '^.*?$'
+        example: "#L1234"
+        minLength: 3
+        maxLength: 16
+      name: likeId
+      in: path
+      required: true
+      description: "**likeID** of a single comment under a photo."
+    #* followID
+    followID:
+      schema:
+        description: followID schema.
+        type: string
+        pattern: '^.*?$'
+        example: "#F1234"
+        minLength: 3
+        maxLength: 16
+      name: followId
+      in: path
+      required: true
+      description: "**followID** of a single comment under a photo."
+    #* banID
+    banID:
+      schema:
+        description: banID schema.
+        type: string
+        pattern: '^.*?$'
+        example: "#B1234"
+        minLength: 3
+        maxLength: 16
+      name: banId
+      in: path
+      required: true
+      description: "**banID** of a single comment under a photo."
