@@ -149,7 +149,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? get a user profile
-  /profile/{username}:
+  /user/{username}/profile:
     parameters: 
       - $ref: "#/components/parameters/username"
     #* getUserProfile
@@ -172,7 +172,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #?
-  /ban/{username}:
+  /user/{username}/ban:
     parameters:
       - $ref: "#/components/parameters/username"
     #* banUser
@@ -234,7 +234,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? all followers for a user
-  /follow/{username}:
+  /user/{username}/follow:
     parameters:
       - $ref: "#/components/parameters/username"
       #* followUser
@@ -363,7 +363,8 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" } 
-  /photo/{username}:
+  #?
+  /user/{username}/photo:
     parameters:
       - $ref : "#/components/parameters/username"
     #* getUserPhotos
