@@ -176,7 +176,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? ban 
-  /users/{username}/ban/{banid}:
+  /users/{username}/ban/{banId}:
     parameters:
       - $ref: "#/components/parameters/username"
       - $ref: "#/components/parameters/banID"
@@ -220,7 +220,7 @@ paths:
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   #? get user bans
-  /users/{username}/ban/:
+  /users/{username}/ban:
     parameters:
       - $ref: "#/components/parameters/username"
     #* getBans
@@ -286,7 +286,7 @@ paths:
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   #? get user followers
-  /users/{username}/follow/:
+  /users/{username}/follow:
     parameters:
       - $ref: "#/components/parameters/username"
     #* getFollowers
@@ -377,7 +377,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" } 
   #? get all photos of a user
-  /users/{username}/photo/:
+  /users/{username}/photo:
     parameters:
       - $ref : "#/components/parameters/username"
     #* getUserPhotos
@@ -400,7 +400,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? like
-  /photo/{photoId}/like/{likeid}:
+  /photo/{photoId}/like/{likeId}:
     parameters:
       - $ref : "#/components/parameters/photoID"
       - $ref : "#/components/parameters/likeID"
@@ -445,7 +445,7 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? get all likes under a photo
-  /photo/{photoId}/like/:
+  /photo/{photoId}/like:
     parameters:
       - $ref : "#/components/parameters/photoID"
     #* getLikes
@@ -523,7 +523,7 @@ paths:
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   #?  get all coments under a photo
-  /photo/{photoId}/comment/:
+  /photo/{photoId}/comment:
     parameters:
       - $ref: "#/components/parameters/photoID"
     #* getComments
@@ -648,18 +648,18 @@ components:
           minLength: 3
           maxLength: 16
         followers: 
-          description: list of objects (each object is a single user)
+          description: list of objects (each object is a followId)
           type: array
           minItems: 0
           maxItems: 99999
           items:
             type: object
             properties:
-              identifier:
-                description: Unique user identifier.
+              followId:
+                description: followID schema.
                 type: string
                 pattern: '^.*?$'
-                example: "#U5678" 
+                example: "#F1234"
                 minLength: 3
                 maxLength: 16
     #* banList schema
@@ -683,18 +683,18 @@ components:
           minLength: 3
           maxLength: 16
         ban: 
-          description: list of objects (each object is a single user)
+          description: list of objects (each object is a a banId)
           type: array
           minItems: 0
           maxItems: 99999
           items:
             type: object
             properties:
-              identifier:
-                description: Unique user identifier.
+              banId:
+                description: banID schema.
                 type: string
                 pattern: '^.*?$'
-                example: "#U5678" 
+                example: "#B1234"
                 minLength: 3
                 maxLength: 16
     #* commentsList schema
@@ -759,18 +759,18 @@ components:
           minLength: 3
           maxLength: 16
         likes: 
-          description: list of objects (each object is a like)
+          description: list of objects (each object is a likeId)
           type: array
           minItems: 0
           maxItems: 99999
           items:
             type: object
             properties:
-              identifier:
-                description: Unique user identifier.
+              likeId:
+                description: likeID schema.
                 type: string
                 pattern: '^.*?$'
-                example: "#U1234"
+                example: "#L1234"
                 minLength: 3
                 maxLength: 16
     #* photoList schema
