@@ -26,27 +26,25 @@ info:
   license:
     name: MIT
 tags:
-  - name: "LoginAction"
+  - name: "Login"
     description: "Function for logging in"
-  - name: "SessionUserActions"
+  - name: "User"
     description: "Function for user actions"
-  - name: "UserActions"
-    description: "Function for logging in"
-  - name: "PhotoActions"
-    description: "Function for logging in"
-  - name: "UserBanActions"
-    description: "Function for logging in"
-  - name: "UserFollowActions"
-    description: "Function for logging in"
-  - name: "LikeActions"
-    description: "Function for logging in"
-  - name: "CommentActions"
+  - name: "Photo"
+    description: "Function for photo actions"
+  - name: "Ban"
+    description: "Function for ban actions"
+  - name: "Follow"
+    description: "Function for follow actions"
+  - name: "Like"
+    description: "Function for like actions"
+  - name: "Comment"
     description: "Function for comment actions"
 paths:
   /session:
     #* doLogin
     post:
-      tags: ["LoginAction"]
+      tags: ["Login"]
       summary: Log in user
       description: |-
         If the user does not exist, it will be created,
@@ -75,7 +73,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["SessionUserActions"]
+      tags: ["User"]
       summary: Set user username
       description: |-
         Set user username, if the user is logged in then the username is set with the username
@@ -106,7 +104,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["SessionUserActions"]
+      tags: ["User"]
       summary: Return user stream
       description: |-
         Return a list of photos for the user stream.
@@ -160,7 +158,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["UserActions"]
+      tags: ["User"]
       summary: Return user profile
       operationId: getUserProfile
       description: |-
@@ -184,7 +182,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["UserBanActions"]
+      tags: ["Ban"]
       summary: Ban user
       description: |-
        Ban an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -203,7 +201,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["UserBanActions"]
+      tags: ["Ban"]
       summary: Unban user
       description: |-
         Unban an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -227,7 +225,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["UserBanActions"]
+      tags: ["Ban"]
       summary: Return user bans
       operationId: getBans
       description: |-
@@ -251,7 +249,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["UserFollowActions"]
+      tags: ["Follow"]
       summary: Follow user
       description: |-
         Folow an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -270,7 +268,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["UserFollowActions"]
+      tags: ["Follow"]
       summary: Unfollow user
       description: |-
        Unfollow an user, if the username provided exists. If the username does not exist then an error response is given.
@@ -293,7 +291,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["UserFollowActions"]
+      tags: ["Follow"]
       summary: Return user followers
       operationId: getFollowers
       description: |-
@@ -317,7 +315,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["PhotoActions"]
+      tags: ["Photo"]
       summary: Upload photo
       description: |-
         Upload a photo, if the photo has the right format then it is uploaded on the user profile. If the file
@@ -360,7 +358,7 @@ paths:
     delete:
       security:
       - bearerAuth : []
-      tags: ["PhotoActions"]
+      tags: ["Photo"]
       operationId: deletePhoto
       summary: Remove photo
       description: |-
@@ -384,7 +382,7 @@ paths:
     get:
       security:
       - bearerAuth : []   
-      tags: ["PhotoActions"]
+      tags: ["Photo"]
       summary: Return user photos
       operationId: getUserPhotos
       description: |-
@@ -408,7 +406,7 @@ paths:
     put: 
       security:
       - bearerAuth : []
-      tags: ["LikeActions"]
+      tags: ["Like"]
       operationId: likePhoto
       summary: Like photo
       description: |-
@@ -428,7 +426,7 @@ paths:
     delete: 
       security:
       - bearerAuth : []
-      tags: ["LikeActions"]
+      tags: ["Like"]
       operationId: unlikePhoto
       summary: Delete like
       description: |-
@@ -451,9 +449,8 @@ paths:
     #* getLikes
     get:
       security:
-
       - bearerAuth : []
-      tags: ["LikeActions"]
+      tags: ["Like"]
       summary: Return photo likes
       description: |-
         Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
@@ -478,7 +475,7 @@ paths:
     put:
       security:
       - bearerAuth : []
-      tags: ["CommentActions"]
+      tags: ["Comment"]
       summary: Add comment
       operationId: commentPhoto
       description: |-
@@ -506,7 +503,7 @@ paths:
     delete:
      security:
      - bearerAuth : []
-     tags: ["CommentActions"]
+     tags: ["Comment"]
      operationId: uncommentPhoto
      summary: Remove comment
      description: |-
@@ -530,7 +527,7 @@ paths:
     get:
       security:
       - bearerAuth : []
-      tags: ["CommentActions"]
+      tags: ["Comment"]
       summary: Return photo comments
       description: |-
         Return a list of comments under a specific photo. If the photoId is correct the list is returned, an error message
@@ -739,12 +736,6 @@ components:
                 example: "Hello World!"
                 minLength: 2
                 maxLength: 30
-              uploadDate:
-                description: Upload date of a specific comment.
-                type: string
-                example: "2022-11-02"
-                minLength: 3
-                maxLength: 16
     #* likesList schema
     likesList: 
       title: Likes
@@ -807,12 +798,7 @@ components:
                 format: binary
                 minLength: 3
                 maxLength: 16
-              uploadDate:
-                description: Upload date of a specific photo.
-                type: string
-                example: "2022-11-02"
-                minLength: 3
-                maxLength: 16
+    #* login schema
     login:        
       description: user schema.
       type: object
@@ -824,6 +810,7 @@ components:
           pattern: '^.*?$'
           minLength: 3
           maxLength: 16
+    #* photo schema
     photo:
       description: photo schema.
       properties:
@@ -840,20 +827,7 @@ components:
             format: binary
             minLength: 1
             maxLength: 9999
-        description:
-          description: Small description of the specific photo.
-          type: string
-          pattern: '^.*?$'
-          example: "I took this photo!"
-          minLength: 1
-          maxLength: 40
-        uploadDate:
-          description: Upload date of a specific photo.
-          type: string
-          pattern: '^.*?$'
-          example: "2022-11-02T09:00:00Z"
-          minLength: 1
-          maxLength: 9999
+    #* comment schema
     comment:
       type: object
       description: content schema.
@@ -905,7 +879,7 @@ components:
       in: path
       required: true
       description: "**commentID** of a single comment under a photo."
-    #* likeID
+    #* likeID parameter
     likeID:
       schema:
         description: likeID schema.
@@ -918,7 +892,7 @@ components:
       in: path
       required: true
       description: "**likeID** of a single comment under a photo."
-    #* followID
+    #* followID parameter
     followID:
       schema:
         description: followID schema.
@@ -931,7 +905,7 @@ components:
       in: path
       required: true
       description: "**followID** of a single comment under a photo."
-    #* banID
+    #* banID parameter
     banID:
       schema:
         description: banID schema.
