@@ -398,8 +398,9 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? like
-  /photo/{photoId}/like/{likeId}:
+  /users/{username}/photo/{photoId}/like/{likeId}:
     parameters:
+      - $ref: "#/components/parameters/username"
       - $ref : "#/components/parameters/photoID"
       - $ref : "#/components/parameters/likeID"
     #* likePhoto
@@ -443,8 +444,9 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? get all likes under a photo
-  /photo/{photoId}/like:
+  /users/{username}/photo/{photoId}/like:
     parameters:
+      - $ref: "#/components/parameters/username"
       - $ref : "#/components/parameters/photoID"
     #* getLikes
     get:
@@ -467,8 +469,9 @@ paths:
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   #? comment
-  /photo/{photoId}/comment/{commentId}:
+  /users/{username}/photo/{photoId}/comment/{commentId}:
     parameters:
+      - $ref: "#/components/parameters/username"
       - $ref: "#/components/parameters/photoID"
       - $ref: "#/components/parameters/commentID"
     #* commentPhoto
@@ -520,8 +523,9 @@ paths:
        "401": { $ref: "#/components/responses/UnauthorizedError" }
        "500": { $ref: "#/components/responses/InternalServerError" }
   #?  get all coments under a photo
-  /photo/{photoId}/comment:
+  /users/{username}/photo/{photoId}/comment:
     parameters:
+      - $ref: "#/components/parameters/username"
       - $ref: "#/components/parameters/photoID"
     #* getComments
     get:
