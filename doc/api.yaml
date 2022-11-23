@@ -320,7 +320,7 @@ paths:
       description: |-
         Upload a photo, if the photo has the right format then it is uploaded on the user profile. If the file
         format is not correct, then an error response is given.
-      operationId: uploadPhoto
+      operationId: uploadPhoto 
       requestBody:
         description: photo
         required: true
@@ -335,14 +335,7 @@ paths:
                   type: string
                   format: binary
                   minLength: 0
-                  maxLength: 9999
-                 description:
-                  description: Small description of the specific photo.
-                  type: string
-                  pattern: '^.*?$'
-                  example: "I took this photo!"
-                  minLength: 1
-                  maxLength: 40
+                  maxLength: 9999   
 
       responses:
         "201":
