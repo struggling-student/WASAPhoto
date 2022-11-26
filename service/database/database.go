@@ -16,7 +16,7 @@ This is an example on how to migrate the DB and connect to it:
 
 	// Start Database
 	logger.Println("initializing database support")
-	db, err := sql.Open("sqlite3", "./foo.db")
+	db, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
 		logger.WithError(err).Error("error opening SQLite DB")
 		return fmt.Errorf("opening SQLite: %w", err)
@@ -38,9 +38,13 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	GetName() (string, error)
-	SetName(name string) error
-
+	GetUser(username string) (User, error)
+	SetUser(Username string, identifier int) error
+	SetUsername(Username string, newUsername string) (int, error)
+	SetPhoto(Username string, identifier uint64, file string) error
+	SetBan(Username string, token int, banIdentifier int) error
+	RemoveBan(banIdentifier int) error
+	GetBans(Token int) ([]Ban, error)
 	Ping() error
 }
 
@@ -57,10 +61,52 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
+	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
-		_, err = db.Exec(sqlStmt)
+		usersDatabase := `CREATE TABLE users (
+			id INTEGER PRIMARY KEY, 
+			username TEXT);`
+		photosDatabase := `CREATE TABLE photos (
+				id INTEGER PRIMARY KEY, 
+				photos TEXT);`
+		likesDatabase := `CREATE TABLE likes (
+			id INTEGER PRIMARY KEY, 
+			likes TEXT);`
+		commentsDatabase := `CREATE TABLE comments(
+			id INTEGER PRIMARY KEY, 
+			comments TEXT);`
+		bansDatabase := `CREATE TABLE bans (
+			id INTEGER PRIMARY KEY, 
+			username TEXT,
+			token INTEGER);`
+		followersDatabase := `CREATE TABLE followers (
+				id INTEGER PRIMARY KEY, 
+				followers TEXT);`
+		_, err = db.Exec(usersDatabase)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+		}
+		_, err = db.Exec(photosDatabase)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+		}
+
+		_, err = db.Exec(likesDatabase)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+		}
+
+		_, err = db.Exec(commentsDatabase)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+		}
+
+		_, err = db.Exec(bansDatabase)
+		if err != nil {
+			return nil, fmt.Errorf("error creating database structure: %w", err)
+		}
+
+		_, err = db.Exec(followersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
