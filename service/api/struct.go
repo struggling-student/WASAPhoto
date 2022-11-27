@@ -1,9 +1,8 @@
 package api
 
-type User struct {
-	Username   string `json:"username"`
-	Identifier int    `json:"identifier"`
-}
+import (
+	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
+)
 
 // * Struct per commento
 type Comments struct {
@@ -50,4 +49,20 @@ type Follow struct {
 	Identifier       int    `json:"identifier"`
 	Username         string `json:"username"`
 	FollowIdentifier int    `json:"followIdentifier"`
+}
+
+type User struct {
+	Identifier int    `json:"id"`
+	Username   string `json:"username"`
+}
+
+func (u *User) FromDatabase(user database.User) {
+	u.Identifier = user.Identifier
+	u.Username = user.Username
+}
+func (u *User) ToDatabase() database.User {
+	return database.User{
+		Identifier: u.Identifier,
+		Username:   u.Username,
+	}
 }

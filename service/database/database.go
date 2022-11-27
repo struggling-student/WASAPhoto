@@ -36,15 +36,21 @@ import (
 	"fmt"
 )
 
+type User struct {
+	Username   string `json:"username"`
+	Identifier int    `json:"identifier"`
+}
+
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	CreateUser(User) (User, error)
+
 	GetUser(username string) (User, error)
-	SetUser(Username string, identifier int) error
 	SetUsername(Username string, newUsername string) (int, error)
 	SetPhoto(Username string, identifier uint64, file string) error
 	SetBan(Username string, token int, banIdentifier int) error
 	RemoveBan(banIdentifier int) error
-	GetBans(Token int) ([]Ban, error)
+	GetBans(Token int) (int, error)
 	Ping() error
 }
 
@@ -64,7 +70,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 		usersDatabase := `CREATE TABLE users (
-			id INTEGER PRIMARY KEY, 
+			identifier INTEGER PRIMARY KEY, 
 			username TEXT);`
 		photosDatabase := `CREATE TABLE photos (
 				id INTEGER PRIMARY KEY, 

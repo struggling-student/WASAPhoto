@@ -1,6 +1,9 @@
 package database
 
-func (db *appdbimpl) SetUser(username string, identifier int) error {
-	_, err := db.c.Exec("INSERT INTO users(id, username) VALUES (?, ?)", identifier, username)
-	return err
+func (db *appdbimpl) CreateUser(u User) (User, error) {
+	_, err := db.c.Exec("INSERT INTO users(identifier, username) VALUES (?, ?)", u.Identifier, u.Username)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
 }
