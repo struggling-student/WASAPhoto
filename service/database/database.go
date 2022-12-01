@@ -1,33 +1,3 @@
-/*
-Package database is the middleware between the app database and the code. All data (de)serialization (save/load) from a
-persistent database are handled here. Database specific logic should never escape this package.
-
-To use this package you need to apply migrations to the database if needed/wanted, connect to it (using the database
-data source name from config), and then initialize an instance of AppDatabase from the DB connection.
-
-For example, this code adds a parameter in `webapi` executable for the database data source name (add it to the
-main.WebAPIConfiguration structure):
-
-	DB struct {
-		Filename string `conf:""`
-	}
-
-This is an example on how to migrate the DB and connect to it:
-
-	// Start Database
-	logger.Println("initializing database support")
-	db, err := sql.Open("sqlite3", "./database.db")
-	if err != nil {
-		logger.WithError(err).Error("error opening SQLite DB")
-		return fmt.Errorf("opening SQLite: %w", err)
-	}
-	defer func() {
-		logger.Debug("database stopping")
-		_ = db.Close()
-	}()
-
-Then you can initialize the AppDatabase and pass it to the api package.
-*/
 package database
 
 import (
@@ -36,21 +6,41 @@ import (
 	"fmt"
 )
 
+var ErrUserDoesNotExist = errors.New("User does not exist")
+
 type User struct {
-	Username   string `json:"username"`
-	Identifier int    `json:"identifier"`
+	// Identifier is the unique identifier for the user
+	Id uint64 `json:"id"`
+	// Username is the username of the user
+	Username string `json:"username"`
+}
+type Bans struct {
+	// Identifier for the user that has the bans
+	Identifier uint64 `json:"identifier"`
+	// List of bans
+	Bans []Ban `json:"bans"`
+}
+type Ban struct {
+	// BanIdentifier is the identifier for the ban action
+	BanId uint64 `json:"banId"`
+	// Identifier for the user who is banned
+	BannedId uint64 `json:"bannedId"`
+	// Identifier for the user who is banning
+	UserId uint64 `json:"userId"`
 }
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	//*DONE
 	CreateUser(User) (User, error)
-
-	GetUser(username string) (User, error)
-	SetUsername(Username string, newUsername string) (int, error)
+	CreateBan(Ban) (Ban, error)
+	GetUserById(User) (User, error)
+	SetUsername(User) (User, error) //? Review if the username is needed
+	//? WORKING
+	RemoveBan(banId int) error
+	GetBans(User) ([]Ban, error)
+	//TODO
 	SetPhoto(Username string, identifier uint64, file string) error
-	SetBan(Username string, token int, banIdentifier int) error
-	RemoveBan(banIdentifier int) error
-	GetBans(Token int) (int, error)
 	Ping() error
 }
 
@@ -64,30 +54,48 @@ func New(db *sql.DB) (AppDatabase, error) {
 	if db == nil {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
-
+	db.Exec("PRAGMA foreign_keys = ON")
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 		usersDatabase := `CREATE TABLE users (
-			identifier INTEGER PRIMARY KEY, 
-			username TEXT);`
+			Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			Username TEXT UNIQUE
+			);`
 		photosDatabase := `CREATE TABLE photos (
-				id INTEGER PRIMARY KEY, 
-				photos TEXT);`
+			Id INTEGER NOT NULL PRIMARY KEY, 
+			userId INTEGER NOT NULL,
+			photo BLOB,
+			date TEXT,
+			FOREIGN KEY (userId) REFERENCES users(Id)
+			);`
 		likesDatabase := `CREATE TABLE likes (
-			id INTEGER PRIMARY KEY, 
-			likes TEXT);`
-		commentsDatabase := `CREATE TABLE comments(
-			id INTEGER PRIMARY KEY, 
-			comments TEXT);`
+			Id INTEGER NOT NULL PRIMARY KEY,
+			photoId INTEGER NOT NULL,
+			userId INTEGER NOT NULL,
+			FOREIGN KEY (userId) REFERENCES users(Id),
+			FOREIGN KEY (photoId) REFERENCES photos(Id)
+			);`
+		commentsDatabase := `CREATE TABLE comments (
+			Id INTEGER NOT NULL PRIMARY KEY,
+			userId INTEGER NOT NULL,
+			photoId INTEGER NOT NULL,
+			FOREIGN KEY (userId) REFERENCES users(Id),
+			FOREIGN KEY (photoId) REFERENCES photos(Id)
+			);`
 		bansDatabase := `CREATE TABLE bans (
-			id INTEGER PRIMARY KEY, 
-			username TEXT,
-			token INTEGER);`
+			banId INTEGER NOT NULL PRIMARY KEY,
+			bannedId INTEGER NOT NULL,
+			userId INTEGER NOT NULL,
+			FOREIGN KEY (userId) REFERENCES users(Id)
+			);`
 		followersDatabase := `CREATE TABLE followers (
-				id INTEGER PRIMARY KEY, 
-				followers TEXT);`
+			Id INTEGER NOT NULL PRIMARY KEY,
+			followerId INTEGER NOT NULL,
+			userId INTEGER NOT NULL,
+			FOREIGN KEY (userId) REFERENCES users(Id)
+			);`
 		_, err = db.Exec(usersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)

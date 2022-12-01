@@ -1,17 +1,15 @@
 package database
 
-func (db *appdbimpl) SetUsername(username string, newUsername string) (int, error) {
-	var identifier int
-	_, err := db.c.Exec("UPDATE users SET username=? WHERE username=?", newUsername, username)
+func (db *appdbimpl) SetUsername(u User) (User, error) {
+	res, err := db.c.Exec(`UPDATE users SET username=? WHERE id=?`, u.Username, u.Id)
 	if err != nil {
-		return identifier, err
+		return u, err
 	}
-	row, err := db.c.Query(`SELECT id FROM users WHERE username=?`, newUsername)
-	for row.Next() {
-		err = row.Scan(&identifier)
-		if err != nil {
-			return identifier, err
-		}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return u, err
+	} else if affected == 0 {
+		return u, ErrUserDoesNotExist
 	}
-	return identifier, nil
+	return u, nil
 }

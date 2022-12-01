@@ -1,31 +1,31 @@
 package database
 
-import "fmt"
+import (
+	"database/sql"
+)
 
-func (db *appdbimpl) GetUser(username string) (User, error) {
-	//var ret []User
+func (db *appdbimpl) GetUserById(u User) (User, error) {
+	// var user User
+	// rows, err := db.c.Query(`SELECT id, username FROM users WHERE username = ?`, u.Username)
+	// if err != nil {
+	// 	return user, ErrUserDoesNotExist
+	// }
+	// defer func() { _ = rows.Close() }()
+	// for rows.Next() {
+	// 	err = rows.Scan(&user.Id, &user.Username)
+	// 	return user, err
+	// }
+	// if rows.Err() != nil {
+	// 	return user, err
+	// }
+
+	// return user, nil
 	var user User
-	// Plain simple SELECT query
-	rows, err := db.c.Query(`SELECT id, username FROM users`)
-	if err != nil {
-		return user, err
-	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
-		//var f User
-		err = rows.Scan(&user.Identifier, &user.Username)
-		if err != nil {
-			return user, err
+	// Query for a value based on a single row.
+	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE username = ?`, u.Username).Scan(&user.Id, &user.Username); err != nil {
+		if err == sql.ErrNoRows {
+			return user, ErrUserDoesNotExist
 		}
-
-		//ret = append(ret, f)
 	}
-	fmt.Printf("%+v\n", user)
-	if rows.Err() != nil {
-		return user, err
-	}
-
 	return user, nil
-
 }

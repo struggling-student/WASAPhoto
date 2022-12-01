@@ -7,38 +7,38 @@ import (
 // Handler returns an instance of httprouter.Router that handle APIs registered here
 func (rt *_router) Handler() http.Handler {
 
-	//* Login - Functions for logging in
-	rt.router.POST("/session", rt.session)
+	// Login - Functions for logging in
+	rt.router.POST("/session", rt.session) //*
 
-	//? User - Functions for user actions
-	rt.router.PUT("/user/:username/setusername", rt.setMyUserName)
-	rt.router.GET("/user/:username/stream", rt.getMyStream)
-	rt.router.GET("/user/:username/profile", rt.getUserProfile)
+	// User - Functions for user actions
+	rt.router.PUT("/user/:username/setusername", rt.setMyUserName) //?
+	rt.router.GET("/user/:username/stream", rt.getMyStream)        //!
+	rt.router.GET("/user/:username/profile", rt.getUserProfile)    //!
 
-	//? Photo - Functions for photo actions
-	rt.router.PUT("/users/:username/photo/:photoid", rt.uploadPhoto)
-	rt.router.DELETE("/users/:username/photo/:photoid", rt.deletePhoto)
-	rt.router.GET("/users/:username/photo", rt.getUserPhotos)
+	// Photo - Functions for photo actions
+	rt.router.PUT("/users/:username/photo/:photoid", rt.uploadPhoto)    //!
+	rt.router.DELETE("/users/:username/photo/:photoid", rt.deletePhoto) //!
+	rt.router.GET("/users/:username/photo", rt.getUserPhotos)           //!
 
-	//* Ban - Functions for ban actions
-	rt.router.PUT("/users/:username/ban/:banid", rt.banUser)
-	rt.router.DELETE("/users/:username/ban/:banid", rt.unbanUser)
-	rt.router.GET("/users/:username/ban", rt.getBans)
+	// Ban - Functions for ban actions
+	rt.router.PUT("/users/:username/ban/:banid", rt.banUser)      //?
+	rt.router.DELETE("/users/:username/ban/:banid", rt.unbanUser) //?
+	rt.router.GET("/users/:username/ban", rt.getBans)             //?
 
-	//? Follow - Functions for follow actions
-	rt.router.PUT("/users/:username/follow/:followid", rt.followUser)
-	rt.router.DELETE("/users/:username/follow/:followid", rt.unfollowUser)
-	rt.router.GET("/users/:username/follow", rt.getFollowers)
+	// Follow - Functions for follow actions
+	rt.router.PUT("/users/:username/follow/:followid", rt.followUser)      //!
+	rt.router.DELETE("/users/:username/follow/:followid", rt.unfollowUser) //!
+	rt.router.GET("/users/:username/follow", rt.getFollowers)              //!
 
-	//? Like - Functions for like actions
-	rt.router.PUT("/users/:username/photo/:photoid/like/:likeid", rt.likePhoto)
-	rt.router.DELETE("/users/:username/photo/:photoid/like/:likeid", rt.unlikePhoto)
-	rt.router.GET("/users/:username/photo/:photoid/like", rt.getLikes)
+	// Like - Functions for like actions
+	rt.router.PUT("/users/:username/photo/:photoid/like/:likeid", rt.likePhoto)      //!
+	rt.router.DELETE("/users/:username/photo/:photoid/like/:likeid", rt.unlikePhoto) //!
+	rt.router.GET("/users/:username/photo/:photoid/like", rt.getLikes)               //!
 
-	//? Comment - Functions for comment actions
-	rt.router.PUT("/users/:username/photo/:photoid/comment/:commentid", rt.commentPhoto)
-	rt.router.DELETE("/users/:username/photo/:photoid/comment/:commentid", rt.uncommentPhoto)
-	rt.router.GET("/users/:username/photo/:photoid/comment", rt.getComments)
+	// Comment - Functions for comment actions
+	rt.router.PUT("/users/:username/photo/:photoid/comment/:commentid", rt.commentPhoto)      //!
+	rt.router.DELETE("/users/:username/photo/:photoid/comment/:commentid", rt.uncommentPhoto) //!
+	rt.router.GET("/users/:username/photo/:photoid/comment", rt.getComments)                  //!
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

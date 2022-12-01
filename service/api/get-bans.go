@@ -1,39 +1,42 @@
 package api
 
 import (
-	"log"
+	"encoding/json"
 	"net/http"
-	"regexp"
-	"strconv"
 
+	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
 	"github.com/julienschmidt/httprouter"
 )
 
 func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
 	var user User
+	var bans []database.Ban
+	var banList database.Bans
+	var dbuser database.User
+	var token uint64
 
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-	test := r.Header.Get("Authorization")
-	tokenS := re.FindAllString(test, -1)
-	token, _ := strconv.Atoi(tokenS[0])
-
-	username := ps.ByName("username")
-
-	_, err := rt.db.GetUser(username)
-	log.Fatalf("id: %v", user)
-
-	if token != token {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	//! create user structure for the user that wants to get the bans
+	token = getToken(r.Header.Get("Authorization"))
+	user.Id = token
+	user.Username = ps.ByName("username")
+	//! check if the user is an existing one
+	dbuser, err := rt.db.GetUserById(user.ToDatabase())
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	_, Error := rt.db.GetBans(token)
-	if Error != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	user.FromDatabase(dbuser)
+	//! get the bans from the database
+	bans, err = rt.db.GetBans(user.ToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//! return the bans to the user
+	banList.Identifier = token
+	banList.Bans = bans
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(banList)
+
 }
