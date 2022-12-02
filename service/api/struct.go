@@ -4,10 +4,9 @@ import (
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
 )
 
-// *
-// * Struct for user
-// *
-// ! This structure is used only for the api and not for the database
+// Struct for user
+//
+// This structure is used only for the api and not for the database
 type Users struct {
 	Users []User `json:"users"`
 }
@@ -32,10 +31,9 @@ func (u *User) ToDatabase() database.User {
 	}
 }
 
-// *
-// * Struct per followers
-// *
-// ! This structure is used only for the api and not for the database
+// Struct per followers
+//
+//	This structure is used only for the api and not for the database
 type Followers struct {
 	// Identifier for the user that has the followers
 	Id int `json:"identifier"`
@@ -49,10 +47,9 @@ type Follow struct {
 	FollowIdentifier int `json:"followIdentifier"`
 }
 
-// *
-// * Struct per bans
-// *
-// ! This structure is used only for the api and not for the database
+// Struct per bans
+//
+// This structure is used only for the api and not for the database
 type Bans struct {
 	// Identifier for the user that has the bans
 	Identifier int `json:"identifier"`
@@ -84,10 +81,9 @@ func (b *Ban) BanToDatabase() database.Ban {
 	}
 }
 
-// *
-// * Struct for photos
-// *
-// ! This structure is used only for the api and not for the database
+// Struct for photos
+//
+// This structure is used only for the api and not for the database
 type Photos struct {
 	// Identifier of the user who has the photos
 	Identifier int `json:"identifier"`
@@ -95,15 +91,15 @@ type Photos struct {
 	Photos []Photo `json:"photos"`
 }
 type Photo struct {
-	Username        string `json:"username"`
-	PhotoIdentifier int64  `json:"photoIdentifier"`
-	//file            string `json:"file"`
+	Id     uint64    `json:"id"`
+	UserId uint64    `json:"userId"`
+	File   [255]byte `json:"file"`
+	Date   string    `json:"date"`
 }
 
-// *
-// * Struct for likes
-// *
-// ! This structure is used only for the api and not for the database
+// Struct for likes
+//
+// This structure is used only for the api and not for the database
 type Likes struct {
 	// Identifier of the user who has commented
 	Id int `json:"id"`
@@ -121,10 +117,9 @@ type Like struct {
 	Identifier int `json:"identifier"`
 }
 
-// *
-// * Struct for comments
-// *
-// ! This structure is used only for the api and not for the database
+// Struct for comments
+//
+// This structure is used only for the api and not for the database
 type Comments struct {
 	// Identifier of the user who has commented
 	Id int `json:"id"`

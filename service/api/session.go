@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/api/reqcontext"
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) session(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user structure
 	var user User
 	// create database user struct
