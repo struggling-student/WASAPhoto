@@ -91,10 +91,28 @@ type Photos struct {
 	Photos []Photo `json:"photos"`
 }
 type Photo struct {
-	Id     uint64    `json:"id"`
-	UserId uint64    `json:"userId"`
-	File   [255]byte `json:"file"`
-	Date   string    `json:"date"`
+	Id     uint64 `json:"id"`
+	UserId uint64 `json:"userId"`
+	File   string `json:"file"`
+	Date   string `json:"date"`
+}
+
+// FromDatabase converts a database.User to an api.User
+func (p *Photo) PhotoFromDatabase(photo database.Photo) {
+	p.Id = photo.Id
+	p.UserId = photo.UserId
+	p.File = photo.File
+	p.Date = photo.Date
+}
+
+// ToDatabase converts an api.User to a database.User
+func (p *Photo) PhotoToDatabase() database.Photo {
+	return database.Photo{
+		Id:     p.Id,
+		UserId: p.UserId,
+		File:   p.File,
+		Date:   p.Date,
+	}
 }
 
 // Struct for likes

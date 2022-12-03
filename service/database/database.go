@@ -7,6 +7,9 @@ import (
 )
 
 var ErrUserDoesNotExist = errors.New("User does not exist")
+var ErrPhotoDoesNotExist = errors.New("Photo does not exist")
+var ErrCommentDoesNotExist = errors.New("Comment does not exist")
+var ErrLikeDoesNotExist = errors.New("Like does not exist")
 
 type User struct {
 	// Identifier is the unique identifier for the user
@@ -29,18 +32,25 @@ type Ban struct {
 	UserId uint64 `json:"userId"`
 }
 
+type Photo struct {
+	Id     uint64 `json:"id"`
+	UserId uint64 `json:"userId"`
+	File   string `json:"file"`
+	Date   string `json:"date"`
+}
+
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	//*DONE
+	// DONE
 	CreateUser(User) (User, error)
 	CreateBan(Ban) (Ban, error)
 	GetUserById(User) (User, error)
-	SetUsername(User) (User, error) //? Review if the username is needed
-	//? WORKING
+	SetUsername(User) (User, error) // Review if the username is needed
+	// WORKING
 	RemoveBan(banId int) error
 	GetBans(User) ([]Ban, error)
-	//TODO
-	SetPhoto(Username string, identifier uint64, file string) error
+	//
+	SetPhoto(Photo) (Photo, error)
 	Ping() error
 }
 
@@ -66,7 +76,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		photosDatabase := `CREATE TABLE photos (
 			Id INTEGER NOT NULL PRIMARY KEY, 
 			userId INTEGER NOT NULL,
-			photo BLOB,
+			photo TEXT,
 			date TEXT,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
