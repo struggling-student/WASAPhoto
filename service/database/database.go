@@ -17,6 +17,20 @@ type User struct {
 	// Username is the username of the user
 	Username string `json:"username"`
 }
+type Followers struct {
+	// Identifier for the user that has the followers
+	Id uint64 `json:"identifier"`
+	// List of followers
+	Followers []Follow `json:"Followers"`
+}
+type Follow struct {
+	// BanIdentifier is the identifier for the ban action
+	FollowId uint64 `json:"followId"`
+	// Identifier for the user who is banned
+	FollowedId uint64 `json:"followedId"`
+	// Identifier for the user who is banning
+	UserId uint64 `json:"userId"`
+}
 type Bans struct {
 	// Identifier for the user that has the bans
 	Identifier uint64 `json:"identifier"`
@@ -31,12 +45,52 @@ type Ban struct {
 	// Identifier for the user who is banning
 	UserId uint64 `json:"userId"`
 }
+type Photos struct {
+	// Identifier of the user who has the photos
+	Identifier uint64 `json:"identifier"`
+	// List of photos
+	Photos []Photo `json:"photos"`
+}
 
 type Photo struct {
 	Id     uint64 `json:"id"`
 	UserId uint64 `json:"userId"`
 	File   string `json:"file"`
 	Date   string `json:"date"`
+}
+type Likes struct {
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
+	// Identifier for the user who liked the photo
+	UserIdentifier uint64 `json:"identifier"`
+	// List of likes under a photo
+	Likes []Like `json:"likes"`
+}
+type Like struct {
+	// Identifier for the like that has been added
+	LikeId uint64 `json:"likeId"`
+	// Identifier for the photo that has the likes
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
+	// Identifier for the user who liked the photo
+	UserIdentifier uint64 `json:"identifier"`
+}
+
+type Comments struct {
+	// Identifier of the user who has commented
+	Id uint64 `json:"id"`
+	// Identifier for the photo that has the comments
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
+	// List of comments under the photo
+	Comments []Comment `json:"comments"`
+}
+type Comment struct {
+	// Identifier of the user who has commented
+	Id uint64 `json:"id"`
+	// Identifier for the photo that has the comments
+	PhotoId uint64 `json:"photoId"`
+	// Identifier of the user who has commented
+	UserId uint64 `json:"userId"`
+	// Content of the comment
+	Content string `json:"content"`
 }
 
 // AppDatabase is the high level interface for the DB
@@ -46,11 +100,40 @@ type AppDatabase interface {
 	CreateBan(Ban) (Ban, error)
 	GetUserById(User) (User, error)
 	SetUsername(User) (User, error) // Review if the username is needed
-	// WORKING
-	RemoveBan(banId int) error
+	RemoveBan(Ban) error
+	GetBanById(Ban) (Ban, error)
 	GetBans(User) ([]Ban, error)
-	//
+	//DB functions for follow
+	SetFollow(Follow) (Follow, error)
+	RemoveFollow(Follow) error
+	GetFollowById(Follow) (Follow, error)
+	GetFollowers(User) ([]Follow, error)
+	// DB functions for photos
+
+	// Insert a photo into the database. Returns the photo with the id, UserId, File and Date filled.
 	SetPhoto(Photo) (Photo, error)
+	// Remove a photo from the database. Returns an error if the photo cannot be deleted.
+	RemovePhoto(Photo) error
+	// Checks if a photo exists in the database.
+	GetPhotoById(Photo) (Photo, error)
+
+	GetPhotos(User) ([]Photo, error)
+
+	// DB functions for likes
+	// Insert a like into the database. Returns the like with the id, PhotoId, UserId filled.
+	SetLike(Like) (Like, error)
+	// Checks if a like exists in the database.
+	GetLikeById(Like) (Like, error)
+	// Remove a like from the database. Returns an error if the like cannot be deleted.
+	RemoveLike(Like) error
+	//
+	GetLikes(Photo) ([]Like, error)
+
+	// DB functions for comments
+	SetComment(Comment) (Comment, error)
+	GetCommentById(Comment) (Comment, error)
+	RemoveComment(Comment) error
+	GetComments(Photo) ([]Comment, error)
 	Ping() error
 }
 
@@ -91,6 +174,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
 			photoId INTEGER NOT NULL,
+			content TEXT NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`

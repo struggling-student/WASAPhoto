@@ -5,11 +5,6 @@ import (
 )
 
 // Struct for user
-//
-// This structure is used only for the api and not for the database
-type Users struct {
-	Users []User `json:"users"`
-}
 type User struct {
 	// Identifier is the unique identifier for the user
 	Id uint64 `json:"id"`
@@ -31,9 +26,8 @@ func (u *User) ToDatabase() database.User {
 	}
 }
 
-// Struct per followers
-//
-//	This structure is used only for the api and not for the database
+// Struct for followers
+// This structure is used only for the api and not for the database
 type Followers struct {
 	// Identifier for the user that has the followers
 	Id int `json:"identifier"`
@@ -41,13 +35,31 @@ type Followers struct {
 	Followers []Follow `json:"Followers"`
 }
 type Follow struct {
-	// Identifier for the user who is followed
-	Identifier int `json:"identifier"`
-	// FollowIdentifier is the identifier for the follow action
-	FollowIdentifier int `json:"followIdentifier"`
+	// BanIdentifier is the identifier for the ban action
+	FollowId uint64 `json:"followId"`
+	// Identifier for the user who is banned
+	FollowedId uint64 `json:"followedId"`
+	// Identifier for the user who is banning
+	UserId uint64 `json:"userId"`
 }
 
-// Struct per bans
+// FollowFromDatabase converts a database.Follow to an api.Follow
+func (f *Follow) FollowFromDatabase(follow database.Follow) {
+	f.FollowId = follow.FollowId
+	f.FollowedId = follow.FollowedId
+	f.UserId = follow.UserId
+}
+
+// FollowToDatabase converts an api.Follow to a database.Follow
+func (f *Follow) FollowToDatabase() database.Follow {
+	return database.Follow{
+		FollowId:   f.FollowId,
+		FollowedId: f.FollowedId,
+		UserId:     f.UserId,
+	}
+}
+
+// Struct for bans
 //
 // This structure is used only for the api and not for the database
 type Bans struct {
@@ -65,14 +77,14 @@ type Ban struct {
 	UserId uint64 `json:"userId"`
 }
 
-// FromDatabase converts a database.User to an api.User
+// BanFromDatabase converts a database.Ban to an api.Ban
 func (b *Ban) BanFromDatabase(ban database.Ban) {
 	b.BanId = ban.BanId
 	b.BannedId = ban.BannedId
 	b.UserId = ban.UserId
 }
 
-// ToDatabase converts an api.User to a database.User
+// BanToDatabase converts an api.Ban to a database.Ban
 func (b *Ban) BanToDatabase() database.Ban {
 	return database.Ban{
 		BanId:    b.BanId,
@@ -82,7 +94,6 @@ func (b *Ban) BanToDatabase() database.Ban {
 }
 
 // Struct for photos
-//
 // This structure is used only for the api and not for the database
 type Photos struct {
 	// Identifier of the user who has the photos
@@ -97,7 +108,7 @@ type Photo struct {
 	Date   string `json:"date"`
 }
 
-// FromDatabase converts a database.User to an api.User
+// PhotoFromDatabase converts a database.Photo to an api.Photo
 func (p *Photo) PhotoFromDatabase(photo database.Photo) {
 	p.Id = photo.Id
 	p.UserId = photo.UserId
@@ -105,7 +116,7 @@ func (p *Photo) PhotoFromDatabase(photo database.Photo) {
 	p.Date = photo.Date
 }
 
-// ToDatabase converts an api.User to a database.User
+// PhotoToDatabase converts an api.Photo to a database.Photo
 func (p *Photo) PhotoToDatabase() database.Photo {
 	return database.Photo{
 		Id:     p.Id,
@@ -116,43 +127,59 @@ func (p *Photo) PhotoToDatabase() database.Photo {
 }
 
 // Struct for likes
-//
-// This structure is used only for the api and not for the database
-type Likes struct {
-	// Identifier of the user who has commented
-	Id int `json:"id"`
-	// List of likes under a photo
-	Likes []Like `json:"likes"`
-}
 type Like struct {
-	// Identifier for the user
-	Id int `json:"id"`
-	// Identifier for the photo that has the likes
-	PhotoIdentifier int `json:"photoIdentifier"`
 	// Identifier for the like that has been added
-	LikeId int `json:"likeId"`
+	LikeId uint64 `json:"likeId"`
+	// Identifier for the photo that has the likes
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
 	// Identifier for the user who liked the photo
-	Identifier int `json:"identifier"`
+	UserIdentifier uint64 `json:"identifier"`
+}
+
+// LikeFromDatabase converts a database.Like to an api.Like
+func (l *Like) LikeFromDatabase(like database.Like) {
+	l.LikeId = like.LikeId
+	l.PhotoIdentifier = like.PhotoIdentifier
+	l.UserIdentifier = like.UserIdentifier
+}
+
+// LikeToDatabase converts an api.Like to a database.Like
+func (l *Like) LikeToDatabase() database.Like {
+	return database.Like{
+		LikeId:          l.LikeId,
+		PhotoIdentifier: l.PhotoIdentifier,
+		UserIdentifier:  l.UserIdentifier,
+	}
 }
 
 // Struct for comments
-//
 // This structure is used only for the api and not for the database
-type Comments struct {
-	// Identifier of the user who has commented
-	Id int `json:"id"`
-	// Identifier for the photo that has the comments
-	PhotoIdentifier int `json:"photoIdentifier"`
-	// List of comments under the photo
-	Comments []Comment `json:"comments"`
-}
+
 type Comment struct {
 	// Identifier of the user who has commented
-	Id int `json:"id"`
+	Id uint64 `json:"id"`
 	// Identifier for the photo that has the comments
-	PhotoId int `json:"photoId"`
+	PhotoId uint64 `json:"photoId"`
 	// Identifier of the user who has commented
-	CommentId int `json:"commentId"`
+	UserId uint64 `json:"userId"`
 	// Content of the comment
-	Content string `json:"comment"`
+	Content string `json:"content"`
+}
+
+// CommentFromDatabase converts a database.Comment to an api.Comment
+func (c *Comment) CommentFromDatabase(comment database.Comment) {
+	c.Id = comment.Id
+	c.PhotoId = comment.PhotoId
+	c.UserId = comment.UserId
+	c.Content = comment.Content
+}
+
+// CommentToDatabase converts an api.Comment to a database.Comment
+func (c *Comment) CommentToDatabase() database.Comment {
+	return database.Comment{
+		Id:      c.Id,
+		PhotoId: c.PhotoId,
+		UserId:  c.UserId,
+		Content: c.Content,
+	}
 }
