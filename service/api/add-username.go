@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
-	"strconv"
 
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/api/reqcontext"
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
@@ -15,13 +13,9 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	var user User
 	var dbuser database.User
-
-	// get the bearer token from the header
-	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
-	Authorization := r.Header.Get("Authorization")
-	stringToken := re.FindAllString(Authorization, -1)
-	// token
-	token, _ := strconv.Atoi(stringToken[0])
+	var token uint64
+	// get the token from the header
+	token = getToken(r.Header.Get("Authorization"))
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	user.Id = uint64(token)

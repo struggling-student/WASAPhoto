@@ -40,7 +40,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	encoded := base64.StdEncoding.EncodeToString(content)
 	photo.File = encoded
 	currentTime := time.Now()
-	photo.Date = currentTime.Format("01-02-2006")
+	photo.Date = currentTime.Format("2006-01-02 15:04:05")
 	photo.UserId = user.Id
 	photo.Id = id
 	dbphoto, err = rt.db.SetPhoto(photo.PhotoToDatabase())

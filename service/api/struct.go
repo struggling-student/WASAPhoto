@@ -26,14 +26,39 @@ func (u *User) ToDatabase() database.User {
 	}
 }
 
+type PhotoStream struct {
+	Id           uint64 `json:"id"`
+	UserId       uint64 `json:"userId"`
+	File         string `json:"file"`
+	Date         string `json:"date"`
+	LikeCount    int    `json:"likeCount"`
+	CommentCount int    `json:"commentCount"`
+}
+
+func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) {
+	s.Id = photoStream.Id
+	s.UserId = photoStream.UserId
+	s.File = photoStream.File
+	s.Date = photoStream.Date
+	s.LikeCount = photoStream.LikeCount
+	s.CommentCount = photoStream.CommentCount
+}
+
+func (s *PhotoStream) PhotoStreamToDatabase() database.PhotoStream {
+	return database.PhotoStream{
+		Id:           s.Id,
+		UserId:       s.UserId,
+		File:         s.File,
+		Date:         s.Date,
+		LikeCount:    s.LikeCount,
+		CommentCount: s.CommentCount,
+	}
+
+}
+
 // Struct for followers
 // This structure is used only for the api and not for the database
-type Followers struct {
-	// Identifier for the user that has the followers
-	Id int `json:"identifier"`
-	// List of followers
-	Followers []Follow `json:"Followers"`
-}
+
 type Follow struct {
 	// BanIdentifier is the identifier for the ban action
 	FollowId uint64 `json:"followId"`
