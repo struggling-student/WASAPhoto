@@ -2,7 +2,7 @@ package database
 
 func (db *appdbimpl) GetComments(p Photo) ([]Comment, error) {
 	var ret []Comment
-	rows, err := db.c.Query(`SELECT id, userId, photoId, content FROM comments WHERE photoId = ?`, p.Id)
+	rows, err := db.c.Query(`SELECT Id, userId, photoId, photoOwner, content FROM comments WHERE photoId = ?`, p.Id)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}
@@ -10,7 +10,7 @@ func (db *appdbimpl) GetComments(p Photo) ([]Comment, error) {
 
 	for rows.Next() {
 		var c Comment
-		err = rows.Scan(&c.Id, &c.UserId, &c.PhotoId, &c.Content)
+		err = rows.Scan(&c.Id, &c.UserId, &c.PhotoId, &c.PhotoOwner, &c.Content)
 		if err != nil {
 			return nil, err
 		}

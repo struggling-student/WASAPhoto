@@ -51,6 +51,7 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 	comment.Id = commentid
 	comment.PhotoId = photoid
 	comment.UserId = token
+	comment.PhotoOwner = photo.UserId
 	dbcomment, err = rt.db.GetCommentById(comment.CommentToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

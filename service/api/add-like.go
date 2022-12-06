@@ -50,6 +50,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	photo.PhotoFromDatabase(dbphoto)
 	like.LikeId = likeid
 	like.PhotoIdentifier = photo.Id
+	like.PhotoOwner = photo.UserId
 	like.UserIdentifier = token
 	dblike, err = rt.db.SetLike(like.LikeToDatabase())
 	if err != nil {

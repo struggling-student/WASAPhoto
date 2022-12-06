@@ -51,6 +51,7 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	like.LikeId = likeid
 	like.PhotoIdentifier = photoid
 	like.UserIdentifier = token
+	like.PhotoOwner = photo.UserId
 	// check if the like is an existing one
 	dblike, err = rt.db.GetLikeById(like.LikeToDatabase())
 	if err != nil {

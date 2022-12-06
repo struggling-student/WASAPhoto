@@ -6,7 +6,7 @@ import (
 
 func (db *appdbimpl) GetLikeById(l Like) (Like, error) {
 	var like Like
-	if err := db.c.QueryRow(`SELECT id, photoId, userId FROM likes WHERE id = ?`, l.LikeId).Scan(&like.LikeId, &like.PhotoIdentifier, &like.UserIdentifier); err != nil {
+	if err := db.c.QueryRow(`SELECT Id, userId, photoId, photoOwner FROM likes WHERE id = ?`, l.LikeId).Scan(&like.LikeId, &like.UserIdentifier, &like.PhotoIdentifier, &like.PhotoOwner); err != nil {
 		if err == sql.ErrNoRows {
 			return like, ErrLikeDoesNotExist
 		}

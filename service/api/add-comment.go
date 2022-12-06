@@ -52,6 +52,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	commentid, err := strconv.ParseUint(ps.ByName("commentid"), 10, 64)
 	comment.UserId = token
 	comment.Id = commentid
+	comment.PhotoOwner = photo.UserId
 	comment.PhotoId = photoid
 	dbcomment, err = rt.db.SetComment(comment.CommentToDatabase())
 	if err != nil {

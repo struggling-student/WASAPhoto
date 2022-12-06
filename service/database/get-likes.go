@@ -2,7 +2,7 @@ package database
 
 func (db *appdbimpl) GetLikes(p Photo) ([]Like, error) {
 	var ret []Like
-	rows, err := db.c.Query(`SELECT id, photoId, userId FROM likes WHERE photoId = ?`, p.Id)
+	rows, err := db.c.Query(`SELECT id, userId, photoId, photoOwner FROM likes WHERE photoId = ?`, p.Id)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}
@@ -10,7 +10,7 @@ func (db *appdbimpl) GetLikes(p Photo) ([]Like, error) {
 
 	for rows.Next() {
 		var l Like
-		err = rows.Scan(&l.LikeId, &l.PhotoIdentifier, &l.UserIdentifier)
+		err = rows.Scan(&l.LikeId, &l.PhotoIdentifier, &l.UserIdentifier, &l.PhotoOwner)
 		if err != nil {
 			return nil, err
 		}

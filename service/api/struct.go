@@ -35,6 +35,16 @@ type PhotoStream struct {
 	CommentCount int    `json:"commentCount"`
 }
 
+type Profile struct {
+	// Identifier is the unique identifier for the user
+	Id uint64 `json:"id"`
+	// Username is the username of the user
+	Username       string `json:"username"`
+	FollowersCount int    `json:"followersCount"`
+	FollowingCount int    `json:"followingCount"`
+	PhotoCount     int    `json:"photoCount"`
+}
+
 func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) {
 	s.Id = photoStream.Id
 	s.UserId = photoStream.UserId
@@ -155,25 +165,30 @@ func (p *Photo) PhotoToDatabase() database.Photo {
 type Like struct {
 	// Identifier for the like that has been added
 	LikeId uint64 `json:"likeId"`
-	// Identifier for the photo that has the likes
-	PhotoIdentifier uint64 `json:"photoIdentifier"`
 	// Identifier for the user who liked the photo
 	UserIdentifier uint64 `json:"identifier"`
+	// Identifier for the photo that has the likes
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
+	// Identifier for the user who has the photo
+	PhotoOwner uint64 `json:"photoOwner"`
 }
 
 // LikeFromDatabase converts a database.Like to an api.Like
 func (l *Like) LikeFromDatabase(like database.Like) {
 	l.LikeId = like.LikeId
-	l.PhotoIdentifier = like.PhotoIdentifier
 	l.UserIdentifier = like.UserIdentifier
+	l.PhotoIdentifier = like.PhotoIdentifier
+	l.PhotoOwner = like.PhotoOwner
+
 }
 
 // LikeToDatabase converts an api.Like to a database.Like
 func (l *Like) LikeToDatabase() database.Like {
 	return database.Like{
 		LikeId:          l.LikeId,
-		PhotoIdentifier: l.PhotoIdentifier,
 		UserIdentifier:  l.UserIdentifier,
+		PhotoIdentifier: l.PhotoIdentifier,
+		PhotoOwner:      l.PhotoOwner,
 	}
 }
 
@@ -183,10 +198,12 @@ func (l *Like) LikeToDatabase() database.Like {
 type Comment struct {
 	// Identifier of the user who has commented
 	Id uint64 `json:"id"`
-	// Identifier for the photo that has the comments
-	PhotoId uint64 `json:"photoId"`
 	// Identifier of the user who has commented
 	UserId uint64 `json:"userId"`
+	// Identifier for the photo that has the comments
+	PhotoId uint64 `json:"photoId"`
+	// Identifier for the user who owns the photo
+	PhotoOwner uint64 `json:"photoOwner"`
 	// Content of the comment
 	Content string `json:"content"`
 }
@@ -194,17 +211,18 @@ type Comment struct {
 // CommentFromDatabase converts a database.Comment to an api.Comment
 func (c *Comment) CommentFromDatabase(comment database.Comment) {
 	c.Id = comment.Id
-	c.PhotoId = comment.PhotoId
 	c.UserId = comment.UserId
+	c.PhotoId = comment.PhotoId
 	c.Content = comment.Content
 }
 
 // CommentToDatabase converts an api.Comment to a database.Comment
 func (c *Comment) CommentToDatabase() database.Comment {
 	return database.Comment{
-		Id:      c.Id,
-		PhotoId: c.PhotoId,
-		UserId:  c.UserId,
-		Content: c.Content,
+		Id:         c.Id,
+		UserId:     c.UserId,
+		PhotoId:    c.PhotoId,
+		PhotoOwner: c.PhotoOwner,
+		Content:    c.Content,
 	}
 }

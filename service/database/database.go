@@ -82,10 +82,12 @@ type Likes struct {
 type Like struct {
 	// Identifier for the like that has been added
 	LikeId uint64 `json:"likeId"`
-	// Identifier for the photo that has the likes
-	PhotoIdentifier uint64 `json:"photoIdentifier"`
 	// Identifier for the user who liked the photo
 	UserIdentifier uint64 `json:"identifier"`
+	// Identifier for the photo that has the likes
+	PhotoIdentifier uint64 `json:"photoIdentifier"`
+	// Identifier for the user who has the photo
+	PhotoOwner uint64 `json:"photoOwner"`
 }
 
 type Comments struct {
@@ -99,10 +101,12 @@ type Comments struct {
 type Comment struct {
 	// Identifier of the user who has commented
 	Id uint64 `json:"id"`
-	// Identifier for the photo that has the comments
-	PhotoId uint64 `json:"photoId"`
 	// Identifier of the user who has commented
 	UserId uint64 `json:"userId"`
+	// Identifier for the photo that has the comments
+	PhotoId uint64 `json:"photoId"`
+	// Identifier for the user who owns the photo
+	PhotoOwner uint64 `json:"photoOwner"`
 	// Content of the comment
 	Content string `json:"content"`
 }
@@ -122,6 +126,13 @@ type AppDatabase interface {
 	GetMyStream(User) ([]PhotoStream, error)
 	GetCommentsCount(uint64) (int, error)
 	GetLikesCount(photoid uint64) (int, error)
+	GetFollowersCount(uint64) (int, error)
+	GetFollowingsCount(uint64) (int, error)
+	GetPhotosCount(uint64) (int, error)
+
+	RemoveComments(uint64, uint64) error
+	RemoveLikes(uint64, uint64) error
+	GetFollowId(f Follow) (Follow, error)
 	// DB functions for bans
 	// Bans an user, returns the ban body and an error if the operation failed.
 	CreateBan(Ban) (Ban, error)
@@ -205,8 +216,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 			);`
 		likesDatabase := `CREATE TABLE likes (
 			Id INTEGER NOT NULL PRIMARY KEY,
-			photoId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
+			photoId INTEGER NOT NULL,
+			photoOwner INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`
@@ -214,6 +226,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
 			photoId INTEGER NOT NULL,
+			photoOwner INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
