@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -77,14 +76,14 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 		photoList.Photos[i].File = filename
 		out, err := os.Create(filename)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			os.Exit(1)
 		}
 
 		err = png.Encode(out, img)
 		err = jpeg.Encode(out, img, nil)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			os.Exit(1)
 		}
 	}

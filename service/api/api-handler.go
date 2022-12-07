@@ -16,7 +16,7 @@ func (rt *_router) Handler() http.Handler {
 	// Method for getting a stream of photos for the user
 	rt.router.GET("/user/:username/stream", rt.wrap(rt.getMyStream))
 	// Method for getting a user profile
-	rt.router.GET("/user/:username/profile", rt.wrap(rt.getUserProfile))
+	rt.router.GET("/users/:username/profile", rt.wrap(rt.getUserProfile))
 
 	// Photo - Functions for photo actions
 	// Method for uploading photos
@@ -51,7 +51,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users/:username/photo/:photoid/like", rt.wrap(rt.getLikes))
 
 	// Comment - Functions for comment actions
-	//s Method for adding a comment to a photo
+	// Method for adding a comment to a photo
 	rt.router.PUT("/users/:username/photo/:photoid/comment/:commentid", rt.wrap(rt.commentPhoto))
 	// Method for deleting a comment from a photo
 	rt.router.DELETE("/users/:username/photo/:photoid/comment/:commentid", rt.wrap(rt.uncommentPhoto))

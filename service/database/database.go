@@ -143,7 +143,7 @@ type AppDatabase interface {
 	// Get the list of bans for a user, returns a list of bans and an error if the operation failed.
 	GetBans(User) ([]Ban, error)
 
-	//DB functions for follow
+	// DB functions for follow
 	// Follows a user, returns the follow body and an error if the operation failed.
 	SetFollow(Follow) (Follow, error)
 	// Removes a follow from the database, returns an error if the operation failed.
@@ -198,10 +198,13 @@ func New(db *sql.DB) (AppDatabase, error) {
 	if db == nil {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
-	db.Exec("PRAGMA foreign_keys = ON")
+	_, err := db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return nil, err
+	}
 	// Check if table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 		usersDatabase := `CREATE TABLE users (
 			Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
