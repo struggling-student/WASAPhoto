@@ -20,9 +20,9 @@ func (db *appdbimpl) RemoveLikes(user uint64, banned uint64) error {
 	return err
 }
 
-func (db *appdbimpl) GetLikes(p Photo) ([]Like, error) {
+func (db *appdbimpl) GetLikes(photoid uint64) ([]Like, error) {
 	var ret []Like
-	rows, err := db.c.Query(`SELECT id, userId, photoId, photoOwner FROM likes WHERE photoId = ?`, p.Id)
+	rows, err := db.c.Query(`SELECT id, userId, photoId, photoOwner FROM likes WHERE photoId = ?`, photoid)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}

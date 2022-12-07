@@ -1,32 +1,34 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func (db *appdbimpl) SetFollow(f Follow) (Follow, error) {
-	_, err := db.c.Exec(`INSERT INTO followers (Id, followerId, userId ) VALUES (?, ?, ?)`, f.FollowId, f.FollowedId, f.UserId)
+	_, err := db.c.Exec(`INSERT INTO followers (Id, followerId, userId, banStatus ) VALUES (?, ?, ?, ?)`, f.FollowId, f.FollowedId, f.UserId, f.BanStatus)
 	if err != nil {
 		return f, err
 	}
 	return f, nil
 }
 
-func (db *appdbimpl) RemoveFollow(f Follow) error {
-	_, err := db.c.Exec(`DELETE FROM followers WHERE id=?`, f.FollowId)
+func (db *appdbimpl) RemoveFollow(FollowId uint64, UserId uint64, FollowedId uint64) error {
+	res, err := db.c.Exec(`DELETE FROM followers WHERE id=? AND followerId=? AND userId=? `, FollowId, FollowedId, UserId)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrUserDoesNotExist
+	}
 	return err
 }
 
-func (db *appdbimpl) GetFollowById(f Follow) (Follow, error) {
+func (db *appdbimpl) GetFollowingId(user1 uint64, user2 uint64) (Follow, error) {
 	var follow Follow
-	if err := db.c.QueryRow(`SELECT id, followerId, userId FROM followers WHERE id = ?`, f.FollowId).Scan(&follow.FollowId, &follow.FollowedId, &follow.UserId); err != nil {
-		if err == sql.ErrNoRows {
-			return follow, ErrLikeDoesNotExist
-		}
-	}
-	return follow, nil
-}
-func (db *appdbimpl) GetFollowId(f Follow) (Follow, error) {
-	var follow Follow
-	if err := db.c.QueryRow(`SELECT Id, followerId, userId FROM followers WHERE followerId=? AND userId = ?`, f.FollowedId, f.UserId).Scan(&follow.FollowId, &follow.FollowedId, &follow.UserId); err != nil {
+	if err := db.c.QueryRow(`SELECT Id, followerId, userId, banStatus FROM followers WHERE followerId=? AND userId = ?`, user1, user2).Scan(&follow.FollowId, &follow.FollowedId, &follow.UserId, &follow.BanStatus); err != nil {
 		if err == sql.ErrNoRows {
 			return follow, ErrLikeDoesNotExist
 		}
@@ -36,7 +38,7 @@ func (db *appdbimpl) GetFollowId(f Follow) (Follow, error) {
 
 func (db *appdbimpl) GetFollowers(u User) ([]Follow, error) {
 	var ret []Follow
-	rows, err := db.c.Query(`SELECT id, followerId, userId FROM followers WHERE userId = ?`, u.Id)
+	rows, err := db.c.Query(`SELECT Id, followerId, userId, banStatus FROM followers WHERE userId = ?`, u.Id)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}
@@ -44,7 +46,7 @@ func (db *appdbimpl) GetFollowers(u User) ([]Follow, error) {
 
 	for rows.Next() {
 		var f Follow
-		err = rows.Scan(&f.FollowId, &f.FollowedId, &f.UserId)
+		err = rows.Scan(&f.FollowId, &f.FollowedId, &f.UserId, &f.BanStatus)
 		if err != nil {
 			return nil, err
 		}

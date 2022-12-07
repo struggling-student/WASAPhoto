@@ -36,6 +36,7 @@ type PhotoStream struct {
 }
 
 type Profile struct {
+	RequestId uint64 `json:"requestId"`
 	// Identifier is the unique identifier for the user
 	Id uint64 `json:"id"`
 	// Username is the username of the user
@@ -75,7 +76,8 @@ type Follow struct {
 	// Identifier for the user who is banned
 	FollowedId uint64 `json:"followedId"`
 	// Identifier for the user who is banning
-	UserId uint64 `json:"userId"`
+	UserId    uint64 `json:"userId"`
+	BanStatus string `json:"banStatus"`
 }
 
 // FollowFromDatabase converts a database.Follow to an api.Follow
@@ -83,6 +85,7 @@ func (f *Follow) FollowFromDatabase(follow database.Follow) {
 	f.FollowId = follow.FollowId
 	f.FollowedId = follow.FollowedId
 	f.UserId = follow.UserId
+	f.BanStatus = follow.BanStatus
 }
 
 // FollowToDatabase converts an api.Follow to a database.Follow
@@ -91,6 +94,7 @@ func (f *Follow) FollowToDatabase() database.Follow {
 		FollowId:   f.FollowId,
 		FollowedId: f.FollowedId,
 		UserId:     f.UserId,
+		BanStatus:  f.BanStatus,
 	}
 }
 

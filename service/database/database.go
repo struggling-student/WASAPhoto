@@ -31,26 +31,33 @@ type PhotoStream struct {
 	LikeCount    int    `json:"likeCount"`
 	CommentCount int    `json:"commentCount"`
 }
+
 type Followers struct {
 	// Identifier for the user that has the followers
 	Id uint64 `json:"identifier"`
 	// List of followers
 	Followers []Follow `json:"Followers"`
 }
+
 type Follow struct {
 	// BanIdentifier is the identifier for the ban action
 	FollowId uint64 `json:"followId"`
 	// Identifier for the user who is banned
 	FollowedId uint64 `json:"followedId"`
 	// Identifier for the user who is banning
-	UserId uint64 `json:"userId"`
+	UserId    uint64 `json:"userId"`
+	BanStatus string `json:"banStatus"`
 }
+
 type Bans struct {
 	// Identifier for the user that has the bans
 	Identifier uint64 `json:"identifier"`
+
+	Username string `json:"username"`
 	// List of bans
 	Bans []Ban `json:"bans"`
 }
+
 type Ban struct {
 	// BanIdentifier is the identifier for the ban action
 	BanId uint64 `json:"banId"`
@@ -59,6 +66,7 @@ type Ban struct {
 	// Identifier for the user who is banning
 	UserId uint64 `json:"userId"`
 }
+
 type Photos struct {
 	// Identifier of the user who has the photos
 	Identifier uint64 `json:"identifier"`
@@ -72,13 +80,17 @@ type Photo struct {
 	File   string `json:"file"`
 	Date   string `json:"date"`
 }
+
 type Likes struct {
+	RequestIdentifier uint64 `json:"requestIdentifier"`
+	// Identifier for the photo that has the likes
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// Identifier for the user who liked the photo
-	UserIdentifier uint64 `json:"identifier"`
+	// Identifier for the owner of the photo
+	PhotoOwner uint64 `json:"identifier"`
 	// List of likes under a photo
 	Likes []Like `json:"likes"`
 }
+
 type Like struct {
 	// Identifier for the like that has been added
 	LikeId uint64 `json:"likeId"`
@@ -91,13 +103,15 @@ type Like struct {
 }
 
 type Comments struct {
-	// Identifier of the user who has commented
-	Id uint64 `json:"id"`
-	// Identifier for the photo that has the comments
+	RequestIdentifier uint64 `json:"requestIdentifier"`
+	// Identifier for the photo that has the likes
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// List of comments under the photo
+	// Identifier for the owner of the photo
+	PhotoOwner uint64 `json:"identifier"`
+	// List of likes under a photo
 	Comments []Comment `json:"comments"`
 }
+
 type Comment struct {
 	// Identifier of the user who has commented
 	Id uint64 `json:"id"`
@@ -117,9 +131,9 @@ type AppDatabase interface {
 	// CreateUser creates a new user. Returns the user identifier and an error if the operation failed.
 	CreateUser(User) (User, error)
 	//
-	GetUserById(User) (User, error)
+	GetUserId(username string) (User, error)
 	//
-	SetUsername(User) (User, error)
+	SetUsername(User, string) (User, error)
 	//
 	GetProfile(User) (User, error)
 	// Get teh stream of photos for a user, returns a list of photos and an error if the operation failed.
@@ -129,10 +143,11 @@ type AppDatabase interface {
 	GetFollowersCount(uint64) (int, error)
 	GetFollowingsCount(uint64) (int, error)
 	GetPhotosCount(uint64) (int, error)
-
+	UpdateBanStatus(string, uint64, uint64) error
 	RemoveComments(uint64, uint64) error
 	RemoveLikes(uint64, uint64) error
-	GetFollowId(f Follow) (Follow, error)
+	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
+	CheckUser(User) (User, error)
 	// DB functions for bans
 	// Bans an user, returns the ban body and an error if the operation failed.
 	CreateBan(Ban) (Ban, error)
@@ -147,9 +162,9 @@ type AppDatabase interface {
 	// Follows a user, returns the follow body and an error if the operation failed.
 	SetFollow(Follow) (Follow, error)
 	// Removes a follow from the database, returns an error if the operation failed.
-	RemoveFollow(Follow) error
+	RemoveFollow(uint64, uint64, uint64) error
 	// GetFollowById returns a follow by its id, returns an error if the operation failed.
-	GetFollowById(Follow) (Follow, error)
+	//GetFollowId(userid uint64) (Follow, error)
 	// GetFollowers returns a list of followers for a user, returns an error if the operation failed.s
 	GetFollowers(User) ([]Follow, error)
 
@@ -157,9 +172,7 @@ type AppDatabase interface {
 	// Insert a photo into the database. Returns the photo with the id, UserId, File and Date filled.
 	SetPhoto(Photo) (Photo, error)
 	// Remove a photo from the database. Returns an error if the photo cannot be deleted.
-	RemovePhoto(Photo) error
-	// Checks if a photo exists in the database.
-	GetPhotoById(Photo) (Photo, error)
+	RemovePhoto(uint64) error
 	// Get the photos of a user. Returns an error if the user does not exist.
 	GetPhotos(User) ([]Photo, error)
 
@@ -171,7 +184,7 @@ type AppDatabase interface {
 	// Remove a like from the database. Returns an error if the like cannot be deleted.
 	RemoveLike(Like) error
 	// Get all likes for a photo. Returns a list of likes.
-	GetLikes(Photo) ([]Like, error)
+	GetLikes(photoid uint64) ([]Like, error)
 
 	// DB functions for comments
 	// Insert a comment into the database. Returns the comment with the id, PhotoId, UserId, Content filled.
@@ -181,7 +194,7 @@ type AppDatabase interface {
 	// Remove a comment from the database. Returns an error if the comment cannot be deleted.
 	RemoveComment(Comment) error
 	// GetComments returns all comments for a photo. Returns an error if the operation failed.
-	GetComments(Photo) ([]Comment, error)
+	GetComments(photoid uint64) ([]Comment, error)
 
 	// Other DB functions
 	// Ping the database to check if it is alive. returns an error if the database is not alive.
@@ -244,6 +257,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			Id INTEGER NOT NULL PRIMARY KEY,
 			followerId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
+			banStatus TEXT NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
 		_, err = db.Exec(usersDatabase)

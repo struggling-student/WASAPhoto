@@ -12,19 +12,14 @@ import (
 
 func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var ban Ban
-	var follow Follow
 	var user User
-	var dbuser database.User
-	var dbban database.Ban
-	var dbfollow database.Follow
-	var token uint64
 
 	// token of the user that wants to ban the other user
-	token = getToken(r.Header.Get("Authorization"))
+	token := getToken(r.Header.Get("Authorization"))
 	// username of the user that has to be banned
-	user.Username = ps.ByName("username")
+	username := ps.ByName("username")
 	// check if the user is an existing one
-	dbuser, err := rt.db.GetUserById(user.ToDatabase())
+	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,7 +29,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	// ban id for the ban
 	id, err := strconv.ParseUint(ps.ByName("banid"), 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// create the ban structure
@@ -42,32 +37,26 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	ban.BannedId = user.Id
 	ban.UserId = token
 	// add the ban to the database
-	dbban, err = rt.db.CreateBan(ban.BanToDatabase())
+	dbban, err := rt.db.CreateBan(ban.BanToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	ban.BanFromDatabase(dbban)
-	// remove the user from the followers database
-	follow.FollowedId = user.Id
-	follow.UserId = token
-	dbfollow, err = rt.db.GetFollowId(follow.FollowToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	follow.FollowFromDatabase(dbfollow)
-	err = rt.db.RemoveFollow(follow.FollowToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+
 	// remove all comments from the banned user on the user's posts
 	err = rt.db.RemoveComments(token, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// remove all likes from the banned user on the user's posts
 	err = rt.db.RemoveLikes(token, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// return the user banned to the user
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(ban)
@@ -83,13 +72,13 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	token = getToken(r.Header.Get("Authorization"))
 	id, err := strconv.ParseUint(ps.ByName("banid"), 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	username := ps.ByName("username")
 	user.Username = username
 	// check if the user is an existing one
-	dbuser, err = rt.db.GetUserById(user.ToDatabase())
+	dbuser, err = rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -116,30 +105,28 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 
 func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
-	var bans []database.Ban
 	var banList database.Bans
-	var dbuser database.User
-	var token uint64
 
 	// create user structure for the user that wants to get the bans
-	token = getToken(r.Header.Get("Authorization"))
+	token := getToken(r.Header.Get("Authorization"))
 	user.Id = token
 	user.Username = ps.ByName("username")
 	// check if the user is an existing one
-	dbuser, err := rt.db.GetUserById(user.ToDatabase())
+	dbuser, err := rt.db.CheckUser(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	user.FromDatabase(dbuser)
 	// get the bans from the database
-	bans, err = rt.db.GetBans(user.ToDatabase())
+	bans, err := rt.db.GetBans(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// return the bans to the user
-	banList.Identifier = token
+	banList.Identifier = user.Id
+	banList.Username = user.Username
 	banList.Bans = bans
 
 	w.Header().Set("Content-Type", "application/json")

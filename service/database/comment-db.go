@@ -20,11 +20,11 @@ func (db *appdbimpl) RemoveComments(user uint64, banned uint64) error {
 	return err
 }
 
-func (db *appdbimpl) GetComments(p Photo) ([]Comment, error) {
+func (db *appdbimpl) GetComments(photoid uint64) ([]Comment, error) {
 	var ret []Comment
-	rows, err := db.c.Query(`SELECT Id, userId, photoId, photoOwner, content FROM comments WHERE photoId = ?`, p.Id)
+	rows, err := db.c.Query(`SELECT Id, userId, photoId, photoOwner, content FROM comments WHERE photoId = ?`, photoid)
 	if err != nil {
-		return ret, ErrUserDoesNotExist
+		return ret, ErrPhotoDoesNotExist
 	}
 	defer func() { _ = rows.Close() }()
 

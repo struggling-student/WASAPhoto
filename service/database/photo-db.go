@@ -10,9 +10,18 @@ func (db *appdbimpl) SetPhoto(p Photo) (Photo, error) {
 	return p, nil
 }
 
-func (db *appdbimpl) RemovePhoto(p Photo) error {
-	_, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, p.Id)
-	return err
+func (db *appdbimpl) RemovePhoto(id uint64) error {
+	res, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrPhotoDoesNotExist
+	}
+	return nil
 }
 
 func (db *appdbimpl) GetPhotos(u User) ([]Photo, error) {
@@ -29,24 +38,12 @@ func (db *appdbimpl) GetPhotos(u User) ([]Photo, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		ret = append(ret, b)
 	}
 	if rows.Err() != nil {
 		return nil, err
 	}
-
 	return ret, nil
-}
-
-func (db *appdbimpl) GetPhotoById(p Photo) (Photo, error) {
-	var photo Photo
-	if err := db.c.QueryRow(`SELECT id, userId, photo, date FROM photos WHERE id = ?`, p.Id).Scan(&photo.Id, &photo.UserId, &photo.File, &photo.Date); err != nil {
-		if err == sql.ErrNoRows {
-			return photo, ErrPhotoDoesNotExist
-		}
-	}
-	return photo, nil
 }
 
 func (db *appdbimpl) GetPhotosCount(id uint64) (int, error) {

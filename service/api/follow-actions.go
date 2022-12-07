@@ -10,22 +10,18 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// TODO DESCRIPTION
 func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// all variables
 	var follow Follow
 	var user User
-	var dbuser database.User
-	var dbfollow database.Follow
-	var token uint64
 
 	// get the bearer token from the header
-	token = getToken(r.Header.Get("Authorization"))
+	token := getToken(r.Header.Get("Authorization"))
 	// get the username from the path
 	username := ps.ByName("username")
-	// set the username in the user struct
-	user.Username = username
 	// check if the user is an existing one
-	dbuser, err := rt.db.GetUserById(user.ToDatabase())
+	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,7 +30,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	// get the followid from the path
 	id, err := strconv.ParseUint(ps.ByName("followid"), 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// set the followid from the path in the follow struct
@@ -44,50 +40,44 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	// set the userId from the token in the follow struct (the user that follows)
 	follow.UserId = token
 	// Create the follow in the database
-	dbfollow, err = rt.db.SetFollow(follow.FollowToDatabase())
+	follow.BanStatus = "False"
+	dbfollow, err := rt.db.SetFollow(follow.FollowToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	follow.FollowFromDatabase(dbfollow)
+
 	// set the header and return the follow body
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(follow)
 }
 
+// TODO DESCRIPTION
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var follow Follow
 	var user User
-	var dbuser database.User
-	var dbfollow database.Follow
-	var token uint64
 
-	token = getToken(r.Header.Get("Authorization"))
+	token := getToken(r.Header.Get("Authorization"))
 	id, err := strconv.ParseUint(ps.ByName("followid"), 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	username := ps.ByName("username")
-	user.Username = username
 	// check if the user is an existing one
-	dbuser, err = rt.db.GetUserById(user.ToDatabase())
+	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	user.FromDatabase(dbuser)
+
 	follow.FollowId = id
 	follow.FollowedId = user.Id
 	follow.UserId = token
-	dbfollow, err = rt.db.GetFollowById(follow.FollowToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	follow.FollowFromDatabase(dbfollow)
-	err = rt.db.RemoveFollow(follow.FollowToDatabase())
+	err = rt.db.RemoveFollow(follow.FollowId, follow.UserId, follow.FollowedId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -97,26 +87,24 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	_ = json.NewEncoder(w).Encode(follow)
 }
 
+// TODO DESCRIPTION
 func (rt *_router) getFollowers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
-	var follows []database.Follow
 	var followList database.Followers
-	var dbuser database.User
-	var token uint64
 
 	// create user structure for the user that wants to get the bans
-	token = getToken(r.Header.Get("Authorization"))
+	token := getToken(r.Header.Get("Authorization"))
 	user.Id = token
 	user.Username = ps.ByName("username")
 	// check if the user is an existing one
-	dbuser, err := rt.db.GetUserById(user.ToDatabase())
+	dbuser, err := rt.db.CheckUser(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	user.FromDatabase(dbuser)
 	// get the bans from the database
-	follows, err = rt.db.GetFollowers(user.ToDatabase())
+	follows, err := rt.db.GetFollowers(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
