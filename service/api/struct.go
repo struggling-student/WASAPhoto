@@ -95,14 +95,6 @@ func (f *Follow) FollowToDatabase() database.Follow {
 }
 
 // Struct for bans
-//
-// This structure is used only for the api and not for the database
-type Bans struct {
-	// Identifier for the user that has the bans
-	Identifier int `json:"identifier"`
-	// List of bans
-	Bans []Ban `json:"bans"`
-}
 type Ban struct {
 	// BanIdentifier is the identifier for the ban action
 	BanId uint64 `json:"banId"`
@@ -130,12 +122,6 @@ func (b *Ban) BanToDatabase() database.Ban {
 
 // Struct for photos
 // This structure is used only for the api and not for the database
-type Photos struct {
-	// Identifier of the user who has the photos
-	Identifier int `json:"identifier"`
-	// List of photos
-	Photos []Photo `json:"photos"`
-}
 type Photo struct {
 	Id     uint64 `json:"id"`
 	UserId uint64 `json:"userId"`
