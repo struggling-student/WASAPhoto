@@ -1,6 +1,8 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func (db *appdbimpl) SetLike(l Like) (Like, error) {
 	_, err := db.c.Exec(`INSERT INTO likes (Id, userId, photoId, photoOwner) VALUES (?, ?, ?, ?)`, l.LikeId, l.UserIdentifier, l.PhotoIdentifier, l.PhotoOwner)
@@ -11,18 +13,36 @@ func (db *appdbimpl) SetLike(l Like) (Like, error) {
 }
 
 func (db *appdbimpl) RemoveLike(l Like) error {
-	_, err := db.c.Exec(`DELETE FROM likes WHERE id=?`, l.LikeId)
-	return err
+	res, err := db.c.Exec(`DELETE FROM likes WHERE id=? AND userId=? AND photoId = ? AND photoOwner = ?`, l.LikeId, l.UserIdentifier, l.PhotoIdentifier, l.PhotoOwner)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrLikeDoesNotExist
+	}
+	return nil
 }
 
 func (db *appdbimpl) RemoveLikes(user uint64, banned uint64) error {
-	_, err := db.c.Exec(`DELETE FROM likes WHERE userId=? AND photoOwner=?`, banned, user)
-	return err
+	res, err := db.c.Exec(`DELETE FROM likes WHERE userId=? AND photoOwner=?`, banned, user)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrLikeDoesNotExist
+	}
+	return nil
 }
 
-func (db *appdbimpl) GetLikes(photoid uint64) ([]Like, error) {
+func (db *appdbimpl) GetLikes(photoid uint64, token uint64) ([]Like, error) {
 	var ret []Like
-	rows, err := db.c.Query(`SELECT id, userId, photoId, photoOwner FROM likes WHERE photoId = ?`, photoid)
+	rows, err := db.c.Query(`SELECT id, userId, photoId, photoOwner FROM likes WHERE photoId = ? AND photoOwner = ?`, photoid, token)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}

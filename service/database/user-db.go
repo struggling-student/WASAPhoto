@@ -8,7 +8,13 @@ import (
 func (db *appdbimpl) CreateUser(u User) (User, error) {
 	res, err := db.c.Exec("INSERT INTO users(username) VALUES (?)", u.Username)
 	if err != nil {
-		return u, err
+		var user User
+		if err := db.c.QueryRow(`SELECT id, username FROM users WHERE username = ?`, u.Username).Scan(&user.Id, &user.Username); err != nil {
+			if err == sql.ErrNoRows {
+				return user, ErrUserDoesNotExist
+			}
+		}
+		return user, nil
 	}
 	lastInsertID, err := res.LastInsertId()
 	if err != nil {
@@ -35,6 +41,16 @@ func (db *appdbimpl) SetUsername(u User, username string) (User, error) {
 func (db *appdbimpl) GetUserId(username string) (User, error) {
 	var user User
 	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE username = ?`, username).Scan(&user.Id, &user.Username); err != nil {
+		if err == sql.ErrNoRows {
+			return user, ErrUserDoesNotExist
+		}
+	}
+	return user, nil
+}
+
+func (db *appdbimpl) CheckUserById(u User) (User, error) {
+	var user User
+	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE id = ?`, u.Id).Scan(&user.Id, &user.Username); err != nil {
 		if err == sql.ErrNoRows {
 			return user, ErrUserDoesNotExist
 		}

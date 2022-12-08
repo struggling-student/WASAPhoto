@@ -107,16 +107,26 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// !TESTARE POSSIIBLI ERRORI
 func (rt *_router) getUserPhotos(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
+	var requestUser User
 	var photoList database.Photos
 
-	// get the token from the header
+	// create user structure for the user that wants to get the bans
 	token := getToken(r.Header.Get("Authorization"))
+	// set the token to the request user
+	requestUser.Id = token
+	// check if the request user does exist
+	dbrequestuser, err := rt.db.CheckUserById(requestUser.ToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	requestUser.FromDatabase(dbrequestuser)
+
 	// get the username from the url
 	username := ps.ByName("username")
-
 	// check if the user is an existing one
 	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
@@ -124,12 +134,14 @@ func (rt *_router) getUserPhotos(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 	user.FromDatabase(dbuser)
+
 	// get the list of photos from the database
 	photos, err := rt.db.GetPhotos(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	photoList.RequestUser = requestUser.Id
 	photoList.Identifier = token
 	photoList.Photos = photos
 	for i := 0; i < len(photoList.Photos); i++ {

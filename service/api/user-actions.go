@@ -16,7 +16,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// TODO DESCRIPTION
+// doLogin is a function that allows a user to login, it takes the username from the body and it returns a user body with the identifier in the response.
+// If the username is not in the database it creates a new user with a new identifier and returns it.
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user structure
 	var user User
@@ -40,7 +41,8 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	_ = json.NewEncoder(w).Encode(user)
 }
 
-// TODO DESCRIPTION
+// setMyUserName is a function that allows a user to set his username, it takes the username from the body and it returns the user with the new username in the response body.
+// It returns an error if the username is already taken.
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user structure
 	var user User
@@ -70,15 +72,28 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	_ = json.NewEncoder(w).Encode(user)
 }
 
-// TODO DESCRIPTION
+// getUserProfile a function that allows a user to get a user profile, it takes the username from the url and it returns the profile in the response body.
+// It returns an error if the user that requested the profile dpes not exist or the username in the path does not exist.
 func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user struct
 	var user User
+	// create request user struct
+	var requestUser User
 	// create profile struct
 	var profile Profile
 
 	// get the token from the header
 	token := getToken(r.Header.Get("Authorization"))
+	// set the token to the request user
+	requestUser.Id = token
+	// check if the request user does exist
+	dbrequestuser, err := rt.db.CheckUserById(requestUser.ToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	requestUser.FromDatabase(dbrequestuser)
 	// set the user id to the token
 	username := ps.ByName("username")
 	// get the id of the user making the profile request
@@ -124,21 +139,25 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	_ = json.NewEncoder(w).Encode(profile)
 }
 
+// TODO
 func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user struct
 	var user User
 	//	create database photoList struct
 	var photoList database.Steam
 
+	// get the token from the header
+	token := getToken(r.Header.Get("Authorization"))
 	// get the username from the url
 	username := ps.ByName("username")
+	user.Id = token
+	user.Username = username
 	// get the id of the user that wants the stream
-	dbuser, err := rt.db.GetUserId(username)
+	dbuser, err := rt.db.CheckUser(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// decode the user from database
 	user.FromDatabase(dbuser)
 	// get the stream of the user
 	photos, err := rt.db.GetMyStream(user.ToDatabase())
@@ -146,8 +165,6 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// get the token from the header
-	token := getToken(r.Header.Get("Authorization"))
 	// set the id of the user that wants the stream
 	photoList.Identifier = token
 	// set the photos to the stream

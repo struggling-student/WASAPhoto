@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -10,17 +11,26 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// TODO DESCRIPTION
+// likePhoto is a function that allows a user to like a photo, it takes the username,photo,likeid from the path and returns the like body in the response.
+// It returns an error if the user is not found or if the photoid/likeid does not exists.
+// Authorizations: the user that wants to follow another user must be logged in.
 func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// struct for the like
 	var like Like
 	// struct for the user
 	var user User
 
-	// get the token identifier from the authorization header
-	token := getToken(r.Header.Get("Authorization"))
-	// get the photoid from the url
+	// get the username of the user that owns the photo
+	username := ps.ByName("username")
+	dbuser, err := rt.db.GetUserId(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	user.FromDatabase(dbuser)
 
+	// get the photoid from the url
 	photoid, err := strconv.ParseUint(ps.ByName("photoid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -34,18 +44,10 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	// get the username of the that owns the photo
-	username := ps.ByName("username")
-	dbuser, err := rt.db.GetUserId(username)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// decode the user from the database
-	user.FromDatabase(dbuser)
-
 	// set the like id to the id from the url
 	like.LikeId = likeid
+	// get the token identifier from the authorization header
+	token := getToken(r.Header.Get("Authorization"))
 	// set the user id to the id of the user that created the like
 	like.UserIdentifier = token
 	// set the photo id to the id from the url
@@ -68,69 +70,90 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	_ = json.NewEncoder(w).Encode(like)
 }
 
-// TODO DESCRIPTION
+// unlikePhoto is a function that allows a user to remove a like from a picture, it takes the username,photoid,likeid from the path and returns a response if the like is removed from the database.
+// It returns an error if the user is not found or if the  photoid/likeid does not exists.
+// Authorizations: the user that wants to remove the follow must be logged in.
 func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-
+	// struct for the user
 	var user User
+	// struct for the like
 	var like Like
 
-	// get the token from the header
-	token := getToken(r.Header.Get("Authorization"))
+	// get the username from the url
+	username := ps.ByName("username")
+	// check if the user is an existing one
+	dbuser, err := rt.db.GetUserId(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	user.FromDatabase(dbuser)
+
 	// get the photo id from the url
 	photoid, err := strconv.ParseUint(ps.ByName("photoid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	// get the like id from the url
 	likeid, err := strconv.ParseUint(ps.ByName("likeid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// get the username from the url
-	username := ps.ByName("username")
-
-	// check if the user is an existing one
-	dbuser, err := rt.db.GetUserId(username)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	user.FromDatabase(dbuser)
-
+	// set the like id to the id from the url
 	like.LikeId = likeid
+	// get the token from the header
+	token := getToken(r.Header.Get("Authorization"))
+	// set the user id to the id of the user that created the like
 	like.UserIdentifier = token
+	// set the photo id to the id from the url
 	like.PhotoIdentifier = photoid
+	// set the user id to the id of the user that owns the photo
 	like.PhotoOwner = user.Id
-	// check if the like is an existing one
-	dblike, err := rt.db.GetLikeById(like.LikeToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	like.LikeFromDatabase(dblike)
-	// delete the like
-	err = rt.db.RemoveLike(like.LikeToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	like.LikeFromDatabase(dblike)
 
-	// return the like removed
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(like)
+	// remove the like from the database
+	err = rt.db.RemoveLike(like.LikeToDatabase())
+	if errors.Is(err, database.ErrLikeDoesNotExist) {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else if err != nil {
+		ctx.Logger.WithError(err).WithField("id", likeid).Error("can't delete the like")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// set the header
+	w.WriteHeader(http.StatusNoContent)
 }
 
-// TODO DESCRIPTION
+// getLikes is a function that allows a user to get all likes from a picture, it takes the username,photoid from the path and returns a likelist body
+// It returns an error if the user is not found or if the  photoid does not exists.
+// Authorizations: the user that wants to remove the follow must be logged in.
 func (rt *_router) getLikes(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// struct for the user
 	var user User
+	// struct for the photo
+	var photo Photo
+	// struct for the request user
+	var requestUser User
+	// struct for the likeList
 	var likeList database.Likes
 
 	// create user structure for the user that wants to get the bans
 	token := getToken(r.Header.Get("Authorization"))
+	// set the token to the request user
+	requestUser.Id = token
+	// check if the request user does exist
+	dbrequestuser, err := rt.db.CheckUserById(requestUser.ToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	requestUser.FromDatabase(dbrequestuser)
+
+	// get the username from the url
 	username := ps.ByName("username")
 	// check if the user is an existing one
 	dbuser, err := rt.db.GetUserId(username)
@@ -138,24 +161,43 @@ func (rt *_router) getLikes(w http.ResponseWriter, r *http.Request, ps httproute
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// decode the user from the database
 	user.FromDatabase(dbuser)
 
+	// get the photo id from the url
 	photoid, err := strconv.ParseUint(ps.ByName("photoid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	likes, err := rt.db.GetLikes(photoid)
+	// check if the photo is an existing one
+	photo.Id = photoid
+	dbphoto, err := rt.db.CheckPhoto(photo.PhotoToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	likeList.RequestIdentifier = token
-	likeList.PhotoIdentifier = photoid
+	// decode the photo from the database
+	photo.PhotoFromDatabase(dbphoto)
+
+	// get the likes from the db
+	likes, err := rt.db.GetLikes(photo.Id, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// set the request identifier to the id of the user that made the request
+	likeList.RequestIdentifier = requestUser.Id
+	// set the photo identifier to the id of the photo
+	likeList.PhotoIdentifier = photo.Id
+	// set the photo owner to the id of the user that owns the photo
 	likeList.PhotoOwner = user.Id
+	// set the likes to the likes from the database
 	likeList.Likes = likes
-	// return the likes
+
+	// set the header and return the likeList
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(likeList)
 }

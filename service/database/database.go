@@ -8,6 +8,8 @@ import (
 
 var ErrUserDoesNotExist = errors.New("User does not exist")
 var ErrPhotoDoesNotExist = errors.New("Photo does not exist")
+var ErrBanDoesNotExist = errors.New("Ban does not exist")
+var ErrFollowDoesNotExist = errors.New("Follow does not exist")
 var ErrCommentDoesNotExist = errors.New("Comment does not exist")
 var ErrLikeDoesNotExist = errors.New("Like does not exist")
 
@@ -68,6 +70,7 @@ type Ban struct {
 }
 
 type Photos struct {
+	RequestUser uint64 `json:"requestUser"`
 	// Identifier of the user who has the photos
 	Identifier uint64 `json:"identifier"`
 	// List of photos
@@ -158,6 +161,7 @@ type AppDatabase interface {
 	// Get the list of bans for a user, returns a list of bans and an error if the operation failed.
 	GetBans(User) ([]Ban, error)
 
+	CheckUserById(u User) (User, error)
 	// DB functions for follow
 	// Follows a user, returns the follow body and an error if the operation failed.
 	SetFollow(Follow) (Follow, error)
@@ -184,7 +188,7 @@ type AppDatabase interface {
 	// Remove a like from the database. Returns an error if the like cannot be deleted.
 	RemoveLike(Like) error
 	// Get all likes for a photo. Returns a list of likes.
-	GetLikes(photoid uint64) ([]Like, error)
+	GetLikes(uint64, uint64) ([]Like, error)
 
 	// DB functions for comments
 	// Insert a comment into the database. Returns the comment with the id, PhotoId, UserId, Content filled.
@@ -195,7 +199,7 @@ type AppDatabase interface {
 	RemoveComment(Comment) error
 	// GetComments returns all comments for a photo. Returns an error if the operation failed.
 	GetComments(photoid uint64) ([]Comment, error)
-
+	CheckPhoto(Photo) (Photo, error)
 	// Other DB functions
 	// Ping the database to check if it is alive. returns an error if the database is not alive.
 	Ping() error

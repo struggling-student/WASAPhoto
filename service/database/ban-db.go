@@ -11,8 +11,17 @@ func (db *appdbimpl) CreateBan(b Ban) (Ban, error) {
 }
 
 func (db *appdbimpl) RemoveBan(b Ban) error {
-	_, err := db.c.Exec(`DELETE FROM bans WHERE banId=?`, b.BanId)
-	return err
+	res, err := db.c.Exec(`DELETE FROM bans WHERE banId=? AND userId=? AND bannedId = ?`, b.BanId, b.UserId, b.BannedId)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrBanDoesNotExist
+	}
+	return nil
 }
 
 func (db *appdbimpl) GetBans(u User) ([]Ban, error) {
@@ -47,4 +56,18 @@ func (db *appdbimpl) GetBanById(b Ban) (Ban, error) {
 		}
 	}
 	return ban, nil
+}
+
+func (db *appdbimpl) UpdateBanStatus(status int, followerId uint64, userId uint64) error {
+	res, err := db.c.Exec(`UPDATE followers SET banStatus=? WHERE followerId=? AND userId=?`, status, followerId, userId)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrBanDoesNotExist
+	}
+	return nil
 }

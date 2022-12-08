@@ -21,7 +21,7 @@ func (db *appdbimpl) RemoveFollow(FollowId uint64, UserId uint64, FollowedId uin
 	if err != nil {
 		return err
 	} else if affected == 0 {
-		return ErrUserDoesNotExist
+		return ErrFollowDoesNotExist
 	}
 	return err
 }
@@ -76,18 +76,4 @@ func (db *appdbimpl) GetFollowingsCount(id uint64) (int, error) {
 		}
 	}
 	return count, nil
-}
-
-func (db *appdbimpl) UpdateBanStatus(status int, followerId uint64, userId uint64) error {
-	res, err := db.c.Exec(`UPDATE followers SET banStatus=? WHERE followerId=? AND userId=?`, status, followerId, userId)
-	if err != nil {
-		return err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	} else if affected == 0 {
-		return ErrUserDoesNotExist
-	}
-	return nil
 }

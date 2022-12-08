@@ -11,13 +11,31 @@ func (db *appdbimpl) SetComment(c Comment) (Comment, error) {
 }
 
 func (db *appdbimpl) RemoveComment(c Comment) error {
-	_, err := db.c.Exec(`DELETE FROM comments WHERE id=?`, c.Id)
-	return err
+	res, err := db.c.Exec(`DELETE FROM comments WHERE id=?`, c.Id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrCommentDoesNotExist
+	}
+	return nil
 }
 
 func (db *appdbimpl) RemoveComments(user uint64, banned uint64) error {
-	_, err := db.c.Exec(`DELETE FROM comments WHERE userId=? AND photoOwner=?`, banned, user)
-	return err
+	res, err := db.c.Exec(`DELETE FROM comments WHERE userId=? AND photoOwner=?`, banned, user)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
+		return ErrCommentDoesNotExist
+	}
+	return nil
 }
 
 func (db *appdbimpl) GetComments(photoid uint64) ([]Comment, error) {

@@ -55,3 +55,13 @@ func (db *appdbimpl) GetPhotosCount(id uint64) (int, error) {
 	}
 	return count, nil
 }
+
+func (db *appdbimpl) CheckPhoto(p Photo) (Photo, error) {
+	var photo Photo
+	if err := db.c.QueryRow(`SELECT Id, userId, photo, date FROM photos WHERE Id=?`, p.Id).Scan(&photo.Id, &photo.UserId, &photo.File, &photo.Date); err != nil {
+		if err == sql.ErrNoRows {
+			return photo, ErrUserDoesNotExist
+		}
+	}
+	return photo, nil
+}
