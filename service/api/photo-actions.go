@@ -24,7 +24,6 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	var user User
 	var photo Photo
-	var dbphoto database.Photo
 
 	token := getToken(r.Header.Get("Authorization"))
 	user.Id = token
@@ -53,11 +52,14 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	// Encode as base64.
 	encoded := base64.StdEncoding.EncodeToString(content)
 	photo.File = encoded
+
 	currentTime := time.Now()
 	photo.Date = currentTime.Format("2006-01-02 15:04:05")
+
 	photo.UserId = user.Id
 	photo.Id = id
-	dbphoto, err = rt.db.SetPhoto(photo.PhotoToDatabase())
+
+	dbphoto, err := rt.db.SetPhoto(photo.PhotoToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

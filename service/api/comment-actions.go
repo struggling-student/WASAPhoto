@@ -12,8 +12,6 @@ import (
 
 func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
-	var dbuser database.User
-	var dbcomment database.Comment
 	var comment Comment
 
 	// take the comment from the body
@@ -34,7 +32,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	username := ps.ByName("username")
 
 	// check if the user is an existing one
-	dbuser, err = rt.db.GetUserId(username)
+	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,7 +46,7 @@ func (rt *_router) commentPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	comment.PhotoOwner = user.Id
 	comment.PhotoId = photoid
 	// set the comment in the database
-	dbcomment, err = rt.db.SetComment(comment.CommentToDatabase())
+	dbcomment, err := rt.db.SetComment(comment.CommentToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,17 +84,12 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 	user.FromDatabase(dbuser)
+
 	comment.Id = commentid
 	comment.PhotoId = photoid
 	comment.UserId = token
 	comment.PhotoOwner = user.Id
-	dbcomment, err := rt.db.GetCommentById(comment.CommentToDatabase())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	comment.CommentFromDatabase(dbcomment)
-	// delete the comment
+
 	err = rt.db.RemoveComment(comment.CommentToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -110,8 +103,6 @@ func (rt *_router) uncommentPhoto(w http.ResponseWriter, r *http.Request, ps htt
 
 func (rt *_router) getComments(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
-	var dbuser database.User
-	var comments []database.Comment
 	var commentList database.Comments
 
 	token := getToken(r.Header.Get("Authorization"))
@@ -122,14 +113,14 @@ func (rt *_router) getComments(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	username := ps.ByName("username")
 	// check if the user is an existing one
-	dbuser, err = rt.db.GetUserId(username)
+	dbuser, err := rt.db.GetUserId(username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	user.FromDatabase(dbuser)
 
-	comments, err = rt.db.GetComments(photoid)
+	comments, err := rt.db.GetComments(photoid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

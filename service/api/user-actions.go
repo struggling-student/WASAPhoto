@@ -74,8 +74,6 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user struct
 	var user User
-	// create database user struct
-	var dbuser database.User
 	// create profile struct
 	var profile Profile
 
@@ -129,10 +127,6 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// create user struct
 	var user User
-	// create database user struct
-	var dbuser database.User
-	//	create database photosteam struct
-	var photos []database.PhotoStream
 	//	create database photoList struct
 	var photoList database.Steam
 
@@ -147,7 +141,7 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 	// decode the user from database
 	user.FromDatabase(dbuser)
 	// get the stream of the user
-	photos, err = rt.db.GetMyStream(user.ToDatabase())
+	photos, err := rt.db.GetMyStream(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
