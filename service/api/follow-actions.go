@@ -40,7 +40,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	// set the userId from the token in the follow struct (the user that follows)
 	follow.UserId = token
 	// Create the follow in the database
-	follow.BanStatus = "False"
+	follow.BanStatus = 0
 	dbfollow, err := rt.db.SetFollow(follow.FollowToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

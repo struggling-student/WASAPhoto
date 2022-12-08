@@ -46,7 +46,7 @@ type Follow struct {
 	FollowedId uint64 `json:"followedId"`
 	// Identifier for the user who is banning
 	UserId    uint64 `json:"userId"`
-	BanStatus string `json:"banStatus"`
+	BanStatus int    `json:"banStatus"`
 }
 
 type Bans struct {
@@ -143,7 +143,7 @@ type AppDatabase interface {
 	GetFollowersCount(uint64) (int, error)
 	GetFollowingsCount(uint64) (int, error)
 	GetPhotosCount(uint64) (int, error)
-	UpdateBanStatus(string, uint64, uint64) error
+	UpdateBanStatus(int, uint64, uint64) error
 	RemoveComments(uint64, uint64) error
 	RemoveLikes(uint64, uint64) error
 	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
@@ -257,7 +257,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			Id INTEGER NOT NULL PRIMARY KEY,
 			followerId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
-			banStatus TEXT NOT NULL,
+			banStatus INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
 		_, err = db.Exec(usersDatabase)

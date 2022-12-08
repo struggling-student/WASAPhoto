@@ -53,7 +53,7 @@ func (db *appdbimpl) CheckUser(u User) (User, error) {
 }
 func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 	var ret []PhotoStream
-	rows, err := db.c.Query(`SELECT Id, userId, photo, date FROM photos WHERE userId IN (SELECT followerId FROM followers WHERE userId=?) ORDER BY date`, u.Id)
+	rows, err := db.c.Query(`SELECT Id, userId, photo, date FROM photos WHERE userId IN (SELECT followerId FROM followers WHERE userId=? AND banStatus = 0) ORDER BY date`, u.Id)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}

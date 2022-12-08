@@ -77,7 +77,7 @@ type Follow struct {
 	FollowedId uint64 `json:"followedId"`
 	// Identifier for the user who is banning
 	UserId    uint64 `json:"userId"`
-	BanStatus string `json:"banStatus"`
+	BanStatus int    `json:"banStatus"`
 }
 
 // FollowFromDatabase converts a database.Follow to an api.Follow

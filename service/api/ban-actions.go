@@ -44,6 +44,11 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	ban.BanFromDatabase(dbban)
 
+	err = rt.db.UpdateBanStatus(1, user.Id, token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// remove all comments from the banned user on the user's posts
 	err = rt.db.RemoveComments(token, user.Id)
 	if err != nil {
@@ -66,7 +71,6 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	var ban Ban
 	var user User
 	var dbuser database.User
-	var dbfollow database.Ban
 	var token uint64
 
 	token = getToken(r.Header.Get("Authorization"))
@@ -87,13 +91,12 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	ban.BanId = id
 	ban.UserId = token
 	ban.BannedId = user.Id
-	dbfollow, err = rt.db.GetBanById(ban.BanToDatabase())
+	err = rt.db.RemoveBan(ban.BanToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ban.BanFromDatabase(dbfollow)
-	err = rt.db.RemoveBan(ban.BanToDatabase())
+	err = rt.db.UpdateBanStatus(0, user.Id, token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
