@@ -4,6 +4,22 @@ import (
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
 )
 
+// Struct for profile
+type Profile struct {
+	// RequestId is the identifier for the request
+	RequestId uint64 `json:"requestId"`
+	// Identifier is the unique identifier for the user
+	Id uint64 `json:"id"`
+	// Username is the username of the user
+	Username string `json:"username"`
+	// FollowersCount is the number of followers of the user
+	FollowersCount int `json:"followersCount"`
+	// FollowingCount is the number of users followed by the user
+	FollowingCount int `json:"followingCount"`
+	// PhotoCount is the number of photos uploaded by the user
+	PhotoCount int `json:"photoCount"`
+}
+
 // Struct for user
 type User struct {
 	// Identifier is the unique identifier for the user
@@ -26,26 +42,23 @@ func (u *User) ToDatabase() database.User {
 	}
 }
 
+// Struct for photo stream
 type PhotoStream struct {
-	Id           uint64 `json:"id"`
-	UserId       uint64 `json:"userId"`
-	File         string `json:"file"`
-	Date         string `json:"date"`
-	LikeCount    int    `json:"likeCount"`
-	CommentCount int    `json:"commentCount"`
-}
-
-type Profile struct {
-	RequestId uint64 `json:"requestId"`
-	// Identifier is the unique identifier for the user
+	// Identifier for the photo
 	Id uint64 `json:"id"`
-	// Username is the username of the user
-	Username       string `json:"username"`
-	FollowersCount int    `json:"followersCount"`
-	FollowingCount int    `json:"followingCount"`
-	PhotoCount     int    `json:"photoCount"`
+	// Identifier for the user who owns the photo
+	UserId uint64 `json:"userId"`
+	// File for the  photo
+	File string `json:"file"`
+	// Date when the photo was uploaded
+	Date string `json:"date"`
+	// Number of likes for the photo
+	LikeCount int `json:"likeCount"`
+	// Number of comments for the photo
+	CommentCount int `json:"commentCount"`
 }
 
+// PhotoStreamFromDatabase converts a database.PhotoStream to an api.PhotoStream
 func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) {
 	s.Id = photoStream.Id
 	s.UserId = photoStream.UserId
@@ -55,6 +68,7 @@ func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) 
 	s.CommentCount = photoStream.CommentCount
 }
 
+// PhotoStreamToDatabase converts an api.PhotoStream to a database.PhotoStream
 func (s *PhotoStream) PhotoStreamToDatabase() database.PhotoStream {
 	return database.PhotoStream{
 		Id:           s.Id,
@@ -67,17 +81,16 @@ func (s *PhotoStream) PhotoStreamToDatabase() database.PhotoStream {
 
 }
 
-// Struct for followers
-// This structure is used only for the api and not for the database
-
+// Struct for follow
 type Follow struct {
 	// BanIdentifier is the identifier for the ban action
 	FollowId uint64 `json:"followId"`
 	// Identifier for the user who is banned
 	FollowedId uint64 `json:"followedId"`
 	// Identifier for the user who is banning
-	UserId    uint64 `json:"userId"`
-	BanStatus int    `json:"banStatus"`
+	UserId uint64 `json:"userId"`
+	// BanStatus is the status of the ban
+	BanStatus int `json:"banStatus"`
 }
 
 // FollowFromDatabase converts a database.Follow to an api.Follow
@@ -98,7 +111,7 @@ func (f *Follow) FollowToDatabase() database.Follow {
 	}
 }
 
-// Struct for bans
+// Struct for ban
 type Ban struct {
 	// BanIdentifier is the identifier for the ban action
 	BanId uint64 `json:"banId"`
@@ -124,13 +137,16 @@ func (b *Ban) BanToDatabase() database.Ban {
 	}
 }
 
-// Struct for photos
-// This structure is used only for the api and not for the database
+// Struct for photo
 type Photo struct {
-	Id     uint64 `json:"id"`
+	// Identifier for the photo
+	Id uint64 `json:"id"`
+	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
-	File   string `json:"file"`
-	Date   string `json:"date"`
+	// File for the  photo
+	File string `json:"file"`
+	// Date when the photo was uploaded
+	Date string `json:"date"`
 }
 
 // PhotoFromDatabase converts a database.Photo to an api.Photo
@@ -151,7 +167,7 @@ func (p *Photo) PhotoToDatabase() database.Photo {
 	}
 }
 
-// Struct for likes
+// Struct for like
 type Like struct {
 	// Identifier for the like that has been added
 	LikeId uint64 `json:"likeId"`
@@ -182,9 +198,7 @@ func (l *Like) LikeToDatabase() database.Like {
 	}
 }
 
-// Struct for comments
-// This structure is used only for the api and not for the database
-
+// Struct for comment
 type Comment struct {
 	// Identifier of the user who has commented
 	Id uint64 `json:"id"`

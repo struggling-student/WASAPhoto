@@ -4,7 +4,6 @@ import (
 	"database/sql"
 )
 
-// TODO decsription
 func (db *appdbimpl) CreateUser(u User) (User, error) {
 	res, err := db.c.Exec("INSERT INTO users(username) VALUES (?)", u.Username)
 	if err != nil {
@@ -24,7 +23,6 @@ func (db *appdbimpl) CreateUser(u User) (User, error) {
 	return u, nil
 }
 
-// TODO description
 func (db *appdbimpl) SetUsername(u User, username string) (User, error) {
 	res, err := db.c.Exec(`UPDATE users SET Username=? WHERE Id=? AND Username=?`, u.Username, u.Id, username)
 	if err != nil {
@@ -38,6 +36,7 @@ func (db *appdbimpl) SetUsername(u User, username string) (User, error) {
 	}
 	return u, nil
 }
+
 func (db *appdbimpl) GetUserId(username string) (User, error) {
 	var user User
 	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE username = ?`, username).Scan(&user.Id, &user.Username); err != nil {
@@ -67,6 +66,7 @@ func (db *appdbimpl) CheckUser(u User) (User, error) {
 	}
 	return user, nil
 }
+
 func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 	var ret []PhotoStream
 	rows, err := db.c.Query(`SELECT Id, userId, photo, date FROM photos WHERE userId IN (SELECT followerId FROM followers WHERE userId=? AND banStatus = 0) ORDER BY date`, u.Id)
@@ -88,9 +88,4 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 	}
 
 	return ret, nil
-}
-
-func (db *appdbimpl) GetProfile(User) (User, error) {
-	// panic("implement me")
-	return User{}, nil
 }

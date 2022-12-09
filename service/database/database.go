@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// List of errors that can be returned by the database.
 var ErrUserDoesNotExist = errors.New("User does not exist")
 var ErrPhotoDoesNotExist = errors.New("Photo does not exist")
 var ErrBanDoesNotExist = errors.New("Ban does not exist")
@@ -13,6 +14,7 @@ var ErrFollowDoesNotExist = errors.New("Follow does not exist")
 var ErrCommentDoesNotExist = errors.New("Comment does not exist")
 var ErrLikeDoesNotExist = errors.New("Like does not exist")
 
+// Struct that represents an user in the database.
 type User struct {
 	// Identifier is the unique identifier for the user
 	Id uint64 `json:"id"`
@@ -20,20 +22,31 @@ type User struct {
 	Username string `json:"username"`
 }
 
+// Struct that represents the photo stream of an user in the database.
 type Steam struct {
-	Identifier uint64        `json:"identifier"`
-	Photos     []PhotoStream `json:"photoStream"`
+	// Identifier of the user stream
+	Identifier uint64 `json:"identifier"`
+	// Stream of photos
+	Photos []PhotoStream `json:"photoStream"`
 }
 
+// Struct that represents a photo for the stream in the database.
 type PhotoStream struct {
-	Id           uint64 `json:"id"`
-	UserId       uint64 `json:"userId"`
-	File         string `json:"file"`
-	Date         string `json:"date"`
-	LikeCount    int    `json:"likeCount"`
-	CommentCount int    `json:"commentCount"`
+	// Identifier for the photo
+	Id uint64 `json:"id"`
+	// Identifier for the user who owns the photo
+	UserId uint64 `json:"userId"`
+	// File for the  photo
+	File string `json:"file"`
+	// Date when the photo was uploaded
+	Date string `json:"date"`
+	// Number of likes for the photo
+	LikeCount int `json:"likeCount"`
+	// Number of comments for the photo
+	CommentCount int `json:"commentCount"`
 }
 
+// Struct that represents the followers of an user in the database.
 type Followers struct {
 	// Identifier for the user that has the followers
 	Id uint64 `json:"identifier"`
@@ -41,25 +54,30 @@ type Followers struct {
 	Followers []Follow `json:"Followers"`
 }
 
+// Struct that represents the follow of an user in the database.
 type Follow struct {
-	// BanIdentifier is the identifier for the ban action
+	// Follow is the identifier for the follow action
 	FollowId uint64 `json:"followId"`
-	// Identifier for the user who is banned
+	// Identifier for the user who is followed
 	FollowedId uint64 `json:"followedId"`
-	// Identifier for the user who is banning
-	UserId    uint64 `json:"userId"`
-	BanStatus int    `json:"banStatus"`
+	// Identifier for the user who is following
+	UserId uint64 `json:"userId"`
+	// Ban status for the user who is followed
+	// If ban status is 1, the user is banned so it's not considered in the follow list.
+	BanStatus int `json:"banStatus"`
 }
 
+// Struct that represents the bans of an user in the database.
 type Bans struct {
 	// Identifier for the user that has the bans
 	Identifier uint64 `json:"identifier"`
-
+	// Username for the user that has the bans
 	Username string `json:"username"`
 	// List of bans
 	Bans []Ban `json:"bans"`
 }
 
+// Struct that represents the ban of an user in the database.
 type Ban struct {
 	// BanIdentifier is the identifier for the ban action
 	BanId uint64 `json:"banId"`
@@ -69,7 +87,9 @@ type Ban struct {
 	UserId uint64 `json:"userId"`
 }
 
+// Struct that represents the photos of an user in the database.
 type Photos struct {
+	// Identifier for the user that has requested the photos
 	RequestUser uint64 `json:"requestUser"`
 	// Identifier of the user who has the photos
 	Identifier uint64 `json:"identifier"`
@@ -77,14 +97,21 @@ type Photos struct {
 	Photos []Photo `json:"photos"`
 }
 
+// Struct that represents a photo in the database.
 type Photo struct {
-	Id     uint64 `json:"id"`
+	// Identifier for the photo
+	Id uint64 `json:"id"`
+	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
-	File   string `json:"file"`
-	Date   string `json:"date"`
+	// File for the  photo
+	File string `json:"file"`
+	// Date when the photo was uploaded
+	Date string `json:"date"`
 }
 
+// Struct that represents the likes of a photo in the database.
 type Likes struct {
+	// Identifier for the user that has requested the likes
 	RequestIdentifier uint64 `json:"requestIdentifier"`
 	// Identifier for the photo that has the likes
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
@@ -94,6 +121,7 @@ type Likes struct {
 	Likes []Like `json:"likes"`
 }
 
+// Struct that represents a like in the database.
 type Like struct {
 	// Identifier for the like that has been added
 	LikeId uint64 `json:"likeId"`
@@ -105,7 +133,9 @@ type Like struct {
 	PhotoOwner uint64 `json:"photoOwner"`
 }
 
+// Struct that represents the comments of a photo in the database.
 type Comments struct {
+	// Identifier for the user that has requested the comments
 	RequestIdentifier uint64 `json:"requestIdentifier"`
 	// Identifier for the photo that has the likes
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
@@ -115,6 +145,7 @@ type Comments struct {
 	Comments []Comment `json:"comments"`
 }
 
+// Struct that represents a comment in the database.
 type Comment struct {
 	// Identifier of the user who has commented
 	Id uint64 `json:"id"`
@@ -130,81 +161,58 @@ type Comment struct {
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+
 	// DB functions for users
-	// CreateUser creates a new user. Returns the user identifier and an error if the operation failed.
 	CreateUser(User) (User, error)
-	//
-	GetUserId(username string) (User, error)
-	//
 	SetUsername(User, string) (User, error)
-	//
-	GetProfile(User) (User, error)
-	// Get teh stream of photos for a user, returns a list of photos and an error if the operation failed.
+	GetUserId(string) (User, error)
+	CheckUserById(User) (User, error)
+	CheckUser(User) (User, error)
 	GetMyStream(User) ([]PhotoStream, error)
-	GetCommentsCount(uint64) (int, error)
-	GetLikesCount(photoid uint64) (int, error)
+
+	// DB functions for followers
+	SetFollow(Follow) (Follow, error)
+	RemoveFollow(uint64, uint64, uint64) error
+	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
+	GetFollowers(User) ([]Follow, error)
 	GetFollowersCount(uint64) (int, error)
 	GetFollowingsCount(uint64) (int, error)
-	GetPhotosCount(uint64) (int, error)
-	UpdateBanStatus(int, uint64, uint64) error
-	RemoveComments(uint64, uint64) error
-	RemoveLikes(uint64, uint64) error
-	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
-	CheckUser(User) (User, error)
-	// DB functions for bans
-	// Bans an user, returns the ban body and an error if the operation failed.
-	CreateBan(Ban) (Ban, error)
-	// Removes a ban, returns the ban body and an error if the operation failed.
-	RemoveBan(Ban) error
-	// Check if a ban exists, returns the ban body and an error if the operation failed.
-	GetBanById(Ban) (Ban, error)
-	// Get the list of bans for a user, returns a list of bans and an error if the operation failed.
-	GetBans(User) ([]Ban, error)
 
-	CheckUserById(u User) (User, error)
-	// DB functions for follow
-	// Follows a user, returns the follow body and an error if the operation failed.
-	SetFollow(Follow) (Follow, error)
-	// Removes a follow from the database, returns an error if the operation failed.
-	RemoveFollow(uint64, uint64, uint64) error
-	// GetFollowById returns a follow by its id, returns an error if the operation failed.
-	//GetFollowId(userid uint64) (Follow, error)
-	// GetFollowers returns a list of followers for a user, returns an error if the operation failed.s
-	GetFollowers(User) ([]Follow, error)
+	// DB functions for bans
+	CreateBan(Ban) (Ban, error)
+	RemoveBan(Ban) error
+	GetBans(User) ([]Ban, error)
+	GetBanById(Ban) (Ban, error)
+	UpdateBanStatus(int, uint64, uint64) error
 
 	// DB functions for photos
-	// Insert a photo into the database. Returns the photo with the id, UserId, File and Date filled.
 	SetPhoto(Photo) (Photo, error)
-	// Remove a photo from the database. Returns an error if the photo cannot be deleted.
 	RemovePhoto(uint64) error
-	// Get the photos of a user. Returns an error if the user does not exist.
 	GetPhotos(User) ([]Photo, error)
+	GetPhotosCount(uint64) (int, error)
+	CheckPhoto(Photo) (Photo, error)
 
 	// DB functions for likes
-	// Insert a like into the database. Returns the like with the id, PhotoId, UserId filled.
 	SetLike(Like) (Like, error)
-	// Checks if a like exists in the database.
-	GetLikeById(Like) (Like, error)
-	// Remove a like from the database. Returns an error if the like cannot be deleted.
 	RemoveLike(Like) error
-	// Get all likes for a photo. Returns a list of likes.
+	RemoveLikes(uint64, uint64) error
 	GetLikes(uint64, uint64) ([]Like, error)
+	GetLikeById(Like) (Like, error)
+	GetLikesCount(photoid uint64) (int, error)
 
 	// DB functions for comments
-	// Insert a comment into the database. Returns the comment with the id, PhotoId, UserId, Content filled.
 	SetComment(Comment) (Comment, error)
-	// Checks if a comment exists in the database.
-	GetCommentById(Comment) (Comment, error)
-	// Remove a comment from the database. Returns an error if the comment cannot be deleted.
 	RemoveComment(Comment) error
-	// GetComments returns all comments for a photo. Returns an error if the operation failed.
+	RemoveComments(uint64, uint64) error
 	GetComments(photoid uint64) ([]Comment, error)
-	CheckPhoto(Photo) (Photo, error)
-	// Other DB functions
-	// Ping the database to check if it is alive. returns an error if the database is not alive.
+	GetCommentById(Comment) (Comment, error)
+	GetCommentsCount(uint64) (int, error)
+
+	// Other functions
 	Ping() error
 }
 
+// AppDatabaseImpl is the implementation of the AppDatabase interface
 type appdbimpl struct {
 	c *sql.DB
 }
@@ -212,9 +220,11 @@ type appdbimpl struct {
 // New returns a new instance of AppDatabase based on the SQLite connection `db`.
 // `db` is required - an error will be returned if `db` is `nil`.
 func New(db *sql.DB) (AppDatabase, error) {
+	// Check if db is nil
 	if db == nil {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
+	// Enable foreign keys
 	_, err := db.Exec("PRAGMA foreign_keys = ON")
 	if err != nil {
 		return nil, err
@@ -223,10 +233,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 	var tableName string
 	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
+		// Create the users table
 		usersDatabase := `CREATE TABLE users (
 			Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			Username TEXT UNIQUE
 			);`
+		// Create the users table
 		photosDatabase := `CREATE TABLE photos (
 			Id INTEGER NOT NULL PRIMARY KEY, 
 			userId INTEGER NOT NULL,
@@ -234,6 +246,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			date TEXT,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
+		// Create the followers table
 		likesDatabase := `CREATE TABLE likes (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
@@ -242,6 +255,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`
+		// Create the comments table
 		commentsDatabase := `CREATE TABLE comments (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
@@ -251,12 +265,14 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`
+		// Create the bans table
 		bansDatabase := `CREATE TABLE bans (
 			banId INTEGER NOT NULL PRIMARY KEY,
 			bannedId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
+		// Create the followers table
 		followersDatabase := `CREATE TABLE followers (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			followerId INTEGER NOT NULL,
@@ -264,30 +280,32 @@ func New(db *sql.DB) (AppDatabase, error) {
 			banStatus INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
+		// check error
 		_, err = db.Exec(usersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
+		// check error
 		_, err = db.Exec(photosDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-
+		// check error
 		_, err = db.Exec(likesDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-
+		// check error
 		_, err = db.Exec(commentsDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-
+		// check error
 		_, err = db.Exec(bansDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-
+		// check error
 		_, err = db.Exec(followersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
@@ -299,6 +317,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}, nil
 }
 
+// Ping checks the connection to the database.
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
 }

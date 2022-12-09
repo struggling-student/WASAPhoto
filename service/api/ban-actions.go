@@ -16,7 +16,9 @@ import (
 // It returns an error if the user is not found or if the followid does not exists.
 // Authorizations: the user that wants to follow another user must be logged in.
 func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// struct for the ban
 	var ban Ban
+	// struct for the user
 	var user User
 
 	// token of the user that wants to ban the other user
@@ -31,41 +33,51 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 	// returns the struct of the user that has to be banned
 	user.FromDatabase(dbuser)
+
 	// ban id for the ban
 	id, err := strconv.ParseUint(ps.ByName("banid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// create the ban structure
+
+	// set the ban id
 	ban.BanId = id
+	// set the banned user id
 	ban.BannedId = user.Id
+	// set the user id to the token
 	ban.UserId = token
+
 	// add the ban to the database
 	dbban, err := rt.db.CreateBan(ban.BanToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// decode the ban from the database
 	ban.BanFromDatabase(dbban)
 
+	// update the ban status to 1 (banned)
 	err = rt.db.UpdateBanStatus(1, user.Id, token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	// remove all comments from the banned user on the user's posts
 	err = rt.db.RemoveComments(token, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	// remove all likes from the banned user on the user's posts
 	err = rt.db.RemoveLikes(token, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	// return the user banned to the user
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -76,16 +88,22 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 // It returns an error if the user is not found or if the followid does not exists.
 // Authorizations: the user that wants to remove the follow must be logged in.
 func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// struct for the ban
 	var ban Ban
+	// struct for the user
 	var user User
 
+	// get the token of the user that wants to unban the other user
 	token := getToken(r.Header.Get("Authorization"))
+	// get the ban id from the url
 	id, err := strconv.ParseUint(ps.ByName("banid"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// get the username of the user that has to be unbanned
 	username := ps.ByName("username")
+	// set the username of the user that has to be unbanned
 	user.Username = username
 	// check if the user is an existing one
 	dbuser, err := rt.db.GetUserId(username)
@@ -93,11 +111,17 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// decode the user from the database
 	user.FromDatabase(dbuser)
 
+	// set the ban id
 	ban.BanId = id
+	// set the user id to the token
 	ban.UserId = token
+	// set the banned user id
 	ban.BannedId = user.Id
+
+	// remove the ban from the database
 	err = rt.db.RemoveBan(ban.BanToDatabase())
 	if errors.Is(err, database.ErrBanDoesNotExist) {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -107,8 +131,8 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
 
+	// update the ban status to 0 (not banned)
 	err = rt.db.UpdateBanStatus(0, user.Id, token)
 	if errors.Is(err, database.ErrBanDoesNotExist) {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -118,15 +142,19 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	// set the header
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // getFollowers is a function that allows a user to get its followers, it takes the username from the path and returns the followers in the response.
 // It returns an error if the user is not found or if the username and id are not matching.
 // Authorizations: the user that wants to get the follow must be logged in.
 func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// struct for the user
 	var user User
+	// struct for the ban list
 	var banList database.Bans
 
 	// create user structure for the user that wants to get the bans
@@ -139,18 +167,22 @@ func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// decode the user from the database
 	user.FromDatabase(dbuser)
+
 	// get the bans from the database
 	bans, err := rt.db.GetBans(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+
 	}
 	// return the bans to the user
 	banList.Identifier = user.Id
 	banList.Username = user.Username
 	banList.Bans = bans
 
+	// set the header and return the ban list
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(banList)
 

@@ -19,7 +19,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// TODO DESCRIPTION
+// uploadPhoto is a function that allows a user to upload a photo, it takes the username,photo,phtooid from the path and returns the photo body in the response.
+// It returns an error if the user is not found or if the photoid alreaady exists.
+// Authorizations: the user that wants to follow another user must be logged in.
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	var user User
@@ -71,7 +73,9 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	_ = json.NewEncoder(w).Encode(photo)
 }
 
-// TODO DESCRIPTION
+// deltePhoto is a function that allows a user to remove a  photo, it takes the username,photoid from the path and returns a response.
+// It returns an error if the user is not found or if the photoid does not exists.
+// Authorizations: the user that wants to follow another user must be logged in.
 func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
 
@@ -107,6 +111,9 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// commentPhoto is a function that allows a user to get the photos of another user it takes the username from the path and returns the photolist body in the response.
+// It returns an error if the user is not found.
+// Authorizations: the user that wants to follow another user must be logged in.
 func (rt *_router) getUserPhotos(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	var user User
 	var requestUser User
