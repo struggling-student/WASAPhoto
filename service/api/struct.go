@@ -49,7 +49,7 @@ type PhotoStream struct {
 	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
 	// File for the  photo
-	File string `json:"file"`
+	File []byte `json:"file"`
 	// Date when the photo was uploaded
 	Date string `json:"date"`
 	// Number of likes for the photo
@@ -144,9 +144,13 @@ type Photo struct {
 	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
 	// File for the  photo
-	File string `json:"file"`
+	File []byte `json:"file"`
 	// Date when the photo was uploaded
 	Date string `json:"date"`
+
+	LikesCount int `json:"likesCount"`
+
+	CommentsCount int `json:"commentsCount"`
 }
 
 // PhotoFromDatabase converts a database.Photo to an api.Photo
@@ -155,15 +159,19 @@ func (p *Photo) PhotoFromDatabase(photo database.Photo) {
 	p.UserId = photo.UserId
 	p.File = photo.File
 	p.Date = photo.Date
+	p.LikesCount = photo.LikesCount
+	p.CommentsCount = photo.CommentsCount
 }
 
 // PhotoToDatabase converts an api.Photo to a database.Photo
 func (p *Photo) PhotoToDatabase() database.Photo {
 	return database.Photo{
-		Id:     p.Id,
-		UserId: p.UserId,
-		File:   p.File,
-		Date:   p.Date,
+		Id:            p.Id,
+		UserId:        p.UserId,
+		File:          p.File,
+		Date:          p.Date,
+		LikesCount:    p.LikesCount,
+		CommentsCount: p.CommentsCount,
 	}
 }
 

@@ -32,7 +32,7 @@ func (db *appdbimpl) SetUsername(u User, username string) (User, error) {
 	if err != nil {
 		return u, err
 	} else if affected == 0 {
-		return u, ErrUserDoesNotExist
+		return u, err
 	}
 	return u, nil
 }
@@ -80,6 +80,23 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 		err = rows.Scan(&b.Id, &b.UserId, &b.File, &b.Date)
 		if err != nil {
 			return nil, err
+		}
+
+		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, b.UserId).Scan(&b.Username); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
+		}
+		if err := db.c.QueryRow(`SELECT COUNT(*) FROM likes WHERE photoId = ?`, b.Id).Scan(&b.LikeCount); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
+		}
+
+		if err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE photoId = ?`, b.Id).Scan(&b.CommentCount); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
 		}
 		ret = append(ret, b)
 	}

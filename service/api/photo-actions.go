@@ -1,16 +1,10 @@
 package api
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"image"
-	"image/jpeg"
-	"image/png"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -46,21 +40,16 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	content, err := io.ReadAll(r.Body)
+	photo.File, err = io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// Encode as base64.
-	encoded := base64.StdEncoding.EncodeToString(content)
-	photo.File = encoded
-
 	currentTime := time.Now()
 	photo.Date = currentTime.Format("2006-01-02 15:04:05")
 
 	photo.UserId = user.Id
 	photo.Id = id
-
 	dbphoto, err := rt.db.SetPhoto(photo.PhotoToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -109,6 +98,11 @@ func (rt *_router) deletePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+
+	// remove comments from the photo
+
+	// remove the likes from the photo
+
 }
 
 // commentPhoto is a function that allows a user to get the photos of another user it takes the username from the path and returns the photolist body in the response.
@@ -151,37 +145,6 @@ func (rt *_router) getUserPhotos(w http.ResponseWriter, r *http.Request, ps http
 	photoList.RequestUser = requestUser.Id
 	photoList.Identifier = token
 	photoList.Photos = photos
-	for i := 0; i < len(photoList.Photos); i++ {
-		temp := photoList.Photos[i].File
-		data, err := base64.StdEncoding.DecodeString(temp)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		img, _, err := image.Decode(bytes.NewReader(data))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		var filename string = "./service/database/images/" + strconv.FormatInt(int64(i), 10) + ".png"
-		out, err := os.Create(filename)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		err = png.Encode(out, img)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = jpeg.Encode(out, img, nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "image/*")
 	_ = json.NewEncoder(w).Encode(photoList)
 }

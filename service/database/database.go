@@ -36,8 +36,10 @@ type PhotoStream struct {
 	Id uint64 `json:"id"`
 	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
+	// Username for the user who owns the photo
+	Username string `json:"username"`
 	// File for the  photo
-	File string `json:"file"`
+	File []byte `json:"file"`
 	// Date when the photo was uploaded
 	Date string `json:"date"`
 	// Number of likes for the photo
@@ -104,9 +106,13 @@ type Photo struct {
 	// Identifier for the user who owns the photo
 	UserId uint64 `json:"userId"`
 	// File for the  photo
-	File string `json:"file"`
+	File []byte `json:"file"`
 	// Date when the photo was uploaded
 	Date string `json:"date"`
+
+	LikesCount int `json:"likesCount"`
+
+	CommentsCount int `json:"commentsCount"`
 }
 
 // Struct that represents the likes of a photo in the database.
@@ -242,7 +248,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		photosDatabase := `CREATE TABLE photos (
 			Id INTEGER NOT NULL PRIMARY KEY, 
 			userId INTEGER NOT NULL,
-			photo TEXT,
+			photo BLOB,
 			date TEXT,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`

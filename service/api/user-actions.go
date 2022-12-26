@@ -1,15 +1,8 @@
 package api
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
-	"image"
-	"image/jpeg"
-	"image/png"
 	"net/http"
-	"os"
-	"strconv"
 
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/api/reqcontext"
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
@@ -188,79 +181,6 @@ func (rt *_router) getMyStream(w http.ResponseWriter, r *http.Request, ps httpro
 	photoList.Identifier = token
 	// set the photos to the stream
 	photoList.Photos = photos
-
-	// create the directory for the stream
-	var mainDir string = "./service/database/stream/" + strconv.FormatUint(token, 10)
-
-	// create the directory
-	err = os.Mkdir(mainDir, 0755)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// for loop to get all the photos
-	for i := 0; i < len(photoList.Photos); i++ {
-		// get the likes count
-		likesCount, err := rt.db.GetLikesCount(photoList.Photos[i].Id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// set the likes count for the photo
-		photoList.Photos[i].LikeCount = likesCount
-
-		// get the comments count
-		commentsCount, err := rt.db.GetCommentsCount(photoList.Photos[i].Id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// set the comments count for the photo
-		photoList.Photos[i].CommentCount = commentsCount
-
-		// get the base65 string of the photo
-		file := photoList.Photos[i].File
-
-		// decode the base64 string
-		data, err := base64.StdEncoding.DecodeString(file)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// decode the image
-		img, _, err := image.Decode(bytes.NewReader(data))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// create a directory for the user
-		filename := mainDir + strconv.FormatInt(int64(i), 10) + ".png"
-
-		// set the file name of the photo
-		photoList.Photos[i].File = filename
-
-		// create the file
-		out, err := os.Create(filename)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// encode the image (png)
-		err = png.Encode(out, img)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// encode the image (jpeg)
-		err = jpeg.Encode(out, img, nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
 
 	// set the header and return the stream
 	w.Header().Set("Content-Type", "application/json")

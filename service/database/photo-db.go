@@ -1,6 +1,8 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func (db *appdbimpl) SetPhoto(p Photo) (Photo, error) {
 	_, err := db.c.Exec(`INSERT INTO photos (Id, userId, photo, date) VALUES (?, ?, ?, ?)`, p.Id, p.UserId, p.File, p.Date)
@@ -11,15 +13,40 @@ func (db *appdbimpl) SetPhoto(p Photo) (Photo, error) {
 }
 
 func (db *appdbimpl) RemovePhoto(id uint64) error {
-	res, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
+	// delete photos
+	res1, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
 	if err != nil {
 		return err
 	}
-	affected, err := res.RowsAffected()
+	affected, err := res1.RowsAffected()
 	if err != nil {
 		return err
 	} else if affected == 0 {
 		return ErrPhotoDoesNotExist
+	}
+
+	// delete likes
+	res2, err := db.c.Exec(`DELETE FROM likes WHERE photoId=?`, id)
+	if err != nil {
+		return err
+	}
+	affected2, err := res2.RowsAffected()
+	if err != nil {
+	} else if affected2 == 0 {
+		return ErrLikeDoesNotExist
+	}
+
+	// delete comments
+	// delete likes
+	res3, err := db.c.Exec(`DELETE FROM comments WHERE photoId=?`, id)
+	if err != nil {
+		return err
+	}
+	affected3, err := res3.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected3 == 0 {
+		return ErrLikeDoesNotExist
 	}
 	return nil
 }
@@ -37,6 +64,19 @@ func (db *appdbimpl) GetPhotos(u User) ([]Photo, error) {
 		err = rows.Scan(&b.Id, &b.UserId, &b.File, &b.Date)
 		if err != nil {
 			return nil, err
+		}
+		// count likes
+		if err := db.c.QueryRow(`SELECT COUNT(*) FROM likes WHERE photoId = ?`, b.Id).Scan(&b.LikesCount); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, ErrLikeDoesNotExist
+			}
+		}
+
+		// count comments
+		if err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE photoId = ?`, b.Id).Scan(&b.CommentsCount); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, ErrLikeDoesNotExist
+			}
 		}
 		ret = append(ret, b)
 	}
