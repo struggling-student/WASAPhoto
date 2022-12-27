@@ -92,8 +92,7 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 				return nil, err
 			}
 		}
-
-		if err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE photoId = ?`, b.Id).Scan(&b.CommentCount); err != nil {
+		if err := db.c.QueryRow(`SELECT EXISTS(SELECT 1 FROM likes WHERE userId = ? AND photoId = ?)`, u.Id, b.Id).Scan(&b.LikeStatus); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, err
 			}

@@ -46,6 +46,8 @@ type PhotoStream struct {
 	LikeCount int `json:"likeCount"`
 	// Number of comments for the photo
 	CommentCount int `json:"commentCount"`
+
+	LikeStatus bool `json:"likeStatus"`
 }
 
 // Struct that represents the followers of an user in the database.
@@ -161,6 +163,10 @@ type Comment struct {
 	PhotoId uint64 `json:"photoId"`
 	// Identifier for the user who owns the photo
 	PhotoOwner uint64 `json:"photoOwner"`
+
+	OwnerUsername string `json:"ownerUsername"`
+
+	Username string `json:"username"`
 	// Content of the comment
 	Content string `json:"content"`
 }

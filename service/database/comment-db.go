@@ -1,6 +1,8 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func (db *appdbimpl) SetComment(c Comment) (Comment, error) {
 	_, err := db.c.Exec(`INSERT INTO comments (Id, userId, photoid, photoOwner, content) VALUES (?, ?, ?, ?, ?)`, c.Id, c.UserId, c.PhotoId, c.PhotoOwner, c.Content)
@@ -52,6 +54,19 @@ func (db *appdbimpl) GetComments(photoid uint64) ([]Comment, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, c.PhotoOwner).Scan(&c.OwnerUsername); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
+		}
+
+		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, c.UserId).Scan(&c.Username); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
+		}
+
 		ret = append(ret, c)
 	}
 	if rows.Err() != nil {

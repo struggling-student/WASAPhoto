@@ -1,10 +1,12 @@
 <script>
 import LogModal from "../components/LogModal.vue";
+
 export default {
 	components: {LogModal},
 	data: function() {
 		return {
 			username : localStorage.getItem('username'),
+			token: localStorage.getItem('token'),
 			errormsg: null,
 			loading: false,
 			some_data: null,
@@ -20,6 +22,8 @@ export default {
 						userId: 0,
 						photoId: 0,
 						photoOwner: 0,
+						ownerUsername: "",
+						username: "",
 						content: "",
 					}
 				],
@@ -39,6 +43,7 @@ export default {
 					}
 				],
 			},
+			searchUserUsername: "",
 		}
 	},
 	methods: {
@@ -70,7 +75,6 @@ export default {
 				}
 			}
 		},
-
 		async getStream() {
 			try { 
                 let response = await this.$axios.get("/user/" + this.username + "/stream", {
@@ -81,7 +85,6 @@ export default {
                 this.stream = response.data
                 for (let i = 0; i < this.stream.photoStream.length; i++) {
                     this.stream.photoStream[i].file = 'data:image/*;base64,' + this.stream.photoStream[i].file
-					//console.log(this.stream.photoStream[i].file)
                 }
             } catch(e) {
 				if (e.response && e.response.status === 400) {
@@ -96,8 +99,8 @@ export default {
 				}
 			}
 		},
-		async getUserProfile() {
-
+		async SearchUser() {
+			this.$router.push({path: '/users/' + this.searchUserUsername + '/view'})
 		},
 
 		async sendComment(username, photoid) {
@@ -131,7 +134,6 @@ export default {
 				this.photoComments = response.data;
 				const modal = new bootstrap.Modal(document.getElementById('logviewer'));
 				modal.show();
-
 			} catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -144,6 +146,8 @@ export default {
 					this.detailedmsg = null;
 				}
 			}
+		},
+		async likePhoto(){
 		}
 	},
 	mounted() {
@@ -153,7 +157,7 @@ export default {
 </script>
 
 <template>
-	<div>
+	<div>	
 		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 			<h1 class="h2">Home page</h1>
 			<div class="btn-toolbar mb-2 mb-md-0">
@@ -169,15 +173,16 @@ export default {
 			</div>
 		</div>
 		<div class="input-group mb-3">
-			<input type="text" class="form-control" placeholder="Search a user in WASAPhoto" aria-label="Recipient's username" aria-describedby="basic-addon2">
+			<input type="text" id="searchUserUsername" v-model="searchUserUsername" class="form-control" placeholder="Search a user in WASAPhoto" aria-label="Recipient's username" aria-describedby="basic-addon2">
 			<div class="input-group-append">
-				<button class="btn btn-outline-success" type="button">Search</button>
+				<button class="btn btn-outline-success" type="button" @click="SearchUser">Search</button>
 			</div>
 		</div>
 
-		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
+	<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
 	
-	<LogModal id="logviewer" :log="photoComments"></LogModal>
+	<LogModal id="logviewer" :log="photoComments" :token="token"></LogModal>
+
 
     <div class="row">
         <div class="col-md-4" v-for="photo in stream.photoStream" :key="photo.id">
@@ -195,7 +200,7 @@ export default {
 					
 					
 					<div class="input-group mb-3">
-						<input type="text" id="comment" v-model="comment" class="form-control" placeholder="Quick comment!" aria-label="Recipient's username" aria-describedby="basic-addon2">
+						<input type="text" id="comment" v-model="comment" class="form-control" placeholder="Comment!" aria-label="Recipient's username" aria-describedby="basic-addon2">
 						<div class="input-group-append">
 							<button class="btn btn-outline-success" type="button" @click="sendComment(photo.username, photo.id)">Send</button>
 						</div>
@@ -203,8 +208,9 @@ export default {
 
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary"  @click="openLog(photo.username, photo.id)">View comments</button>
-                            <button type="button" class="btn btn-outline-primary" @click="">Like Photo</button>
+							<button type="button" class="btn btn-sm btn-outline-secondary" @click="openPhoto()">View</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"  @click="openLog(photo.username, photo.id)">Comments</button>
+                            <button type="button" class="btn btn-outline-primary" @click="likePhoto()">Like</button>
                         </div>
                     </div>
 
