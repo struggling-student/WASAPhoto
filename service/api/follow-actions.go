@@ -123,37 +123,29 @@ func (rt *_router) getFollowers(w http.ResponseWriter, r *http.Request, ps httpr
 	// struct for the user
 	var user User
 	// struct for the follow list
-	var followList database.Followers
+	var follow Follow
 
 	// get the bearer token from the header
 	token := getToken(r.Header.Get("Authorization"))
-	// set the user id from the token
-	user.Id = token
 	// get the username from the path
 	user.Username = ps.ByName("username")
 
 	// check if the user is an existing one (a user can only get its own followers, not the one of another user)
-	dbuser, err := rt.db.CheckUser(user.ToDatabase())
+	dbuser, err := rt.db.CheckUserByUsername(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// decode the user from the database
 	user.FromDatabase(dbuser)
-
 	// get the bans from the database
-	follows, err := rt.db.GetFollowers(user.ToDatabase())
+	dbfollow, err := rt.db.GetFollowers(user.ToDatabase(), token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// set the folloList id to the user id
-	followList.Id = user.Id
-	// set the followList followers to the follows list
-	followList.Followers = follows
-
+	follow.FollowFromDatabase(dbfollow)
 	// set the header and return the followList body
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(followList)
+	_ = json.NewEncoder(w).Encode(follow)
 }

@@ -28,9 +28,25 @@ export default {
             ],
            },
            comment: "",
+           follow: {
+                followId: 0,
+                followedId: 0,
+                userId: 0,
+                banStatus: 0,
+           },
+           ban: {
+                banId: 0,
+                bannedId: 0,
+                userId: 0,
+           },
+        
 		}
 	},
 	methods: {
+        async refresh() {
+            await this.userProfile()
+            await this.userPhotos()
+        },
         async userProfile() {
             try { 
                 let response = await this.$axios.get("users/" + this.$route.params.username + "/profile",{
@@ -78,11 +94,136 @@ export default {
 			}
         },
 
-        async banUser() {
-
+        async banUser(username) {
+            try { 
+                let response = await this.$axios.put("/users/" + username + "/ban/" + Math.floor(Math.random() * 10000),{}, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
         },
 
-        async followUser() {
+        async unbanUser(username) {
+            try { 
+                let response = await this.$axios.get("/users/" + username + "/ban", {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+                this.ban = response.data
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+
+            try { 
+				let response = await this.$axios.delete("/users/" + username + "/ban/" + this.ban.banId, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+        },
+
+        async followUser(username) {
+            try { 
+                let response = await this.$axios.put("/users/" + username + "/follow/" + Math.floor(Math.random() * 10000),{}, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+        },
+
+        async unfollowUser(username) {
+            try { 
+                let response = await this.$axios.get("/users/" + username + "/follow", {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+                this.follow = response.data
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+
+            try { 
+				let response = await this.$axios.delete("/users/" + username + "/follow/" + this.follow.followId, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
 
         },
 	},
@@ -98,9 +239,10 @@ export default {
             <h1 class="h2">User profile of {{ profile.username }} </h1>
     </div>
     <div class="btn-toolbar mb-2 mb-md-0 ">
-                        <button type="button" v-if="profile.followStatus==false" class="btn btn-primary " @click="">Follow</button>
-                        <button type="button" v-if="profile.followStatus==true" class="btn btn-outline-danger " @click="">Unfollow</button>
-                        <button type="button" class="btn btn-danger" @click="">Ban</button>
+                        <button type="button" v-if="profile.followStatus==false" class="btn btn-primary " @click="followUser(profile.username)">Follow {{profile.username }}</button>
+                        <button type="button" v-if="profile.followStatus==true" class="btn btn-outline-danger " @click="unfollowUser(profile.username)">Unfollow</button>
+                        <button type="button" v-if="profile.banStatus==false" class="btn btn-danger" @click="banUser(profile.username)">Ban{{profile.username}}</button>
+                        <button type="button" v-if="profile.banStatus==true" class="btn btn-outline-danger" @click="unbanUser(profile.username)">Unban {{profile.username}}</button>
             </div>
     <div class="d-flex justify-content-between align-items-center">
         <h4>

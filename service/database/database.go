@@ -179,6 +179,7 @@ type AppDatabase interface {
 	SetUsername(User, string) (User, error)
 	GetUserId(string) (User, error)
 	CheckUserById(User) (User, error)
+	CheckUserByUsername(User) (User, error)
 	CheckUser(User) (User, error)
 	GetMyStream(User) ([]PhotoStream, error)
 
@@ -186,7 +187,7 @@ type AppDatabase interface {
 	SetFollow(Follow) (Follow, error)
 	RemoveFollow(uint64, uint64, uint64) error
 	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
-	GetFollowers(User) ([]Follow, error)
+	GetFollowers(User, uint64) (Follow, error)
 	GetFollowersCount(uint64) (int, error)
 	GetFollowingsCount(uint64) (int, error)
 	GetFollowStatus(uint64, uint64) (bool, error)
@@ -194,7 +195,7 @@ type AppDatabase interface {
 	// DB functions for bans
 	CreateBan(Ban) (Ban, error)
 	RemoveBan(Ban) error
-	GetBans(User) ([]Ban, error)
+	GetBans(User, uint64) (Ban, error)
 	GetBanById(Ban) (Ban, error)
 	UpdateBanStatus(int, uint64, uint64) error
 	GetBanStatus(uint64, uint64) (bool, error)

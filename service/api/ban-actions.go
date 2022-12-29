@@ -155,14 +155,13 @@ func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter
 	// struct for the user
 	var user User
 	// struct for the ban list
-	var banList database.Bans
+	var ban Ban
 
 	// create user structure for the user that wants to get the bans
 	token := getToken(r.Header.Get("Authorization"))
-	user.Id = token
 	user.Username = ps.ByName("username")
 	// check if the user is an existing one
-	dbuser, err := rt.db.CheckUser(user.ToDatabase())
+	dbuser, err := rt.db.CheckUserByUsername(user.ToDatabase())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -171,19 +170,16 @@ func (rt *_router) getBans(w http.ResponseWriter, r *http.Request, ps httprouter
 	user.FromDatabase(dbuser)
 
 	// get the bans from the database
-	bans, err := rt.db.GetBans(user.ToDatabase())
+	dban, err := rt.db.GetBans(user.ToDatabase(), token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 
 	}
-	// return the bans to the user
-	banList.Identifier = user.Id
-	banList.Username = user.Username
-	banList.Bans = bans
+	ban.BanFromDatabase(dban)
 
 	// set the header and return the ban list
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(banList)
+	_ = json.NewEncoder(w).Encode(ban)
 
 }

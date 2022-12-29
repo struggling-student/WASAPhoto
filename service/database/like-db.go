@@ -27,15 +27,9 @@ func (db *appdbimpl) RemoveLike(l Like) error {
 }
 
 func (db *appdbimpl) RemoveLikes(user uint64, banned uint64) error {
-	res, err := db.c.Exec(`DELETE FROM likes WHERE userId=? AND photoOwner=?`, banned, user)
+	_, err := db.c.Exec(`DELETE FROM likes WHERE userId=? AND photoOwner=?`, banned, user)
 	if err != nil {
 		return err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	} else if affected == 0 {
-		return ErrLikeDoesNotExist
 	}
 	return nil
 }

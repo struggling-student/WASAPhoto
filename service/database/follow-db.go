@@ -36,26 +36,14 @@ func (db *appdbimpl) GetFollowingId(user1 uint64, user2 uint64) (Follow, error) 
 	return follow, nil
 }
 
-func (db *appdbimpl) GetFollowers(u User) ([]Follow, error) {
-	var ret []Follow
-	rows, err := db.c.Query(`SELECT Id, followerId, userId, banStatus FROM followers WHERE userId = ?`, u.Id)
-	if err != nil {
-		return ret, ErrUserDoesNotExist
-	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
-		var f Follow
-		err = rows.Scan(&f.FollowId, &f.FollowedId, &f.UserId, &f.BanStatus)
-		if err != nil {
-			return nil, err
+func (db *appdbimpl) GetFollowers(u User, token uint64) (Follow, error) {
+	var follow Follow
+	if err := db.c.QueryRow(`SELECT Id, followerId, userId, banStatus FROM followers WHERE followerId=? AND userId = ?`, u.Id, token).Scan(&follow.FollowId, &follow.FollowedId, &follow.UserId, &follow.BanStatus); err != nil {
+		if err == sql.ErrNoRows {
+			return follow, ErrLikeDoesNotExist
 		}
-		ret = append(ret, f)
 	}
-	if rows.Err() != nil {
-		return nil, err
-	}
-	return ret, nil
+	return follow, nil
 }
 
 func (db *appdbimpl) GetFollowersCount(id uint64) (int, error) {

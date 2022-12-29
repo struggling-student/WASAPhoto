@@ -47,6 +47,16 @@ func (db *appdbimpl) GetUserId(username string) (User, error) {
 	return user, nil
 }
 
+func (db *appdbimpl) CheckUserByUsername(u User) (User, error) {
+	var user User
+	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE username = ?`, u.Username).Scan(&user.Id, &user.Username); err != nil {
+		if err == sql.ErrNoRows {
+			return user, ErrUserDoesNotExist
+		}
+	}
+	return user, nil
+}
+
 func (db *appdbimpl) CheckUserById(u User) (User, error) {
 	var user User
 	if err := db.c.QueryRow(`SELECT id, username FROM users WHERE id = ?`, u.Id).Scan(&user.Id, &user.Username); err != nil {
