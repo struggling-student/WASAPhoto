@@ -7,8 +7,8 @@ import UserView from '../views/UserView.vue'
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
 	routes: [
-		{path: '/', component: HomeView},
-		{path: '/session', component: LoginView},
+		{path: '/', component: LoginView},
+		{path: '/session', component: HomeView},
 		{path: '/users/:username/profile', component: ProfileView},
 		{path: '/users/:username/view', component: UserView},
 	]

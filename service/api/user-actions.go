@@ -140,6 +140,18 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 	// set the photos count of the profile
 	profile.PhotoCount = photoCount
 
+	profile.BanStatus, err = rt.db.GetBanStatus(requestUser.Id, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	profile.FollowStatus, err = rt.db.GetFollowStatus(requestUser.Id, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// return the profile
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

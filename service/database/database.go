@@ -117,17 +117,17 @@ type Photo struct {
 	CommentsCount int `json:"commentsCount"`
 }
 
-// Struct that represents the likes of a photo in the database.
-type Likes struct {
-	// Identifier for the user that has requested the likes
-	RequestIdentifier uint64 `json:"requestIdentifier"`
-	// Identifier for the photo that has the likes
-	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// Identifier for the owner of the photo
-	PhotoOwner uint64 `json:"identifier"`
-	// List of likes under a photo
-	Likes []Like `json:"likes"`
-}
+// // Struct that represents the likes of a photo in the database.
+// type Likes struct {
+// 	// Identifier for the user that has requested the likes
+// 	RequestIdentifier uint64 `json:"requestIdentifier"`
+// 	// Identifier for the photo that has the likes
+// 	PhotoIdentifier uint64 `json:"photoIdentifier"`
+// 	// Identifier for the owner of the photo
+// 	PhotoOwner uint64 `json:"identifier"`
+// 	// List of likes under a photo
+// 	Likes []Like `json:"likes"`
+// }
 
 // Struct that represents a like in the database.
 type Like struct {
@@ -189,6 +189,7 @@ type AppDatabase interface {
 	GetFollowers(User) ([]Follow, error)
 	GetFollowersCount(uint64) (int, error)
 	GetFollowingsCount(uint64) (int, error)
+	GetFollowStatus(uint64, uint64) (bool, error)
 
 	// DB functions for bans
 	CreateBan(Ban) (Ban, error)
@@ -196,6 +197,7 @@ type AppDatabase interface {
 	GetBans(User) ([]Ban, error)
 	GetBanById(Ban) (Ban, error)
 	UpdateBanStatus(int, uint64, uint64) error
+	GetBanStatus(uint64, uint64) (bool, error)
 
 	// DB functions for photos
 	SetPhoto(Photo) (Photo, error)
@@ -208,7 +210,7 @@ type AppDatabase interface {
 	SetLike(Like) (Like, error)
 	RemoveLike(Like) error
 	RemoveLikes(uint64, uint64) error
-	GetLikes(uint64, uint64) ([]Like, error)
+	GetLike(uint64, uint64) (Like, error)
 	GetLikeById(Like) (Like, error)
 	GetLikesCount(photoid uint64) (int, error)
 

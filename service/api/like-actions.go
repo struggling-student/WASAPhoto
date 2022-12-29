@@ -138,7 +138,7 @@ func (rt *_router) getLikes(w http.ResponseWriter, r *http.Request, ps httproute
 	// struct for the request user
 	var requestUser User
 	// struct for the likeList
-	var likeList database.Likes
+	//var like Like
 
 	// create user structure for the user that wants to get the bans
 	token := getToken(r.Header.Get("Authorization"))
@@ -182,22 +182,13 @@ func (rt *_router) getLikes(w http.ResponseWriter, r *http.Request, ps httproute
 	photo.PhotoFromDatabase(dbphoto)
 
 	// get the likes from the db
-	likes, err := rt.db.GetLikes(photo.Id, user.Id)
+	like, err := rt.db.GetLike(photo.Id, token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// set the request identifier to the id of the user that made the request
-	likeList.RequestIdentifier = requestUser.Id
-	// set the photo identifier to the id of the photo
-	likeList.PhotoIdentifier = photo.Id
-	// set the photo owner to the id of the user that owns the photo
-	likeList.PhotoOwner = user.Id
-	// set the likes to the likes from the database
-	likeList.Likes = likes
-
 	// set the header and return the likeList
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(likeList)
+	_ = json.NewEncoder(w).Encode(like)
 }

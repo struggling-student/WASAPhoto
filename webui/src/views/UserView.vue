@@ -9,6 +9,8 @@ export default {
                followersCount: 0,
                followingCount: 0,
                photoCount: 0,
+               followStatus: null,
+               banStatus: null,
             },
 
             photoList: {
@@ -76,6 +78,13 @@ export default {
 			}
         },
 
+        async banUser() {
+
+        },
+
+        async followUser() {
+
+        },
 	},
 	mounted() {
         this.userProfile()
@@ -87,11 +96,12 @@ export default {
 <template>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">User profile of {{ profile.username }} </h1>
-            <div class="btn-toolbar mb-2 mb-md-0 ">
-                        <button type="button" class="btn btn-primary " @click="">Follow</button>
+    </div>
+    <div class="btn-toolbar mb-2 mb-md-0 ">
+                        <button type="button" v-if="profile.followStatus==false" class="btn btn-primary " @click="">Follow</button>
+                        <button type="button" v-if="profile.followStatus==true" class="btn btn-outline-danger " @click="">Unfollow</button>
                         <button type="button" class="btn btn-danger" @click="">Ban</button>
             </div>
-    </div>
     <div class="d-flex justify-content-between align-items-center">
         <h4>
         Followers : {{profile.followersCount}}
@@ -102,6 +112,7 @@ export default {
     <h4>
         Photos : {{profile.photoCount}}
     </h4>
+
     </div>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
     <div class="row">

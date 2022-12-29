@@ -1,5 +1,5 @@
 <script>
-import LogModal from "../components/LogModal.vue";
+import LogModal from "../components/Logmodal.vue";
 
 export default {
 	components: {LogModal},
@@ -12,6 +12,7 @@ export default {
 			some_data: null,
 			images: null,
 			image: null,
+			clear: null,
 			photoComments: {
 				requestIdentifier: 0,
 				photoIdentifier: 0,
@@ -40,19 +41,26 @@ export default {
 						date: "",
 						likeCount: 0,
 						commentCount: 0,
+						likeStatus: null,
 					}
 				],
 			},
 			searchUserUsername: "",
+			like : {
+				likeId: 0,
+				identifier: 0,
+				photoIdentifier: 0,
+				photoOwner: 0,
+			}
 		}
 	},
 	methods: {
 		async refresh() {
-
+			this.getStream()
 		}, 
 		async uploadFile() {
 			this.images = this.$refs.file.files[0]
-			
+		
 		},
 		async submitFile() {
 			try { 
@@ -102,7 +110,6 @@ export default {
 		async SearchUser() {
 			this.$router.push({path: '/users/' + this.searchUserUsername + '/view'})
 		},
-
 		async sendComment(username, photoid) {
 			try { 
                 let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), {content: this.comment}, {
@@ -110,6 +117,7 @@ export default {
                         Authorization: "Bearer " + localStorage.getItem("token")
                     }
                 })
+				this.clear = response.data
 				
             } catch(e) {
 				if (e.response && e.response.status === 400) {
@@ -147,8 +155,69 @@ export default {
 				}
 			}
 		},
-		async likePhoto(){
-		}
+		async likePhoto(username, id){
+			try { 
+                let response = await this.$axios.put("/users/" + username + "/photo/" + id + "/like/" + Math.floor(Math.random() * 10000),{}, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+		},
+		async deleteLike(username, id){
+			try { 
+				let response = await this.$axios.get("/users/" + username + "/photo/" + id + "/like", {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+                this.like = response.data
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+
+			try { 
+				let response = await this.$axios.delete("/users/" + username + "/photo/" + id + "/like/" + this.like.likeId, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+		},
 	},
 	mounted() {
 		this.getStream()
@@ -208,9 +277,9 @@ export default {
 
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-							<button type="button" class="btn btn-sm btn-outline-secondary" @click="openPhoto()">View</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary"  @click="openLog(photo.username, photo.id)">Comments</button>
-                            <button type="button" class="btn btn-outline-primary" @click="likePhoto()">Like</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"  @click="openLog(photo.username, photo.id)">View comments</button>
+                            <button type="button" v-if="photo.likeStatus==false" class="btn btn-primary" @click="likePhoto(photo.username, photo.id)">Like</button>
+							<button type="button" v-if="photo.likeStatus==true" class="btn btn-danger" @click="deleteLike(photo.username, photo.id)">Unlike</button>
                         </div>
                     </div>
 

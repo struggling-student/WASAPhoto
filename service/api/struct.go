@@ -18,6 +18,10 @@ type Profile struct {
 	FollowingCount int `json:"followingCount"`
 	// PhotoCount is the number of photos uploaded by the user
 	PhotoCount int `json:"photoCount"`
+
+	FollowStatus bool `json:"followStatus"`
+
+	BanStatus bool `json:"banStatus"`
 }
 
 // Struct for user

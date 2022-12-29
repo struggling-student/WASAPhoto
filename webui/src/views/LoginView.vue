@@ -20,7 +20,7 @@ export default{
                 localStorage.setItem("token", this.profile.id);
                 localStorage.setItem("username", this.profile.username);
                 // redirect to the home page
-                this.$router.push({path: '/'})
+                this.$router.push({path: '/session'})
             } catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
