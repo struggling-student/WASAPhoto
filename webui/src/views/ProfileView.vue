@@ -5,6 +5,7 @@ export default{
     components: {LogModal},
     data: function() {
         return {
+            errormsg: null,
             username : localStorage.getItem('username'),
             token: localStorage.getItem('token'),
             newUsername : "",
@@ -36,7 +37,6 @@ export default{
                username: "",
             },
             comment: "",
-            errormsg: null,
             photoComments: {
 				requestIdentifier: 0,
 				photoIdentifier: 0,
@@ -101,7 +101,7 @@ export default{
 					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
 					this.detailedmsg = e.toString();
 				} else {
-					this.errormsg = e.toString();
+					this.errormsg = "You haven't posted any photos yet. Go to the home and upload one!";
 					this.detailedmsg = null;
 				}
 			}
@@ -139,7 +139,10 @@ export default{
                 })
                 this.user= response.data
                 localStorage.setItem("username", this.user.username);
+                this.profile.username = this.user.username;
+                this.username = this.user.username;
                 this.$router.push({path: '/users/' + this.user.username + '/profile'})
+                this.refresh()
             } catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -297,7 +300,7 @@ export default{
 				</div>
 			</nav>
      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Welcome to your profile {{ username }} </h1>
+        <h1 class="h2">Welcome to your profile {{ profile.username }} </h1>
         <div class="p-4 text-black" >
             <div class="d-flex justify-content-end text-center py-1">
               <div>
@@ -325,6 +328,7 @@ export default{
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
     
     <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+    
     <LogModal id="logviewer" :log="photoComments" :token="token"></LogModal>
 
     <div class="row">

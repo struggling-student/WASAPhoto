@@ -120,13 +120,15 @@ export default {
 					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
 					this.detailedmsg = e.toString();
 				} else {
-					this.errormsg = e.toString();
+					this.errormsg = "You are not following anyone yet. Follow someone to see their photos.";
 					this.detailedmsg = null;
 				}
 			}
 		},
 		async SearchUser() {
-			if (this.searchUserUsername === "") {
+			if (this.searchUserUsername === this.username) {
+				this.errormsg = "You can't search yourself."
+			} else if (this.searchUserUsername === "") {
 				this.errormsg = "Emtpy username field."
 			} else {
 				try { 
