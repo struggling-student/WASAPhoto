@@ -73,7 +73,7 @@ export default {
         },
         async userProfile() {
             try { 
-                let response = await this.$axios.get("users/" + this.$route.params.username + "/profile",{
+                let response = await this.$axios.get("/users/" + this.$route.params.username + "/profile",{
                     headers: {
                         Authorization: "Bearer " + localStorage.getItem("token")
                     }

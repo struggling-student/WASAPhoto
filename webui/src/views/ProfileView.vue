@@ -127,9 +127,6 @@ export default{
 				}
 			}
         },
-        async getComments(){
-
-        },
         async changeName() {
             if (this.newUsername == "") {
                 this.errormsg = "Emtpy username field."

@@ -126,3 +126,69 @@ func (rt *_router) unlikePhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	// set the header
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// getLikes is a function that allows a user to get all likes from a picture, it takes the username,photoid from the path and returns a likelist body
+// It returns an error if the user is not found or if the  photoid does not exists.
+// Authorizations: the user that wants to remove the follow must be logged in.
+func (rt *_router) getLikes(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// struct for the user
+	var user User
+	// struct for the photo
+	var photo Photo
+	// struct for the request user
+	var requestUser User
+	// struct for the likeList
+	//var like Like
+
+	// create user structure for the user that wants to get the bans
+	token := getToken(r.Header.Get("Authorization"))
+	// set the token to the request user
+	requestUser.Id = token
+	// check if the request user does exist
+	dbrequestuser, err := rt.db.CheckUserById(requestUser.ToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	requestUser.FromDatabase(dbrequestuser)
+
+	// get the username from the url
+	username := ps.ByName("username")
+	// check if the user is an existing one
+	dbuser, err := rt.db.GetUserId(username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the user from the database
+	user.FromDatabase(dbuser)
+
+	// get the photo id from the url
+	photoid, err := strconv.ParseUint(ps.ByName("photoid"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// check if the photo is an existing one
+	photo.Id = photoid
+	dbphoto, err := rt.db.CheckPhoto(photo.PhotoToDatabase())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// decode the photo from the database
+	photo.PhotoFromDatabase(dbphoto)
+
+	// get the likes from the db
+	like, err := rt.db.GetLike(photo.Id, token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// set the header and return the likeList
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(like)
+}

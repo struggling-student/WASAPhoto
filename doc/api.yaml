@@ -436,7 +436,31 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/UnauthorizedError" }
         "500": { $ref: "#/components/responses/InternalServerError" }
- 
+   #? get all likes under a photo
+  /users/{username}/photo/{photoId}/like:
+    parameters:
+      - $ref: "#/components/parameters/username"
+      - $ref : "#/components/parameters/photoID"
+    #* getLikes
+    get:
+      security:
+      - bearerAuth : []
+      tags: ["Like"]
+      summary: Return photo likes
+      description: |-
+        Return a list of likes to a specific photo. If the photoId is correct then the list is returned, it contains the identifiers of
+        users that liked the picture. An error message is given if the Id is not correct.
+      operationId: getLikes
+      responses:
+        "200": 
+          description: Photo likes retrived successfully.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/likesList"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
   #? comment
   /users/{username}/photo/{photoId}/comment/{commentId}:
     parameters:
