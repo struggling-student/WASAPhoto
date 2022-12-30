@@ -4,43 +4,28 @@ import (
 	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
 )
 
-// Struct for profile
 type Profile struct {
-	// RequestId is the identifier for the request
-	RequestId uint64 `json:"requestId"`
-	// Identifier is the unique identifier for the user
-	Id uint64 `json:"id"`
-	// Username is the username of the user
-	Username string `json:"username"`
-	// FollowersCount is the number of followers of the user
-	FollowersCount int `json:"followersCount"`
-	// FollowingCount is the number of users followed by the user
-	FollowingCount int `json:"followingCount"`
-	// PhotoCount is the number of photos uploaded by the user
-	PhotoCount int `json:"photoCount"`
-
-	FollowStatus bool `json:"followStatus"`
-
-	BanStatus bool `json:"banStatus"`
-
-	CheckIfBanned bool `json:"checkIfBanned"`
+	RequestId      uint64 `json:"requestId"`
+	Id             uint64 `json:"id"`
+	Username       string `json:"username"`
+	FollowersCount int    `json:"followersCount"`
+	FollowingCount int    `json:"followingCount"`
+	PhotoCount     int    `json:"photoCount"`
+	FollowStatus   bool   `json:"followStatus"`
+	BanStatus      bool   `json:"banStatus"`
+	CheckIfBanned  bool   `json:"checkIfBanned"`
 }
 
-// Struct for user
 type User struct {
-	// Identifier is the unique identifier for the user
-	Id uint64 `json:"id"`
-	// Username is the username of the user
+	Id       uint64 `json:"id"`
 	Username string `json:"username"`
 }
 
-// FromDatabase converts a database.User to an api.User
 func (u *User) FromDatabase(user database.User) {
 	u.Id = user.Id
 	u.Username = user.Username
 }
 
-// ToDatabase converts an api.User to a database.User
 func (u *User) ToDatabase() database.User {
 	return database.User{
 		Id:       u.Id,
@@ -48,23 +33,15 @@ func (u *User) ToDatabase() database.User {
 	}
 }
 
-// Struct for photo stream
 type PhotoStream struct {
-	// Identifier for the photo
-	Id uint64 `json:"id"`
-	// Identifier for the user who owns the photo
-	UserId uint64 `json:"userId"`
-	// File for the  photo
-	File []byte `json:"file"`
-	// Date when the photo was uploaded
-	Date string `json:"date"`
-	// Number of likes for the photo
-	LikeCount int `json:"likeCount"`
-	// Number of comments for the photo
-	CommentCount int `json:"commentCount"`
+	Id           uint64 `json:"id"`
+	UserId       uint64 `json:"userId"`
+	File         []byte `json:"file"`
+	Date         string `json:"date"`
+	LikeCount    int    `json:"likeCount"`
+	CommentCount int    `json:"commentCount"`
 }
 
-// PhotoStreamFromDatabase converts a database.PhotoStream to an api.PhotoStream
 func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) {
 	s.Id = photoStream.Id
 	s.UserId = photoStream.UserId
@@ -74,7 +51,6 @@ func (s *PhotoStream) PhotoStreamFromDatabase(photoStream database.PhotoStream) 
 	s.CommentCount = photoStream.CommentCount
 }
 
-// PhotoStreamToDatabase converts an api.PhotoStream to a database.PhotoStream
 func (s *PhotoStream) PhotoStreamToDatabase() database.PhotoStream {
 	return database.PhotoStream{
 		Id:           s.Id,
@@ -87,19 +63,13 @@ func (s *PhotoStream) PhotoStreamToDatabase() database.PhotoStream {
 
 }
 
-// Struct for follow
 type Follow struct {
-	// BanIdentifier is the identifier for the ban action
-	FollowId uint64 `json:"followId"`
-	// Identifier for the user who is banned
+	FollowId   uint64 `json:"followId"`
 	FollowedId uint64 `json:"followedId"`
-	// Identifier for the user who is banning
-	UserId uint64 `json:"userId"`
-	// BanStatus is the status of the ban
-	BanStatus int `json:"banStatus"`
+	UserId     uint64 `json:"userId"`
+	BanStatus  int    `json:"banStatus"`
 }
 
-// FollowFromDatabase converts a database.Follow to an api.Follow
 func (f *Follow) FollowFromDatabase(follow database.Follow) {
 	f.FollowId = follow.FollowId
 	f.FollowedId = follow.FollowedId
@@ -107,7 +77,6 @@ func (f *Follow) FollowFromDatabase(follow database.Follow) {
 	f.BanStatus = follow.BanStatus
 }
 
-// FollowToDatabase converts an api.Follow to a database.Follow
 func (f *Follow) FollowToDatabase() database.Follow {
 	return database.Follow{
 		FollowId:   f.FollowId,
@@ -117,24 +86,18 @@ func (f *Follow) FollowToDatabase() database.Follow {
 	}
 }
 
-// Struct for ban
 type Ban struct {
-	// BanIdentifier is the identifier for the ban action
-	BanId uint64 `json:"banId"`
-	// Identifier for the user who is banned
+	BanId    uint64 `json:"banId"`
 	BannedId uint64 `json:"bannedId"`
-	// Identifier for the user who is banning
-	UserId uint64 `json:"userId"`
+	UserId   uint64 `json:"userId"`
 }
 
-// BanFromDatabase converts a database.Ban to an api.Ban
 func (b *Ban) BanFromDatabase(ban database.Ban) {
 	b.BanId = ban.BanId
 	b.BannedId = ban.BannedId
 	b.UserId = ban.UserId
 }
 
-// BanToDatabase converts an api.Ban to a database.Ban
 func (b *Ban) BanToDatabase() database.Ban {
 	return database.Ban{
 		BanId:    b.BanId,
@@ -143,23 +106,15 @@ func (b *Ban) BanToDatabase() database.Ban {
 	}
 }
 
-// Struct for photo
 type Photo struct {
-	// Identifier for the photo
-	Id uint64 `json:"id"`
-	// Identifier for the user who owns the photo
-	UserId uint64 `json:"userId"`
-	// File for the  photo
-	File []byte `json:"file"`
-	// Date when the photo was uploaded
-	Date string `json:"date"`
-
-	LikesCount int `json:"likesCount"`
-
-	CommentsCount int `json:"commentsCount"`
+	Id            uint64 `json:"id"`
+	UserId        uint64 `json:"userId"`
+	File          []byte `json:"file"`
+	Date          string `json:"date"`
+	LikesCount    int    `json:"likesCount"`
+	CommentsCount int    `json:"commentsCount"`
 }
 
-// PhotoFromDatabase converts a database.Photo to an api.Photo
 func (p *Photo) PhotoFromDatabase(photo database.Photo) {
 	p.Id = photo.Id
 	p.UserId = photo.UserId
@@ -169,7 +124,6 @@ func (p *Photo) PhotoFromDatabase(photo database.Photo) {
 	p.CommentsCount = photo.CommentsCount
 }
 
-// PhotoToDatabase converts an api.Photo to a database.Photo
 func (p *Photo) PhotoToDatabase() database.Photo {
 	return database.Photo{
 		Id:            p.Id,
@@ -181,19 +135,13 @@ func (p *Photo) PhotoToDatabase() database.Photo {
 	}
 }
 
-// Struct for like
 type Like struct {
-	// Identifier for the like that has been added
-	LikeId uint64 `json:"likeId"`
-	// Identifier for the user who liked the photo
-	UserIdentifier uint64 `json:"identifier"`
-	// Identifier for the photo that has the likes
+	LikeId          uint64 `json:"likeId"`
+	UserIdentifier  uint64 `json:"identifier"`
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// Identifier for the user who has the photo
-	PhotoOwner uint64 `json:"photoOwner"`
+	PhotoOwner      uint64 `json:"photoOwner"`
 }
 
-// LikeFromDatabase converts a database.Like to an api.Like
 func (l *Like) LikeFromDatabase(like database.Like) {
 	l.LikeId = like.LikeId
 	l.UserIdentifier = like.UserIdentifier
@@ -202,7 +150,6 @@ func (l *Like) LikeFromDatabase(like database.Like) {
 
 }
 
-// LikeToDatabase converts an api.Like to a database.Like
 func (l *Like) LikeToDatabase() database.Like {
 	return database.Like{
 		LikeId:          l.LikeId,
@@ -212,21 +159,14 @@ func (l *Like) LikeToDatabase() database.Like {
 	}
 }
 
-// Struct for comment
 type Comment struct {
-	// Identifier of the user who has commented
-	Id uint64 `json:"id"`
-	// Identifier of the user who has commented
-	UserId uint64 `json:"userId"`
-	// Identifier for the photo that has the comments
-	PhotoId uint64 `json:"photoId"`
-	// Identifier for the user who owns the photo
+	Id         uint64 `json:"id"`
+	UserId     uint64 `json:"userId"`
+	PhotoId    uint64 `json:"photoId"`
 	PhotoOwner uint64 `json:"photoOwner"`
-	// Content of the comment
-	Content string `json:"content"`
+	Content    string `json:"content"`
 }
 
-// CommentFromDatabase converts a database.Comment to an api.Comment
 func (c *Comment) CommentFromDatabase(comment database.Comment) {
 	c.Id = comment.Id
 	c.UserId = comment.UserId
@@ -234,7 +174,6 @@ func (c *Comment) CommentFromDatabase(comment database.Comment) {
 	c.Content = comment.Content
 }
 
-// CommentToDatabase converts an api.Comment to a database.Comment
 func (c *Comment) CommentToDatabase() database.Comment {
 	return database.Comment{
 		Id:         c.Id,

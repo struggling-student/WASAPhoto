@@ -6,7 +6,6 @@ import (
 	"fmt"
 )
 
-// List of errors that can be returned by the database.
 var ErrUserDoesNotExist = errors.New("User does not exist")
 var ErrPhotoDoesNotExist = errors.New("Photo does not exist")
 var ErrBanDoesNotExist = errors.New("Ban does not exist")
@@ -14,169 +13,93 @@ var ErrFollowDoesNotExist = errors.New("Follow does not exist")
 var ErrCommentDoesNotExist = errors.New("Comment does not exist")
 var ErrLikeDoesNotExist = errors.New("Like does not exist")
 
-// Struct that represents an user in the database.
 type User struct {
-	// Identifier is the unique identifier for the user
-	Id uint64 `json:"id"`
-	// Username is the username of the user
+	Id       uint64 `json:"id"`
 	Username string `json:"username"`
 }
 
-// Struct that represents the photo stream of an user in the database.
 type Steam struct {
-	// Identifier of the user stream
-	Identifier uint64 `json:"identifier"`
-	// Stream of photos
-	Photos []PhotoStream `json:"photoStream"`
+	Identifier uint64        `json:"identifier"`
+	Photos     []PhotoStream `json:"photoStream"`
 }
 
-// Struct that represents a photo for the stream in the database.
 type PhotoStream struct {
-	// Identifier for the photo
-	Id uint64 `json:"id"`
-	// Identifier for the user who owns the photo
-	UserId uint64 `json:"userId"`
-	// Username for the user who owns the photo
-	Username string `json:"username"`
-	// File for the  photo
-	File []byte `json:"file"`
-	// Date when the photo was uploaded
-	Date string `json:"date"`
-	// Number of likes for the photo
-	LikeCount int `json:"likeCount"`
-	// Number of comments for the photo
-	CommentCount int `json:"commentCount"`
-
-	LikeStatus bool `json:"likeStatus"`
+	Id           uint64 `json:"id"`
+	UserId       uint64 `json:"userId"`
+	Username     string `json:"username"`
+	File         []byte `json:"file"`
+	Date         string `json:"date"`
+	LikeCount    int    `json:"likeCount"`
+	CommentCount int    `json:"commentCount"`
+	LikeStatus   bool   `json:"likeStatus"`
 }
 
-// Struct that represents the followers of an user in the database.
 type Followers struct {
-	// Identifier for the user that has the followers
-	Id uint64 `json:"identifier"`
-	// List of followers
+	Id        uint64   `json:"identifier"`
 	Followers []Follow `json:"Followers"`
 }
 
-// Struct that represents the follow of an user in the database.
 type Follow struct {
-	// Follow is the identifier for the follow action
-	FollowId uint64 `json:"followId"`
-	// Identifier for the user who is followed
+	FollowId   uint64 `json:"followId"`
 	FollowedId uint64 `json:"followedId"`
-	// Identifier for the user who is following
-	UserId uint64 `json:"userId"`
-	// Ban status for the user who is followed
-	// If ban status is 1, the user is banned so it's not considered in the follow list.
-	BanStatus int `json:"banStatus"`
+	UserId     uint64 `json:"userId"`
+	BanStatus  int    `json:"banStatus"`
 }
 
-// Struct that represents the bans of an user in the database.
 type Bans struct {
-	// Identifier for the user that has the bans
 	Identifier uint64 `json:"identifier"`
-	// Username for the user that has the bans
-	Username string `json:"username"`
-	// List of bans
-	Bans []Ban `json:"bans"`
+	Username   string `json:"username"`
+	Bans       []Ban  `json:"bans"`
 }
 
-// Struct that represents the ban of an user in the database.
 type Ban struct {
-	// BanIdentifier is the identifier for the ban action
-	BanId uint64 `json:"banId"`
-	// Identifier for the user who is banned
+	BanId    uint64 `json:"banId"`
 	BannedId uint64 `json:"bannedId"`
-	// Identifier for the user who is banning
-	UserId uint64 `json:"userId"`
+	UserId   uint64 `json:"userId"`
 }
 
-// Struct that represents the photos of an user in the database.
 type Photos struct {
-	// Identifier for the user that has requested the photos
-	RequestUser uint64 `json:"requestUser"`
-	// Identifier of the user who has the photos
-	Identifier uint64 `json:"identifier"`
-	// List of photos
-	Photos []Photo `json:"photos"`
+	RequestUser uint64  `json:"requestUser"`
+	Identifier  uint64  `json:"identifier"`
+	Photos      []Photo `json:"photos"`
 }
 
-// Struct that represents a photo in the database.
 type Photo struct {
-	// Identifier for the photo
-	Id uint64 `json:"id"`
-	// Identifier for the user who owns the photo
-	UserId uint64 `json:"userId"`
-	// File for the  photo
-	File []byte `json:"file"`
-	// Date when the photo was uploaded
-	Date string `json:"date"`
-
-	LikesCount int `json:"likesCount"`
-
-	CommentsCount int `json:"commentsCount"`
-
-	LikeStatus bool `json:"likeStatus"`
+	Id            uint64 `json:"id"`
+	UserId        uint64 `json:"userId"`
+	File          []byte `json:"file"`
+	Date          string `json:"date"`
+	LikesCount    int    `json:"likesCount"`
+	CommentsCount int    `json:"commentsCount"`
+	LikeStatus    bool   `json:"likeStatus"`
 }
 
-// // Struct that represents the likes of a photo in the database.
-// type Likes struct {
-// 	// Identifier for the user that has requested the likes
-// 	RequestIdentifier uint64 `json:"requestIdentifier"`
-// 	// Identifier for the photo that has the likes
-// 	PhotoIdentifier uint64 `json:"photoIdentifier"`
-// 	// Identifier for the owner of the photo
-// 	PhotoOwner uint64 `json:"identifier"`
-// 	// List of likes under a photo
-// 	Likes []Like `json:"likes"`
-// }
-
-// Struct that represents a like in the database.
 type Like struct {
-	// Identifier for the like that has been added
-	LikeId uint64 `json:"likeId"`
-	// Identifier for the user who liked the photo
-	UserIdentifier uint64 `json:"identifier"`
-	// Identifier for the photo that has the likes
+	LikeId          uint64 `json:"likeId"`
+	UserIdentifier  uint64 `json:"identifier"`
 	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// Identifier for the user who has the photo
-	PhotoOwner uint64 `json:"photoOwner"`
+	PhotoOwner      uint64 `json:"photoOwner"`
 }
 
-// Struct that represents the comments of a photo in the database.
 type Comments struct {
-	// Identifier for the user that has requested the comments
-	RequestIdentifier uint64 `json:"requestIdentifier"`
-	// Identifier for the photo that has the likes
-	PhotoIdentifier uint64 `json:"photoIdentifier"`
-	// Identifier for the owner of the photo
-	PhotoOwner uint64 `json:"identifier"`
-	// List of likes under a photo
-	Comments []Comment `json:"comments"`
+	RequestIdentifier uint64    `json:"requestIdentifier"`
+	PhotoIdentifier   uint64    `json:"photoIdentifier"`
+	PhotoOwner        uint64    `json:"identifier"`
+	Comments          []Comment `json:"comments"`
 }
 
-// Struct that represents a comment in the database.
 type Comment struct {
-	// Identifier of the user who has commented
-	Id uint64 `json:"id"`
-	// Identifier of the user who has commented
-	UserId uint64 `json:"userId"`
-	// Identifier for the photo that has the comments
-	PhotoId uint64 `json:"photoId"`
-	// Identifier for the user who owns the photo
-	PhotoOwner uint64 `json:"photoOwner"`
-
+	Id            uint64 `json:"id"`
+	UserId        uint64 `json:"userId"`
+	PhotoId       uint64 `json:"photoId"`
+	PhotoOwner    uint64 `json:"photoOwner"`
 	OwnerUsername string `json:"ownerUsername"`
-
-	Username string `json:"username"`
-	// Content of the comment
-	Content string `json:"content"`
+	Username      string `json:"username"`
+	Content       string `json:"content"`
 }
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-
-	// DB functions for users
 	CreateUser(User) (User, error)
 	SetUsername(User, string) (User, error)
 	GetUserId(string) (User, error)
@@ -185,7 +108,6 @@ type AppDatabase interface {
 	CheckUser(User) (User, error)
 	GetMyStream(User) ([]PhotoStream, error)
 
-	// DB functions for followers
 	SetFollow(Follow) (Follow, error)
 	RemoveFollow(uint64, uint64, uint64) error
 	GetFollowingId(user1 uint64, user2 uint64) (Follow, error)
@@ -194,7 +116,6 @@ type AppDatabase interface {
 	GetFollowingsCount(uint64) (int, error)
 	GetFollowStatus(uint64, uint64) (bool, error)
 
-	// DB functions for bans
 	CreateBan(Ban) (Ban, error)
 	RemoveBan(Ban) error
 	GetBans(User, uint64) (Ban, error)
@@ -202,14 +123,13 @@ type AppDatabase interface {
 	UpdateBanStatus(int, uint64, uint64) error
 	GetBanStatus(uint64, uint64) (bool, error)
 	CheckIfBanned(uint64, uint64) (bool, error)
-	// DB functions for photos
+
 	SetPhoto(Photo) (Photo, error)
 	RemovePhoto(uint64) error
 	GetPhotos(User, uint64) ([]Photo, error)
 	GetPhotosCount(uint64) (int, error)
 	CheckPhoto(Photo) (Photo, error)
 
-	// DB functions for likes
 	SetLike(Like) (Like, error)
 	RemoveLike(Like) error
 	RemoveLikes(uint64, uint64) error
@@ -217,7 +137,6 @@ type AppDatabase interface {
 	GetLikeById(Like) (Like, error)
 	GetLikesCount(photoid uint64) (int, error)
 
-	// DB functions for comments
 	SetComment(Comment) (Comment, error)
 	RemoveComment(Comment) error
 	RemoveComments(uint64, uint64) error
@@ -225,7 +144,6 @@ type AppDatabase interface {
 	GetCommentById(Comment) (Comment, error)
 	GetCommentsCount(uint64) (int, error)
 
-	// Other functions
 	Ping() error
 }
 
@@ -250,12 +168,10 @@ func New(db *sql.DB) (AppDatabase, error) {
 	var tableName string
 	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		// Create the users table
 		usersDatabase := `CREATE TABLE users (
 			Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			Username TEXT NOT NULL UNIQUE
 			);`
-		// Create the users table
 		photosDatabase := `CREATE TABLE photos (
 			Id INTEGER NOT NULL PRIMARY KEY, 
 			userId INTEGER NOT NULL,
@@ -263,7 +179,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 			date TEXT ,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
-		// Create the followers table
 		likesDatabase := `CREATE TABLE likes (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
@@ -272,7 +187,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`
-		// Create the comments table
 		commentsDatabase := `CREATE TABLE comments (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			userId INTEGER NOT NULL,
@@ -282,14 +196,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (userId) REFERENCES users(Id),
 			FOREIGN KEY (photoId) REFERENCES photos(Id)
 			);`
-		// Create the bans table
 		bansDatabase := `CREATE TABLE bans (
 			banId INTEGER NOT NULL PRIMARY KEY,
 			bannedId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
-		// Create the followers table
 		followersDatabase := `CREATE TABLE followers (
 			Id INTEGER NOT NULL PRIMARY KEY,
 			followerId INTEGER NOT NULL,
@@ -297,32 +209,26 @@ func New(db *sql.DB) (AppDatabase, error) {
 			banStatus INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
-		// check error
 		_, err = db.Exec(usersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-		// check error
 		_, err = db.Exec(photosDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-		// check error
 		_, err = db.Exec(likesDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-		// check error
 		_, err = db.Exec(commentsDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-		// check error
 		_, err = db.Exec(bansDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)
 		}
-		// check error
 		_, err = db.Exec(followersDatabase)
 		if err != nil {
 			return nil, fmt.Errorf("error creating database structure: %w", err)

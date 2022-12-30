@@ -6,6 +6,7 @@ export default {
 	data: function() {
 		return {
             errormsg: null,
+            successmsg: null,
             username : localStorage.getItem('username'),
 			token: localStorage.getItem('token'),
             profile: {
@@ -193,6 +194,7 @@ export default {
                 })
 				this.clear = response.data
 				this.refresh()
+                this.successmsg = "User" + username + "followed successfully"
             } catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -235,6 +237,7 @@ export default {
                     }
                 })
 				this.clear = response.data
+                this.successmsg = "User" + username + "unfollowed successfully"
 				this.refresh()
             } catch(e) {
 				if (e.response && e.response.status === 400) {
@@ -364,8 +367,6 @@ export default {
 				}
 			}
 		},
-
-
 	},
 	mounted() {
         this.userProfile()
@@ -375,6 +376,21 @@ export default {
 </script>
 
 <template>
+    			<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+				<div class="position-sticky pt-3 sidebar-sticky">
+					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+						<span>General</span>
+					</h6>
+					<ul class="nav flex-column">
+						<li class="nav-item">
+							<RouterLink to="/session" class="nav-link">
+								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
+								Home
+							</RouterLink>
+						</li>
+					</ul>
+				</div>
+			</nav>
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" v-if="profile.checkIfBanned==true">
         <div class="alert alert-danger " role="alert">
   <h4 class="alert-heading">Oh no...!</h4>
@@ -385,10 +401,10 @@ export default {
 
     </div>
 
-    <div v-if="profile.checkIfBanned==false">
+    <div>
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Profile of {{ profile.username }} </h1>
-        <div class="p-4 text-black" >
+        <div v-if="profile.checkIfBanned==false" class="p-4 text-black" >
             <div class="d-flex justify-content-end text-center py-1">
               <div>
                 <p class="mb-1 h5">{{ profile.followersCount }}</p>
@@ -403,7 +419,7 @@ export default {
                 <p class="small text-muted mb-0">Photos</p>
               </div>
             </div>
-          </div>
+        </div>
         <div class="form-group row ">
             <div class="col-md-6">
                 <button type="button" v-if="profile.followStatus==false" class="btn btn-outline-primary " @click="followUser(profile.username)">Follow </button>
@@ -415,11 +431,12 @@ export default {
             </div>
         </div>
     </div>
- 
+    
+    <SuccessMsg v-if="successmsg" :msg="successmsg"></SuccessMsg>
     <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
     <LogModal id="logviewer" :log="photoComments" :token="token"></LogModal>
-    <div class="row">
+    <div v-if="profile.checkIfBanned==false" class="row">
         <div class="col-md-4" v-for="photo in photoList.photos" :key="photo.id">
             <div class="card mb-4 shadow-sm">
                 <img class="card-img-top" :src=photo.file alt="Card image cap">

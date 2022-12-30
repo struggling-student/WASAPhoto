@@ -13,7 +13,6 @@ func (db *appdbimpl) SetPhoto(p Photo) (Photo, error) {
 }
 
 func (db *appdbimpl) RemovePhoto(id uint64) error {
-	// delete photos
 	res1, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
 	if err != nil {
 		return err
@@ -24,8 +23,6 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	} else if affected == 0 {
 		return nil
 	}
-
-	// delete likes
 	res2, err := db.c.Exec(`DELETE FROM likes WHERE photoId=?`, id)
 	if err != nil {
 		return err
@@ -35,9 +32,6 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	} else if affected2 == 0 {
 		return nil
 	}
-
-	// delete comments
-	// delete likes
 	res3, err := db.c.Exec(`DELETE FROM comments WHERE photoId=?`, id)
 	if err != nil {
 		return err
@@ -58,21 +52,17 @@ func (db *appdbimpl) GetPhotos(u User, token uint64) ([]Photo, error) {
 		return ret, ErrUserDoesNotExist
 	}
 	defer func() { _ = rows.Close() }()
-
 	for rows.Next() {
 		var b Photo
 		err = rows.Scan(&b.Id, &b.UserId, &b.File, &b.Date)
 		if err != nil {
 			return nil, err
 		}
-		// count likes
 		if err := db.c.QueryRow(`SELECT COUNT(*) FROM likes WHERE photoId = ?`, b.Id).Scan(&b.LikesCount); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, ErrLikeDoesNotExist
 			}
 		}
-
-		// count comments
 		if err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE photoId = ?`, b.Id).Scan(&b.CommentsCount); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, ErrLikeDoesNotExist
@@ -83,7 +73,6 @@ func (db *appdbimpl) GetPhotos(u User, token uint64) ([]Photo, error) {
 				return nil, err
 			}
 		}
-
 		ret = append(ret, b)
 	}
 	if rows.Err() != nil {

@@ -84,14 +84,12 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 		return ret, ErrUserDoesNotExist
 	}
 	defer func() { _ = rows.Close() }()
-
 	for rows.Next() {
 		var b PhotoStream
 		err = rows.Scan(&b.Id, &b.UserId, &b.File, &b.Date)
 		if err != nil {
 			return nil, err
 		}
-		//log.Fatalf("%v", b)
 		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, b.UserId).Scan(&b.Username); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, err
@@ -102,7 +100,6 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 				return nil, err
 			}
 		}
-
 		if err := db.c.QueryRow(`SELECT COUNT(*) FROM comments WHERE photoId = ?`, b.Id).Scan(&b.CommentCount); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, err
@@ -118,7 +115,6 @@ func (db *appdbimpl) GetMyStream(u User) ([]PhotoStream, error) {
 	if rows.Err() != nil {
 		return nil, err
 	}
-
 	return ret, nil
 }
 

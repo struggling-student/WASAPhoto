@@ -1,11 +1,13 @@
 <script>
 import LogModal from "../components/Logmodal.vue";
+import SuccessMsg from "../components/SuccessMsg.vue";
 
 export default {
-	components: {LogModal},
+	components: { LogModal, SuccessMsg },
 	data: function() {
 		return {
 			errormsg: null,
+			successmsg: null,
 			detailedmsg: null,
 			username : localStorage.getItem('username'),
 			token: localStorage.getItem('token'),
@@ -84,6 +86,7 @@ export default {
 						}
 					})
 					this.profile = response.data
+					this.successmsg = "Photo uploaded successfully."
 				} catch(e) {
 					if (e.response && e.response.status === 400) {
 						this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -261,6 +264,16 @@ export default {
 				}
 			}
 		},
+
+		async logout() {
+			localStorage.removeItem("token")
+			localStorage.removeItem("username")
+			this.$router.push({path: '/'})
+		},
+
+		async ViewProfile() {
+			this.$router.push({path: '/users/' + this.username + '/profile'})
+		},
 	},
 	mounted() {
 		this.getStream()
@@ -270,16 +283,34 @@ export default {
 
 <template>
 	<div>	
+		<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+				<div class="position-sticky pt-3 sidebar-sticky">
+					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+						<span>General</span>
+					</h6>
+					<ul class="nav flex-column">
+						<li class="nav-item">
+							<RouterLink to="/session" class="nav-link">
+								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
+								Home
+							</RouterLink>
+						</li>
+					</ul>
+				</div>
+			</nav>
 		<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 			<h1 class="h2">Welcome to WASAPhoto {{this.username }}</h1>
 			<div class="btn-toolbar mb-2 mb-md-0">
 				<div class="btn-group me-2">
+					<button class="btn btn-danger" type="button" @click="logout">Logout</button>
+					<button class="btn btn-primary" type="button" @click="ViewProfile">View your profile</button>
 					<input type="file" accept="image/*" class="btn btn-outline-primary" @change="uploadFile" ref="file">
-					<button class="btn btn-primary" @click="submitFile">Upload Photo</button>
+					<button class="btn btn-success" @click="submitFile">Upload Photo</button>
 				</div>
 			</div>
 		</div>
 		<div class="input-group mb-3">
+			
 			<input type="text" id="searchUserUsername" v-model="searchUserUsername" class="form-control" placeholder="Search a user in WASAPhoto." aria-label="Recipient's username" aria-describedby="basic-addon2">
 			<div class="input-group-append">
 				<button class="btn btn-primary" type="button" @click="SearchUser">Search</button>
@@ -289,6 +320,7 @@ export default {
 	<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
 	
 	<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+	<SuccessMsg v-if="successmsg" :msg="successmsg"></SuccessMsg>
 
 	<LogModal id="logviewer" :log="photoComments" :token="token"></LogModal>
 

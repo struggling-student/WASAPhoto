@@ -41,26 +41,22 @@ func (db *appdbimpl) GetComments(photoid uint64) ([]Comment, error) {
 		return ret, ErrPhotoDoesNotExist
 	}
 	defer func() { _ = rows.Close() }()
-
 	for rows.Next() {
 		var c Comment
 		err = rows.Scan(&c.Id, &c.UserId, &c.PhotoId, &c.PhotoOwner, &c.Content)
 		if err != nil {
 			return nil, err
 		}
-
 		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, c.PhotoOwner).Scan(&c.OwnerUsername); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, err
 			}
 		}
-
 		if err := db.c.QueryRow(`SELECT username FROM users WHERE id = ?`, c.UserId).Scan(&c.Username); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, err
 			}
 		}
-
 		ret = append(ret, c)
 	}
 	if rows.Err() != nil {
