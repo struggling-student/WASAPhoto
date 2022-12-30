@@ -47,8 +47,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/users/:username/photo/:photoid/like/:likeid", rt.wrap(rt.likePhoto))
 	// Method for deleting a like
 	rt.router.DELETE("/users/:username/photo/:photoid/like/:likeid", rt.wrap(rt.unlikePhoto))
-	// Method for getting the likes
-	rt.router.GET("/users/:username/photo/:photoid/like", rt.wrap(rt.getLikes))
 
 	// Comment - Functions for comment actions
 	// Method for adding a comment to a photo
