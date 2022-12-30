@@ -7,7 +7,6 @@ export default {
 
 	data() {
 		return {
-			username: localStorage.getItem("username"),
 		};
 		
 	},
@@ -37,7 +36,7 @@ export default {
 							</RouterLink>
 						</li>
 						<li class="nav-item">
-							<RouterLink :to="'/users/' + this.username + '/profile'" class="nav-link">
+							<RouterLink :to="'/users/' + localStorage.getItem("username") + '/profile'" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
 								Profile
 							</RouterLink>

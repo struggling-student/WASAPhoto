@@ -36,7 +36,7 @@ func (db *appdbimpl) RemoveLikes(user uint64, banned uint64) error {
 
 func (db *appdbimpl) GetLike(photoid uint64, token uint64) (Like, error) {
 	var like Like
-	//log.Fatalf("%d, %d", photoid, token)
+
 	if err := db.c.QueryRow(`SELECT Id, userId, photoId, photoOwner FROM likes WHERE userId = ? AND photoId = ?`, token, photoid).Scan(&like.LikeId, &like.UserIdentifier, &like.PhotoIdentifier, &like.PhotoOwner); err != nil {
 		if err == sql.ErrNoRows {
 			return like, ErrLikeDoesNotExist

@@ -1,8 +1,7 @@
-
 FROM golang:1.19.1 AS builder
 
 ### Copy Go code
-WORKDIR /src/
+WORKDIR /home/wasa/Desktop/WASAPhoto/
 COPY . .
 
 ### Build executables
