@@ -152,6 +152,12 @@ func (rt *_router) getUserProfile(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	profile.CheckIfBanned, err = rt.db.CheckIfBanned(requestUser.Id, user.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// return the profile
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

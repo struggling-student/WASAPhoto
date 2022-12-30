@@ -22,7 +22,7 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	if err != nil {
 		return err
 	} else if affected == 0 {
-		return ErrPhotoDoesNotExist
+		return nil
 	}
 
 	// delete likes
@@ -33,7 +33,7 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	affected2, err := res2.RowsAffected()
 	if err != nil {
 	} else if affected2 == 0 {
-		return ErrLikeDoesNotExist
+		return nil
 	}
 
 	// delete comments
@@ -46,12 +46,12 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	if err != nil {
 		return err
 	} else if affected3 == 0 {
-		return ErrLikeDoesNotExist
+		return nil
 	}
 	return nil
 }
 
-func (db *appdbimpl) GetPhotos(u User) ([]Photo, error) {
+func (db *appdbimpl) GetPhotos(u User, token uint64) ([]Photo, error) {
 	var ret []Photo
 	rows, err := db.c.Query(`SELECT id, userId, photo, date FROM photos WHERE userId = ?`, u.Id)
 	if err != nil {
@@ -78,6 +78,12 @@ func (db *appdbimpl) GetPhotos(u User) ([]Photo, error) {
 				return nil, ErrLikeDoesNotExist
 			}
 		}
+		if err := db.c.QueryRow(`SELECT EXISTS(SELECT 1 FROM likes WHERE userId = ? AND photoId = ?)`, token, b.Id).Scan(&b.LikeStatus); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, err
+			}
+		}
+
 		ret = append(ret, b)
 	}
 	if rows.Err() != nil {

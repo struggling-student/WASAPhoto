@@ -3,6 +3,7 @@ export default{
     components: {},
     data: function() {
         return {
+            errormsg: null,
             username: "",
             profile: {
                id: 0,
@@ -12,14 +13,14 @@ export default{
     },
     methods: {
         async login() {
-            try {
+            if (this.username=="") {
+                this.errormsg = "Username cannot be empty.";
+            } else {
+                try {
                 let response = await this.$axios.post("/session", {username: this.username})
-                // save the response data 
                 this.profile = response.data
-                // save the data in the local storage
                 localStorage.setItem("token", this.profile.id);
                 localStorage.setItem("username", this.profile.username);
-                // redirect to the home page
                 this.$router.push({path: '/session'})
             } catch(e) {
 				if (e.response && e.response.status === 400) {
@@ -33,6 +34,8 @@ export default{
 					this.detailedmsg = null;
 				}
 			}
+            }
+     
         }
     },
     mounted() {
@@ -46,14 +49,13 @@ export default{
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Welcome to WASAPhoto</h1>
     </div>
-	<div class="mb-3">
-        <label for="username">Username</label>
-        <input type="text" id="username" v-model="username">
-    </div>
-    <div class="mb-3">  
-       <button type="button" class="btn btn-sm btn-primary" @click="login">Login</button>
-    </div>
-
+    <div class="input-group mb-3">
+			<input type="text" id="username" v-model="username" class="form-control" placeholder="Insert a username to log in WASAPhoto." aria-label="Recipient's username" aria-describedby="basic-addon2">
+			<div class="input-group-append">
+				<button class="btn btn-success" type="button" @click="login" >Login</button>
+			</div>
+		</div>
+    <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 </template>
 
 <style>

@@ -22,6 +22,8 @@ type Profile struct {
 	FollowStatus bool `json:"followStatus"`
 
 	BanStatus bool `json:"banStatus"`
+
+	CheckIfBanned bool `json:"checkIfBanned"`
 }
 
 // Struct for user

@@ -1,9 +1,12 @@
 <script>
+import LogModal from "../components/Logmodal.vue";
+
 export default{
-    components: {},
+    components: {LogModal},
     data: function() {
         return {
             username : localStorage.getItem('username'),
+            token: localStorage.getItem('token'),
             newUsername : "",
             profile: {
                requestId: 0,
@@ -24,6 +27,7 @@ export default{
                     date: "",
                     likesCount: 0,
                     commentsCount: 0,
+                    likeStatus: null,
                 }
             ],
            },
@@ -31,9 +35,32 @@ export default{
                id: 0,
                username: "",
             },
+            comment: "",
+            errormsg: null,
+            photoComments: {
+				requestIdentifier: 0,
+				photoIdentifier: 0,
+				identifier: 0,
+				comments: [
+					{
+						id: 0,
+						userId: 0,
+						photoId: 0,
+						photoOwner: 0,
+						ownerUsername: "",
+						username: "",
+						content: "",
+					}
+				],
+			},
         }
     },
     methods: {
+
+        async refresh() {
+            await this.userProfile();
+            await this.userPhotos();
+        },
         async userProfile() {
             try { 
                 let response = await this.$axios.get("/users/" + this.username + "/profile", {
@@ -86,6 +113,7 @@ export default{
                         Authorization: "Bearer " + localStorage.getItem("token")
                     }
                 })
+                this.refresh();
             } catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -103,7 +131,10 @@ export default{
 
         },
         async changeName() {
-            try { 
+            if (this.newUsername == "") {
+                this.errormsg = "Emtpy username field."
+            } else {
+                try { 
                 let response = await this.$axios.put("/user/" + this.username + "/setusername", {username: this.newUsername}, {
                     headers: {
                         Authorization: "Bearer " + localStorage.getItem("token")
@@ -124,10 +155,127 @@ export default{
 					this.detailedmsg = null;
 				}
 			}
+            }
+
         },
         async logout() {
 
-        }
+        }, 
+        async sendComment(username, photoid) {
+			if (this.comment === "") {
+				this.errormsg = "Emtpy comment field."
+			} else {
+				try { 
+					let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), {content: this.comment}, {
+						headers: {
+							Authorization: "Bearer " + localStorage.getItem("token")
+						}
+					})
+					this.clear = response.data
+					this.refresh()
+				} catch(e) {
+					if (e.response && e.response.status === 400) {
+						this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+						this.detailedmsg = null;
+					} else if (e.response && e.response.status === 500) {
+						this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+						this.detailedmsg = e.toString();
+					} else {
+						this.errormsg = e.toString();
+						this.detailedmsg = null;
+					}
+				}
+			}
+		},
+
+        async openLog(username, photoid) {
+			try {
+				let response = await this.$axios.get("/users/" + username + "/photo/" + photoid + "/comment", {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.photoComments = response.data;
+				const modal = new bootstrap.Modal(document.getElementById('logviewer'));
+				modal.show();
+			} catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+        },
+
+        async likePhoto(username, id){
+			try { 
+                let response = await this.$axios.put("/users/" + username + "/photo/" + id + "/like/" + Math.floor(Math.random() * 10000),{}, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+		},
+		async deleteLike(username, id){
+			try { 
+				let response = await this.$axios.get("/users/" + username + "/photo/" + id + "/like", {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+                this.like = response.data
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+
+			try { 
+				let response = await this.$axios.delete("/users/" + username + "/photo/" + id + "/like/" + this.like.likeId, {
+                    headers: {
+                        Authorization: "Bearer " + localStorage.getItem("token")
+                    }
+                })
+				this.clear = response.data
+				this.refresh()
+            } catch(e) {
+				if (e.response && e.response.status === 400) {
+                    this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
+					this.detailedmsg = null;
+				} else if (e.response && e.response.status === 500) {
+					this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+					this.detailedmsg = e.toString();
+				} else {
+					this.errormsg = e.toString();
+					this.detailedmsg = null;
+				}
+			}
+		},
     },
     mounted() {
         this.userProfile()
@@ -138,48 +286,66 @@ export default{
 </script>
 
 <template>
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">User profile of {{username}} </h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-outline-danger" @click="logout">
-						Logout
-					</button>
+     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Welcome to your profile {{ username }} </h1>
+        <div class="p-4 text-black" >
+            <div class="d-flex justify-content-end text-center py-1">
+              <div>
+                <p class="mb-1 h5">{{ profile.followersCount }}</p>
+                <p class="small text-muted mb-0">Followers</p>
+              </div>
+              <div class="px-3">
+                <p class="mb-1 h5">{{profile.followingCount}}</p>
+                <p class="small text-muted mb-0">Followings</p>
+              </div>
+              <div>
+                <p class="mb-1 h5">{{ profile.photoCount }}</p>
+                <p class="small text-muted mb-0">Photos</p>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
     <div class="input-group mb-3">
 			<input type="text" id="newUsername" v-model="newUsername" class="form-control" placeholder="Insert a new username for your profile..." aria-label="Recipient's username" aria-describedby="basic-addon2">
 			<div class="input-group-append">
-				<button class="btn btn-outline-success" type="button" @click="changeName" >Change Username</button>
+				<button class="btn btn-success" type="button" @click="changeName" >Change your username</button>
 			</div>
 		</div>
-    <div class="d-flex justify-content-between align-items-center">
-        <h4>
-        Followers : {{profile.followersCount}}
-    </h4>
-    <h4>
-        Following : {{profile.followingCount}}
-    </h4>
-    <h4>
-        Photos : {{profile.photoCount}}
-    </h4>
-    </div>
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
     
+    <ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+    <LogModal id="logviewer" :log="photoComments" :token="token"></LogModal>
+
     <div class="row">
         <div class="col-md-4" v-for="photo in photoList.photos" :key="photo.id">
             <div class="card mb-4 shadow-sm">
                 <img class="card-img-top" :src=photo.file alt="Card image cap">
                 <div class="card-body">
-                    <p class="card-text">Photo uploaded on {{photo.date}}</p>
+                    <RouterLink :to="'/users/' + profile.username + '/profile'" class="nav-link">
+						<button type="button" class="btn btn-outline-primary">{{profile.username}}</button>
+					</RouterLink>
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
                     <div class="d-flex justify-content-between align-items-center">
                         <p class="card-text">Likes : {{photo.likesCount}}</p>
-                        <p class="card-text">Comments : {{photo.commentsCount}}</p>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
+                        <p class="card-text">Comments : {{photo.commentsCount}}</p>
+                    </div>
+                    <p class="card-text">Photo uploaded on {{photo.date}}</p>
+
+                    <div class="input-group mb-3">
+						<input type="text" id="comment" v-model="comment" class="form-control" placeholder="Comment!" aria-label="Recipient's username" aria-describedby="basic-addon2">
+						<div class="input-group-append">
+							<button class="btn btn-primary" type="button" @click="sendComment(username, photo.id)">Send</button>
+						</div>
+					</div>
+
+                    <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">View photo</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">View comments</button>
+                            <button type="button" class="btn btn-dark" @click="openLog(username, photo.id)">View comments</button>
+                            <button type="button" v-if="photo.likeStatus==false" class="btn btn-primary" @click="likePhoto(username, photo.id)">Like</button>
+							<button type="button" v-if="photo.likeStatus==true" class="btn btn-danger" @click="deleteLike(username, photo.id)">Unlike</button>
                             <button type="button" class="btn btn-sm btn btn-outline-danger" @click="deletePhoto(photo.id)">Delete Photo</button>
                         </div>
                     </div>
@@ -192,9 +358,9 @@ export default{
 </template>
 
 <style>
-.card-img-top {
+/* .card-img-top {
     width: 100%;
     height: 15vw;
     object-fit: cover;
-}
+} */
 </style>

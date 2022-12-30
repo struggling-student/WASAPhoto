@@ -59,3 +59,13 @@ func (db *appdbimpl) UpdateBanStatus(status int, followerId uint64, userId uint6
 	}
 	return nil
 }
+
+func (db *appdbimpl) CheckIfBanned(r uint64, u uint64) (bool, error) {
+	var res bool
+	if err := db.c.QueryRow(`SELECT EXISTS(SELECT 1 FROM bans WHERE bannedId = ? AND userId = ?)`, r, u).Scan(&res); err != nil {
+		if err == sql.ErrNoRows {
+			return false, err
+		}
+	}
+	return res, nil
+}

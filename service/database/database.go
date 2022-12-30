@@ -115,6 +115,8 @@ type Photo struct {
 	LikesCount int `json:"likesCount"`
 
 	CommentsCount int `json:"commentsCount"`
+
+	LikeStatus bool `json:"likeStatus"`
 }
 
 // // Struct that represents the likes of a photo in the database.
@@ -199,11 +201,11 @@ type AppDatabase interface {
 	GetBanById(Ban) (Ban, error)
 	UpdateBanStatus(int, uint64, uint64) error
 	GetBanStatus(uint64, uint64) (bool, error)
-
+	CheckIfBanned(uint64, uint64) (bool, error)
 	// DB functions for photos
 	SetPhoto(Photo) (Photo, error)
 	RemovePhoto(uint64) error
-	GetPhotos(User) ([]Photo, error)
+	GetPhotos(User, uint64) ([]Photo, error)
 	GetPhotosCount(uint64) (int, error)
 	CheckPhoto(Photo) (Photo, error)
 
@@ -251,14 +253,14 @@ func New(db *sql.DB) (AppDatabase, error) {
 		// Create the users table
 		usersDatabase := `CREATE TABLE users (
 			Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-			Username TEXT UNIQUE
+			Username TEXT NOT NULL UNIQUE
 			);`
 		// Create the users table
 		photosDatabase := `CREATE TABLE photos (
 			Id INTEGER NOT NULL PRIMARY KEY, 
 			userId INTEGER NOT NULL,
 			photo BLOB,
-			date TEXT,
+			date TEXT ,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
 		// Create the followers table
