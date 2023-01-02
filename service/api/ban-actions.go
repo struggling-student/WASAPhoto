@@ -36,11 +36,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 	ban.BanFromDatabase(dbban)
-	err = rt.db.UpdateBanStatus(1, user.Id, token)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+
 	err = rt.db.RemoveComments(token, user.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -77,15 +73,6 @@ func (rt *_router) unbanUser(w http.ResponseWriter, r *http.Request, ps httprout
 	ban.UserId = token
 	ban.BannedId = user.Id
 	err = rt.db.RemoveBan(ban.BanToDatabase())
-	if errors.Is(err, database.ErrBanDoesNotExist) {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	} else if err != nil {
-		ctx.Logger.WithError(err).WithField("id", id).Error("can't delete the photo")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	err = rt.db.UpdateBanStatus(0, user.Id, token)
 	if errors.Is(err, database.ErrBanDoesNotExist) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

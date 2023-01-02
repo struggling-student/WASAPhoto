@@ -110,7 +110,7 @@ export default {
                     this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
                     this.detailedmsg = e.toString();
                 } else {
-                    this.errormsg = e.toString();
+                    this.errormsg = "User hasen't posted any photos yet."
                     this.detailedmsg = null;
                 }
             }
