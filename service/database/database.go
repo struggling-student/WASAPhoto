@@ -43,7 +43,6 @@ type Follow struct {
 	FollowId   uint64 `json:"followId"`
 	FollowedId uint64 `json:"followedId"`
 	UserId     uint64 `json:"userId"`
-	BanStatus  int    `json:"banStatus"`
 }
 
 type Bans struct {
@@ -206,7 +205,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 			Id INTEGER NOT NULL PRIMARY KEY,
 			followerId INTEGER NOT NULL,
 			userId INTEGER NOT NULL,
-			banStatus INTEGER NOT NULL,
 			FOREIGN KEY (userId) REFERENCES users(Id)
 			);`
 		_, err = db.Exec(usersDatabase)

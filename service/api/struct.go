@@ -67,14 +67,12 @@ type Follow struct {
 	FollowId   uint64 `json:"followId"`
 	FollowedId uint64 `json:"followedId"`
 	UserId     uint64 `json:"userId"`
-	BanStatus  int    `json:"banStatus"`
 }
 
 func (f *Follow) FollowFromDatabase(follow database.Follow) {
 	f.FollowId = follow.FollowId
 	f.FollowedId = follow.FollowedId
 	f.UserId = follow.UserId
-	f.BanStatus = follow.BanStatus
 }
 
 func (f *Follow) FollowToDatabase() database.Follow {
@@ -82,7 +80,6 @@ func (f *Follow) FollowToDatabase() database.Follow {
 		FollowId:   f.FollowId,
 		FollowedId: f.FollowedId,
 		UserId:     f.UserId,
-		BanStatus:  f.BanStatus,
 	}
 }
 
