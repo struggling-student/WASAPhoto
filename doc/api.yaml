@@ -76,8 +76,7 @@ paths:
       tags: ["User"]
       summary: Set user username
       description: |-
-        Set user username, if the user is logged in then the username is set with the username
-        in the request body.
+        Set a new username.s
       operationId: setMyUserName
       requestBody:
         description: User username
@@ -422,9 +421,7 @@ paths:
       summary: Add comment
       operationId: commentPhoto
       description: |-
-       Add a comment under a Photo, if photoId is correct
-       then the comment in the request body is added under the photo. If 
-       the photoId is wrong then a response error is given.
+       Add a comment under a specific photo.
       requestBody:
         description: Comment 
         content: 
@@ -450,8 +447,7 @@ paths:
      operationId: uncommentPhoto
      summary: Remove comment
      description: |-
-       Delete a comment under a photo. If the commentId is correct then the comment is removed from the photo, an error response
-       is given if the commentId is not correct.
+       Deletete a comment under a specific photo.
      responses:
        "204": { description: Comment deleted successfully. }
        "400": { $ref: "#/components/responses/BadRequest" }
@@ -469,8 +465,7 @@ paths:
       tags: ["Comment"]
       summary: Return photo comments
       description: |-
-        Return a list of comments under a specific photo. If the photoId is correct the list is returned, an error message
-        is returned if the Id is not corecct.
+        Return all comments under a specific photo.
       operationId: getComments
       responses:
         "200": 
@@ -498,7 +493,7 @@ components:
    
     user:
       title: User 
-      description: This object represent a single user.
+      description: User schema.
       type: object
       properties:
         identifier:
@@ -518,7 +513,7 @@ components:
   
     profile:
       title: Profile
-      description: This object represent a single user profile.
+      description: Profile schema.
       type: object
       properties:
         requestid:
@@ -575,7 +570,7 @@ components:
     
     ban:
       title: Ban 
-      description: This object represent the ban of a single user.
+      description: Ban schema.
       type: object
       properties:
         banId:
@@ -602,7 +597,7 @@ components:
     
     follow:
       title: Follow 
-      description: This object represent the follow of a single user.
+      description: Follow schema.
       type: object
       properties:
         followId:
@@ -629,7 +624,7 @@ components:
   
     commentsList: 
       title: Comments
-      description: This object represent the comments under a single photo.
+      description: Comments schema.
       type: object
       properties:
         requestId:
@@ -713,7 +708,7 @@ components:
     
     like:
       title: Like 
-      description: This object represent the like of a single user.
+      description: Like schema.
       type: object
       properties:
         likeId:
@@ -747,7 +742,7 @@ components:
     
     photosList: 
       title: Photos
-      description: This object represent the photos of a single user.
+      description: Photos schema.
       type: object
       properties:
         requestId:
@@ -818,7 +813,7 @@ components:
     
     stream: 
       title: Stream
-      description: This object represent the photos stream of a single user.
+      description: Stream schema.
       type: object
       properties:
         identifier:
@@ -889,7 +884,7 @@ components:
   
     login:        
       title: Login
-      description: user schema.
+      description: Login schema.
       type: object
       properties:
         username:
@@ -951,7 +946,7 @@ components:
     comment:
       title: Comment
       type: object
-      description: content schema.
+      description: comment schema.
       properties:
         content:
           description: content
