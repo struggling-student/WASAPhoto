@@ -1,12 +1,26 @@
-# WASAPhoto
-
+# WASAPhoto [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 > Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! Directly from your PC, you can upload your photos, and they will be  visible to everyone who is following you.
 
+</div> 
+<div align="center">
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white">
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
+  <img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E">
+  <img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vue.js&logoColor=4FC08D">
+  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white">
+  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white">
+  <img src="https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white">
+</div
+
+[![Screenshot-2023-01-16-at-00-10-22.png](https://i.postimg.cc/kggFZbkj/Screenshot-2023-01-16-at-00-10-22.png)](https://postimg.cc/0bhwKb5m)
+
 As part of the Web and Software Architecture exam:
-- define APIs using the OpenAPI standard
-- design and develop the server side ("backend") in Go
-- design and develop the client side ("frontend") in JavaScript
-- create a Docker container image for deployment
+- define APIs using the OpenAPI standard.
+- design and develop the server side ("backend") in Go.
+- design and develop the client side ("frontend") in JavaScript.
+- create a Docker container image for deployment.
 
 ## Description 
 Each user will be presented with a stream of photos in reverse chronological order, with information about when it was uploaded and how many likes and comments it has. Users can place(and later remove) a "like" to photos from other users. Also, users can add comments to any photo(even those uploaded by themself). Comments can be removed by the author only.
@@ -87,5 +101,18 @@ Frontend
 ```
 $ docker run -it --rm -p 8081:80 wasa-photos-frontend:latest
 ```
-## License
-See [LICENSE](LICENSE).
+## Website showcase
+### View User profile
+>User has a profile view, where he is able to change it's username, delete photos and view the followers/followings/photo count. User is also able to perform different actions on each image.
+
+[![Screenshot-2023-01-16-at-00-01-44.png](https://i.postimg.cc/yNJx31Z6/Screenshot-2023-01-16-at-00-01-44.png)](https://postimg.cc/5HVbZMgD)
+### View another user profile
+>User can view the profile of another user, the view contains photos,followers/followings/photo count and the follow and ban buttons. User is also able to perform different actions on each image.
+
+[![Screenshot-2023-01-16-at-00-02-04.png](https://i.postimg.cc/JhJmWGXX/Screenshot-2023-01-16-at-00-02-04.png)](https://postimg.cc/4KJj64B4)
+## For more pictures...
+check [this link](https://postimages.org/). 
+
+#
+<img src="http://ForTheBadge.com/images/badges/built-with-love.svg"> 
+Last Update on : 16/01/2023
