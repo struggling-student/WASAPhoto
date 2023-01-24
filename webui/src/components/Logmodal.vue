@@ -6,7 +6,6 @@ export default {
 		}
 	},
 
-
 	methods: {
 		async deleteComment(username, photoid, commentid ) {
 			try {
@@ -15,6 +14,7 @@ export default {
 						Authorization: "Bearer " + localStorage.getItem("token")
 					}
 				})
+				location.reload();
 			} catch(e) {
 				if (e.response && e.response.status === 400) {
                     this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
@@ -29,6 +29,8 @@ export default {
 			}
 		},
 	},
+	mounted() {
+    }
 }
 </script>
 
@@ -47,7 +49,7 @@ export default {
 								<div class="card-body">
 									<h5 class="card-title">Comment by {{ comment.username }}</h5>
 									<p class="card-text">{{ comment.content }}</p>
-									<button type="button" v-if="token==comment.userId" class="btn btn-danger" @click="deleteComment(comment.ownerUsername, comment.photoId,comment.id)">Delete Comment</button>
+									<button type="button" v-if="token==comment.userId"  data-bs-dismiss="modal" class="btn btn-danger" @click="deleteComment(comment.ownerUsername, comment.photoId,comment.id)">Delete</button>
 								</div>
 							</div>
 							</div>

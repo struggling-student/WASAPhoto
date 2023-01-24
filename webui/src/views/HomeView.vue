@@ -44,6 +44,7 @@ export default {
 						date: "",
 						likeCount: 0,
 						commentCount: 0,
+						comment: "",
 						likeStatus: null,
 					}
 				],
@@ -143,7 +144,7 @@ export default {
 						this.errormsg = "Form error, please check all fields and try again. If you think that this is an error, write an e-mail to us.";
 						this.detailedmsg = null;
 					} else if (e.response && e.response.status === 500) {
-						this.errormsg = "An internal error occurred. We will be notified. Please try again later.";
+						this.errormsg = "User does not exist on WASAPhoto.";
 						this.detailedmsg = e.toString();
 					} else {
 						this.errormsg = e.toString();
@@ -152,12 +153,12 @@ export default {
 				}
 			}
 		},
-		async sendComment(username, photoid) {
-			if (this.comment === "") {
+		async sendComment(username, photoid, comment) {
+			if (comment === "") {
 				this.errormsg = "Emtpy comment field."
 			} else {
 				try {
-					let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), { content: this.comment }, {
+					let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), { content: comment }, {
 						headers: {
 							Authorization: "Bearer " + localStorage.getItem("token")
 						}
@@ -302,13 +303,13 @@ export default {
 		</nav>
 		<div
 			class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-			<h1 class="h2">Welcome to WASAPhoto {{this.username }}</h1>
+			<h1 class="h2">Welcome back {{this.username }}</h1>
 			<div class="btn-toolbar mb-2 mb-md-0">
 				<div class="btn-group me-2">
 					<button class="btn btn-danger" type="button" @click="doLogout">Logout</button>
-					<button class="btn btn-primary" type="button" @click="ViewProfile">View your profile</button>
+					<button class="btn btn-primary" type="button" @click="ViewProfile">Profile</button>
 					<input type="file" accept="image/*" class="btn btn-outline-primary" @change="uploadFile" ref="file">
-					<button class="btn btn-success" @click="submitFile">Upload Photo</button>
+					<button class="btn btn-success" @click="submitFile">Upload</button>
 				</div>
 			</div>
 		</div>
@@ -352,19 +353,19 @@ export default {
 						<p class="card-text">Uploaded on : {{photo.date}}</p>
 
 						<div class="input-group mb-3">
-							<input type="text" id="comment" v-model="comment" class="form-control"
+							<input type="text" id="comment" v-model="photo.comment" class="form-control"
 								placeholder="Comment!" aria-label="Recipient's username"
 								aria-describedby="basic-addon2">
 							<div class="input-group-append">
 								<button class="btn btn-primary" type="button"
-									@click="sendComment(photo.username, photo.id)">Send</button>
+									@click="sendComment(photo.username, photo.id, photo.comment)">Send</button>
 							</div>
 						</div>
 
 						<div class="d-flex justify-content-between align-items-center">
 							<div class="btn-group">
 								<button type="button" class="btn btn-dark"
-									@click="openLog(photo.username, photo.id)">View comments</button>
+									@click="openLog(photo.username, photo.id)">Comments</button>
 								<button type="button" v-if="photo.likeStatus==false" class="btn btn-primary"
 									@click="likePhoto(photo.username, photo.id)">Like</button>
 								<button type="button" v-if="photo.likeStatus==true" class="btn btn-danger"

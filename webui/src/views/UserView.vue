@@ -58,6 +58,7 @@ export default {
                         photoId: 0,
                         photoOwner: 0,
                         ownerUsername: "",
+                        comment: "",
                         username: "",
                         content: "",
                     }
@@ -245,12 +246,12 @@ export default {
             }
 
         },
-        async sendComment(username, photoid) {
-            if (this.comment === "") {
+        async sendComment(username, photoid, comment) {
+            if (comment === "") {
                 this.errormsg = "Emtpy comment field."
             } else {
                 try {
-                    let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), { content: this.comment }, {
+                    let response = await this.$axios.put("/users/" + username + "/photo/" + photoid + "/comment/" + Math.floor(Math.random() * 10000), { content: comment }, {
                         headers: {
                             Authorization: "Bearer " + localStorage.getItem("token")
                         }
@@ -456,18 +457,18 @@ export default {
                         </div>
                         <p class="card-text">Uploaded on : {{ photo.date }}</p>
                         <div class="input-group mb-3">
-                            <input type="text" id="comment" v-model="comment" class="form-control"
+                            <input type="text" id="comment" v-model="photo.comment" class="form-control"
                                 placeholder="Comment!" aria-label="Recipient's username"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-primary" type="button"
-                                    @click="sendComment(profile.username, photo.id)">Send</button>
+                                    @click="sendComment(profile.username, photo.id, photo.comment)">Send</button>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-dark"
-                                    @click="openLog(profile.username, photo.id)">View comments</button>
+                                    @click="openLog(profile.username, photo.id)">Comments</button>
                                 <button type="button" v-if="photo.likeStatus == false" class="btn btn-primary"
                                     @click="likePhoto(profile.username, photo.id)">Like</button>
                                 <button type="button" v-if="photo.likeStatus == true" class="btn btn-danger"

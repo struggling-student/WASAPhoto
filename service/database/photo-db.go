@@ -30,7 +30,7 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 
 func (db *appdbimpl) GetPhotos(u User, token uint64) ([]Photo, error) {
 	var ret []Photo
-	rows, err := db.c.Query(`SELECT id, userId, photo, date FROM photos WHERE userId = ? ORDER BY date`, u.Id)
+	rows, err := db.c.Query(`SELECT id, userId, photo, date FROM photos WHERE userId = ?`, u.Id)
 	if err != nil {
 		return ret, ErrUserDoesNotExist
 	}
