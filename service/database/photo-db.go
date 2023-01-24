@@ -13,16 +13,6 @@ func (db *appdbimpl) SetPhoto(p Photo) (Photo, error) {
 }
 
 func (db *appdbimpl) RemovePhoto(id uint64) error {
-	res1, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
-	if err != nil {
-		return err
-	}
-	affected, err := res1.RowsAffected()
-	if err != nil {
-		return err
-	} else if affected == 0 {
-		return nil
-	}
 	res2, err := db.c.Exec(`DELETE FROM likes WHERE photoId=?`, id)
 	if err != nil {
 		return err
@@ -40,6 +30,16 @@ func (db *appdbimpl) RemovePhoto(id uint64) error {
 	if err != nil {
 		return err
 	} else if affected3 == 0 {
+		return nil
+	}
+	res1, err := db.c.Exec(`DELETE FROM photos WHERE id=?`, id)
+	if err != nil {
+		return err
+	}
+	affected, err := res1.RowsAffected()
+	if err != nil {
+		return err
+	} else if affected == 0 {
 		return nil
 	}
 	return nil
