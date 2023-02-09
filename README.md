@@ -110,8 +110,6 @@ $ docker run -it --rm -p 8081:80 wasa-photos-frontend:latest
 >User can view the profile of another user, the view contains photos,followers/followings/photo count and the follow and ban buttons. User is also able to perform different actions on each image.
 
 [![Screenshot-2023-01-16-at-00-02-04.png](https://i.postimg.cc/JhJmWGXX/Screenshot-2023-01-16-at-00-02-04.png)](https://postimg.cc/4KJj64B4)
-## For more pictures...
-check [this link](https://postimages.org/). 
 
 #
 <img src="http://ForTheBadge.com/images/badges/built-with-love.svg"> 
